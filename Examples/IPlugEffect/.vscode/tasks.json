@@ -1,0 +1,53 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build VST2 Debug",
+            "type": "shell",
+            "command": "xcodebuild",
+            "args": [
+                "-project", "${workspaceFolder}/projects/IPlugEffect-macOS.xcodeproj", "-target", "VST2", "-configuration", "Debug", "SYMROOT=~/Library/Developer/Xcode/DerivedData"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "build VST3 Debug",
+            "type": "shell",
+            "command": "xcodebuild",
+            "args": [
+                "-project", "${workspaceFolder}/projects/IPlugEffect-macOS.xcodeproj", "-target", "VST3", "-configuration", "Debug", "SYMROOT=~/Library/Developer/Xcode/DerivedData"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "build AUv2 Debug",
+            "type": "shell",
+            "command": "xcodebuild",
+            "args": [
+                "-project", "${workspaceFolder}/projects/IPlugEffect-macOS.xcodeproj", "-target", "AU", "-configuration", "Debug", "SYMROOT=~/Library/Developer/Xcode/DerivedData"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "build APP Debug",
+            "type": "shell",
+            "command": "xcodebuild",
+            "args": [
+                "-project", "${workspaceFolder}/projects/IPlugEffect-macOS.xcodeproj", "-target", "APP", "-configuration", "Debug", "SYMROOT=~/Library/Developer/Xcode/DerivedData"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}
