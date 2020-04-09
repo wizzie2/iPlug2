@@ -4,61 +4,81 @@
         {
             "label": "build VST2 Debug",
             "type": "shell",
-            "command": "xcodebuild",
-            "args": [
-                "-project", "${workspaceFolder}/projects/IPlugEffect-macOS.xcodeproj", "-target", "VST2", "-configuration", "Debug", "SYMROOT=~/Library/Developer/Xcode/DerivedData"
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
+            "group": "build",
+            // "osx":{
+                "command": "xcodebuild",
+                "args": [
+                    "-project",
+                    "${workspaceFolder}/projects/IPlugEffect-macOS.xcodeproj",
+                    "-target",
+                    "VST2",
+                    "-configuration",
+                    "Debug",
+                    "SYMROOT=~/Library/Developer/Xcode/DerivedData"
+                ],
+            // },
+            // "windows": {
+            //     "command": "\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Professional\\MSBuild\\15.0\\Bin\\msbuild.exe\"",
+            //     "args": [
+            //         // Ask msbuild to generate full paths for file names.
+            //         "/property:GenerateFullPaths=true",
+            //         "/t:build"
+            //     ],
+            //     // Use the standard MS compiler pattern to detect errors, warnings and infos
+            //     "problemMatcher": "$msCompile"
+            // }
         },
         {
             "label": "build VST3 Debug",
             "type": "shell",
             "command": "xcodebuild",
             "args": [
-                "-project", "${workspaceFolder}/projects/IPlugEffect-macOS.xcodeproj", "-target", "VST3", "-configuration", "Debug", "SYMROOT=~/Library/Developer/Xcode/DerivedData"
+                "-project",
+                "${workspaceFolder}/projects/IPlugEffect-macOS.xcodeproj",
+                "-target",
+                "VST3",
+                "-configuration",
+                "Debug",
+                "SYMROOT=~/Library/Developer/Xcode/DerivedData"
             ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
+            "group": "build"
         },
         {
             "label": "build AUv2 Debug",
             "type": "shell",
             "command": "xcodebuild",
             "args": [
-                "-project", "${workspaceFolder}/projects/IPlugEffect-macOS.xcodeproj", "-target", "AU", "-configuration", "Debug", "SYMROOT=~/Library/Developer/Xcode/DerivedData"
+                "-project",
+                "${workspaceFolder}/projects/IPlugEffect-macOS.xcodeproj",
+                "-target",
+                "AU",
+                "-configuration",
+                "Debug",
+                "SYMROOT=~/Library/Developer/Xcode/DerivedData"
             ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            } 
+            "group": "build"
         },
         {
             "label": "build APP Debug",
             "type": "shell",
             "command": "xcodebuild",
             "args": [
-                "-project", "${workspaceFolder}/projects/IPlugEffect-macOS.xcodeproj", "-target", "APP", "-configuration", "Debug", "SYMROOT=~/Library/Developer/Xcode/DerivedData"
+                "-project",
+                "${workspaceFolder}/projects/IPlugEffect-macOS.xcodeproj",
+                "-target",
+                "APP",
+                "-configuration",
+                "Debug",
+                "SYMROOT=~/Library/Developer/Xcode/DerivedData"
             ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
+            "group": "build"
         },
         {
             "label": "build WAM",
             "type": "shell",
             "command": "${workspaceFolder}/scripts/makedist-web.sh",
-            "args": [
-            ],
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
+            "args": [],
+            "group": "build"
         }
     ]
 }
