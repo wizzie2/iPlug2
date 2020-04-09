@@ -35,7 +35,7 @@
             "group": {
                 "kind": "build",
                 "isDefault": true
-            }
+            } 
         },
         {
             "label": "build APP Debug",
@@ -43,6 +43,17 @@
             "command": "xcodebuild",
             "args": [
                 "-project", "${workspaceFolder}/projects/IPlugEffect-macOS.xcodeproj", "-target", "APP", "-configuration", "Debug", "SYMROOT=~/Library/Developer/Xcode/DerivedData"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "build WAM",
+            "type": "shell",
+            "command": "${workspaceFolder}/scripts/makedist-web.sh",
+            "args": [
             ],
             "group": {
                 "kind": "build",
