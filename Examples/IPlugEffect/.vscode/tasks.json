@@ -6,16 +6,16 @@
             "type": "shell",
             "group": "build",
             // "osx":{
-                "command": "xcodebuild",
-                "args": [
-                    "-project",
-                    "${workspaceFolder}/projects/IPlugEffect-macOS.xcodeproj",
-                    "-target",
-                    "VST2",
-                    "-configuration",
-                    "Debug",
-                    "SYMROOT=~/Library/Developer/Xcode/DerivedData"
-                ],
+            "command": "xcodebuild",
+            "args": [
+                "-project",
+                "${workspaceFolder}/projects/IPlugEffect-macOS.xcodeproj",
+                "-target",
+                "VST2",
+                "-configuration",
+                "Debug",
+                "SYMROOT=~/Library/Developer/Xcode/DerivedData"
+            ],
             // },
             // "windows": {
             //     "command": "\"C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Professional\\MSBuild\\15.0\\Bin\\msbuild.exe\"",
