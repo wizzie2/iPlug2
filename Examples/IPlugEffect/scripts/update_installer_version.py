@@ -33,7 +33,7 @@ def main():
 
 # MAC INSTALLER
 
-  print "Updating Mac Installer version info..."
+  print("Updating Mac Installer version info...")
   
   plistpath = projectpath + "/installer/" + config['BUNDLE_NAME'] + ".pkgproj"
   installer = plistlib.readPlist(plistpath)
@@ -53,7 +53,7 @@ def main():
 #   replacestrs(plistpath, "//Apple//", "//Apple Computer//");
   
 # WIN INSTALLER
-  print "Updating Windows Installer version info..."
+  print("Updating Windows Installer version info...")
   
   for line in fileinput.input(projectpath + "/installer/" + config['BUNDLE_NAME'] + ".iss",inplace=1):
     if "AppVersion" in line:
@@ -82,8 +82,7 @@ def main():
      else:
        line="SetupWindowTitle=IPlugEffect installer\n"
        
-    sys.stdout.write(line)
-    
+    sys.stdout.write(line) 
     
     
 if __name__ == '__main__':

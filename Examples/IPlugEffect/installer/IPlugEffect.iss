@@ -11,7 +11,7 @@ DefaultDirName={pf}\IPlugEffect
 DefaultGroupName=IPlugEffect
 Compression=lzma2
 SolidCompression=yes
-OutputDir=.\
+OutputDir=.\..\build-win\installer
 ArchitecturesInstallIn64BitMode=x64
 OutputBaseFilename=IPlugEffect Installer
 LicenseFile=license.rtf
@@ -32,50 +32,50 @@ SelectDirBrowseLabel=To continue, click Next. If you would like to select a diff
 
 [Components]
 Name: "app"; Description: "Standalone application (.exe)"; Types: full custom;
-Name: "vst2_32"; Description: "32-bit VST2 Plugin (.dll)"; Types: full custom;
-Name: "vst2_64"; Description: "64-bit VST2 Plugin (.dll)"; Types: full custom; Check: Is64BitInstallMode;
-Name: "vst3_32"; Description: "32-bit VST3 Plugin (.vst3)"; Types: full custom;
+;Name: "vst2_32"; Description: "32-bit VST2 Plugin (.dll)"; Types: full custom;
+;Name: "vst2_64"; Description: "64-bit VST2 Plugin (.dll)"; Types: full custom; Check: Is64BitInstallMode;
+;Name: "vst3_32"; Description: "32-bit VST3 Plugin (.vst3)"; Types: full custom;
 Name: "vst3_64"; Description: "64-bit VST3 Plugin (.vst3)"; Types: full custom; Check: Is64BitInstallMode;
 ;Name: "aax_32"; Description: "32-bit AAX Plugin (.aaxplugin)"; Types: full custom;
-Name: "aax_64"; Description: "64-bit AAX Plugin (.aaxplugin)"; Types: full custom; Check: Is64BitInstallMode;
+;Name: "aax_64"; Description: "64-bit AAX Plugin (.aaxplugin)"; Types: full custom; Check: Is64BitInstallMode;
 Name: "manual"; Description: "User guide"; Types: full custom; Flags: fixed
 
 [Dirs] 
 ;Name: "{cf32}\Avid\Audio\Plug-Ins\IPlugEffect.aaxplugin\"; Attribs: readonly; Components:aax_32; 
-Name: "{cf64}\Avid\Audio\Plug-Ins\IPlugEffect.aaxplugin\"; Attribs: readonly; Check: Is64BitInstallMode; Components:aax_64; 
-Name: "{cf32}\VST3\IPlugEffect.vst3\"; Attribs: readonly; Components:vst3_32; 
+;Name: "{cf64}\Avid\Audio\Plug-Ins\IPlugEffect.aaxplugin\"; Attribs: readonly; Check: Is64BitInstallMode; Components:aax_64; 
+;Name: "{cf32}\VST3\IPlugEffect.vst3\"; Attribs: readonly; Components:vst3_32; 
 Name: "{cf64}\VST3\IPlugEffect.vst3\"; Attribs: readonly; Check: Is64BitInstallMode; Components:vst3_64; 
 
 [Files]
-Source: "..\build-win\IPlugEffect_Win32.exe"; DestDir: "{app}"; Check: not Is64BitInstallMode; Components:app; Flags: ignoreversion;
+;Source: "..\build-win\IPlugEffect_Win32.exe"; DestDir: "{app}"; Check: not Is64BitInstallMode; Components:app; Flags: ignoreversion;
 Source: "..\build-win\IPlugEffect_x64.exe"; DestDir: "{app}"; Check: Is64BitInstallMode; Components:app; Flags: ignoreversion;
 
-Source: "..\build-win\IPlugEffect_Win32.dll"; DestDir: {code:GetVST2Dir_32}; Check: not Is64BitInstallMode; Components:vst2_32; Flags: ignoreversion;
-Source: "..\build-win\IPlugEffect_Win32.dll"; DestDir: {code:GetVST2Dir_32}; Check: Is64BitInstallMode; Components:vst2_32; Flags: ignoreversion;
-Source: "..\build-win\IPlugEffect_x64.dll"; DestDir: {code:GetVST2Dir_64}; Check: Is64BitInstallMode; Components:vst2_64; Flags: ignoreversion;
+;Source: "..\build-win\IPlugEffect_Win32.dll"; DestDir: {code:GetVST2Dir_32}; Check: not Is64BitInstallMode; Components:vst2_32; Flags: ignoreversion;
+;Source: "..\build-win\IPlugEffect_Win32.dll"; DestDir: {code:GetVST2Dir_32}; Check: Is64BitInstallMode; Components:vst2_32; Flags: ignoreversion;
+;Source: "..\build-win\IPlugEffect_x64.dll"; DestDir: {code:GetVST2Dir_64}; Check: Is64BitInstallMode; Components:vst2_64; Flags: ignoreversion;
 
-Source: "..\build-win\IPlugEffect.vst3\*.*"; Excludes: "\Contents\x86_64\*,*.pdb,*.exp,*.lib,*.ilk,*.ico,*.ini"; DestDir: "{cf32}\VST3\IPlugEffect.vst3\"; Components:vst3_32; Flags: ignoreversion recursesubdirs;
-Source: "..\build-win\IPlugEffect.vst3\Desktop.ini"; DestDir: "{cf32}\VST3\IPlugEffect.vst3\"; Components:vst3_32; Flags: overwritereadonly ignoreversion; Attribs: hidden system;
-Source: "..\build-win\IPlugEffect.vst3\PlugIn.ico"; DestDir: "{cf32}\VST3\IPlugEffect.vst3\"; Components:vst3_32; Flags: overwritereadonly ignoreversion; Attribs: hidden system;
+;Source: "..\build-win\IPlugEffect.vst3\*.*"; Excludes: "\Contents\x86_64\*,*.pdb,*.exp,*.lib,*.ilk,*.ico,*.ini"; DestDir: "{cf32}\VST3\IPlugEffect.vst3\"; Components:vst3_32; Flags: ignoreversion recursesubdirs;
+;Source: "..\build-win\IPlugEffect.vst3\Desktop.ini"; DestDir: "{cf32}\VST3\IPlugEffect.vst3\"; Components:vst3_32; Flags: overwritereadonly ignoreversion; Attribs: hidden system;
+;Source: "..\build-win\IPlugEffect.vst3\PlugIn.ico"; DestDir: "{cf32}\VST3\IPlugEffect.vst3\"; Components:vst3_32; Flags: overwritereadonly ignoreversion; Attribs: hidden system;
 
 Source: "..\build-win\IPlugEffect.vst3\*.*"; Excludes: "\Contents\x86\*,*.pdb,*.exp,*.lib,*.ilk,*.ico,*.ini"; DestDir: "{cf64}\VST3\IPlugEffect.vst3\"; Check: Is64BitInstallMode; Components:vst3_64; Flags: ignoreversion recursesubdirs;
 Source: "..\build-win\IPlugEffect.vst3\Desktop.ini"; DestDir: "{cf64}\VST3\IPlugEffect.vst3\"; Check: Is64BitInstallMode; Components:vst3_64; Flags: overwritereadonly ignoreversion; Attribs: hidden system;
 Source: "..\build-win\IPlugEffect.vst3\PlugIn.ico"; DestDir: "{cf64}\VST3\IPlugEffect.vst3\"; Check: Is64BitInstallMode; Components:vst3_64; Flags: overwritereadonly ignoreversion; Attribs: hidden system;
 
-; Source: "..\build-win\aax\bin\IPlugEffect.aaxplugin\*.*"; Excludes: "\Contents\x64\*,*.pdb,*.exp,*.lib,*.ilk,*.ico,*.ini"; DestDir: "{cf32}\Avid\Audio\Plug-Ins\IPlugEffect.aaxplugin\"; Components:aax_32; Flags: ignoreversion recursesubdirs;
-; Source: "..\build-win\aax\bin\IPlugEffect.aaxplugin\Desktop.ini"; DestDir: "{cf32}\Avid\Audio\Plug-Ins\IPlugEffect.aaxplugin\"; Components:aax_32; Flags: overwritereadonly ignoreversion; Attribs: hidden system;
-; Source: "..\build-win\aax\bin\IPlugEffect.aaxplugin\PlugIn.ico"; DestDir: "{cf32}\Avid\Audio\Plug-Ins\IPlugEffect.aaxplugin\"; Components:aax_32; Flags: overwritereadonly ignoreversion; Attribs: hidden system;
+;Source: "..\build-win\aax\bin\IPlugEffect.aaxplugin\*.*"; Excludes: "\Contents\x64\*,*.pdb,*.exp,*.lib,*.ilk,*.ico,*.ini"; DestDir: "{cf32}\Avid\Audio\Plug-Ins\IPlugEffect.aaxplugin\"; Components:aax_32; Flags: ignoreversion recursesubdirs;
+;Source: "..\build-win\aax\bin\IPlugEffect.aaxplugin\Desktop.ini"; DestDir: "{cf32}\Avid\Audio\Plug-Ins\IPlugEffect.aaxplugin\"; Components:aax_32; Flags: overwritereadonly ignoreversion; Attribs: hidden system;
+;Source: "..\build-win\aax\bin\IPlugEffect.aaxplugin\PlugIn.ico"; DestDir: "{cf32}\Avid\Audio\Plug-Ins\IPlugEffect.aaxplugin\"; Components:aax_32; Flags: overwritereadonly ignoreversion; Attribs: hidden system;
 
-Source: "..\build-win\IPlugEffect.aaxplugin\*.*"; Excludes: "\Contents\Win32\*,*.pdb,*.exp,*.lib,*.ilk,*.ico,*.ini"; DestDir: "{cf64}\Avid\Audio\Plug-Ins\IPlugEffect.aaxplugin\"; Check: Is64BitInstallMode; Components:aax_64; Flags: ignoreversion recursesubdirs;
-Source: "..\build-win\IPlugEffect.aaxplugin\Desktop.ini"; DestDir: "{cf64}\Avid\Audio\Plug-Ins\IPlugEffect.aaxplugin\"; Check: Is64BitInstallMode; Components:aax_64; Flags: overwritereadonly ignoreversion; Attribs: hidden system;
-Source: "..\build-win\IPlugEffect.aaxplugin\PlugIn.ico"; DestDir: "{cf64}\Avid\Audio\Plug-Ins\IPlugEffect.aaxplugin\"; Check: Is64BitInstallMode; Components:aax_64; Flags: overwritereadonly ignoreversion; Attribs: hidden system;
+;Source: "..\build-win\IPlugEffect.aaxplugin\*.*"; Excludes: "\Contents\Win32\*,*.pdb,*.exp,*.lib,*.ilk,*.ico,*.ini"; DestDir: "{cf64}\Avid\Audio\Plug-Ins\IPlugEffect.aaxplugin\"; Check: Is64BitInstallMode; Components:aax_64; Flags: ignoreversion recursesubdirs;
+;Source: "..\build-win\IPlugEffect.aaxplugin\Desktop.ini"; DestDir: "{cf64}\Avid\Audio\Plug-Ins\IPlugEffect.aaxplugin\"; Check: Is64BitInstallMode; Components:aax_64; Flags: overwritereadonly ignoreversion; Attribs: hidden system;
+;Source: "..\build-win\IPlugEffect.aaxplugin\PlugIn.ico"; DestDir: "{cf64}\Avid\Audio\Plug-Ins\IPlugEffect.aaxplugin\"; Check: Is64BitInstallMode; Components:aax_64; Flags: overwritereadonly ignoreversion; Attribs: hidden system;
 
 Source: "..\manual\IPlugEffect manual.pdf"; DestDir: "{app}"
 Source: "changelog.txt"; DestDir: "{app}"
 Source: "readme-win.rtf"; DestDir: "{app}"; DestName: "readme.rtf"; Flags: isreadme
 
 [Icons]
-Name: "{group}\IPlugEffect"; Filename: "{app}\IPlugEffect.exe"
+Name: "{group}\IPlugEffect"; Filename: "{app}\IPlugEffect_x64.exe"
 Name: "{group}\User guide"; Filename: "{app}\IPlugEffect manual.pdf"
 Name: "{group}\Changelog"; Filename: "{app}\changelog.txt"
 ;Name: "{group}\readme"; Filename: "{app}\readme.rtf"
@@ -84,6 +84,7 @@ Name: "{group}\Uninstall IPlugEffect"; Filename: "{app}\unins000.exe"
 [Code]
 var
   OkToCopyLog : Boolean;
+(*
   VST2DirPage_32: TInputDirWizardPage;
   VST2DirPage_64: TInputDirWizardPage;
 
@@ -122,6 +123,7 @@ function GetVST2Dir_64(Param: String): String;
 begin
   Result := VST2DirPage_64.Values[0]
 end;
+*)
 
 procedure CurStepChanged(CurStep: TSetupStep);
 begin

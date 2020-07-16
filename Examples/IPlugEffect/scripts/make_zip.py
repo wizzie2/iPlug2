@@ -1,7 +1,13 @@
-import zipfile, os, fileinput, string, sys
+import zipfile, os, fileinput, string, sys, shutil
 
 scriptpath = os.path.dirname(os.path.realpath(__file__))
 projectpath = os.path.abspath(os.path.join(scriptpath, os.pardir))
+
+IPLUG2_ROOT = "../../.."
+
+sys.path.insert(0, os.path.join(scriptpath, IPLUG2_ROOT + '\Scripts'))
+
+from parse_config import parse_config
 
 MajorStr = ""
 MinorStr = "" 
@@ -14,48 +20,43 @@ def  main():
     sys.exit(1)
   else:
     demo=int(sys.argv[1])
-   
-  installer = "\installer\IPlugEffect Installer.exe"
+
+  config = parse_config(projectpath)
+  
+  dir = projectpath + "\\build-win\\zip"
+  
+  if os.path.exists(dir):
+    shutil.rmtree(dir)
+  
+  os.makedirs(dir)
+  
+  installer = "\\build-win\\installer\\IPlugEffect Installer.exe"
    
   if demo:
-    installer = "\installer\IPlugEffect Demo Installer.exe"
+    installer = "\\build-win\\installer\\IPlugEffect Demo Installer.exe"
    
-  FILES_TO_ZIP = [
+  files = [
     projectpath + installer,
     projectpath + "\installer\changelog.txt",
     projectpath + "\installer\known-issues.txt",
     projectpath + "\manual\IPlugEffect manual.pdf" 
   ]
 
-  # extract values from config.h
-  for line in fileinput.input(projectpath + "\config.h",inplace=0):
-    if "#define PLUG_VERSION_HEX " in line:
-      PLUG_VER_STR = string.lstrip(line, "#define PLUG_VERSION_HEX ")
-      PLUG_VER = int(PLUG_VER_STR, 16)
-      MAJOR = PLUG_VER & 0xFFFF0000
-      MAJORSTR = str(MAJOR >> 16)
-      MINOR = PLUG_VER & 0x0000FF00
-      MINORSTR = str(MINOR >> 8)
-      BUGFIXSTR = str(PLUG_VER & 0x000000FF)
-    
-    if "#define BUNDLE_NAME " in line:
-      BUNDLE_NAME = string.lstrip(line, "#define BUNDLE_NAME ")
-
-  FULLVERSIONSTR = MAJORSTR + "." + MINORSTR + "." + BUGFIXSTR
-
-  ZIPNAME = "IPlugEffect-v" + FULLVERSIONSTR + "-win.zip"
+  zipname = "IPlugEffect-v" + config['FULL_VER_STR']
   
   if demo:
-    ZIPNAME = "IPlugEffect-v" + FULLVERSIONSTR + "-win-demo.zip"
-  
-  zf = zipfile.ZipFile(projectpath + "\installer\/" + ZIPNAME, mode="w")
+    zipname = zipname + "-win-demo.zip"
+  else:
+    zipname = zipname + "-win.zip"
 
-  for f in FILES_TO_ZIP:
+  zf = zipfile.ZipFile(projectpath + "\\build-win\\zip\\" + zipname, mode="w")
+
+  for f in files:
     print("adding " + f)
     zf.write(f, os.path.basename(f));
 
   zf.close()
-  print("wrote ")
+  print("wrote " + zipname)
 
 if __name__ == '__main__':
   main()

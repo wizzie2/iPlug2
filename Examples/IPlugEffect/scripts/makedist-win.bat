@@ -8,10 +8,6 @@ REM - AAX codesigning requires wraptool tool added to %PATH% env variable and aa
 
 if %1 == 1 (echo Making IPlugEffect Windows DEMO VERSION distribution ...) else (echo Making IPlugEffect Windows FULL VERSION distribution ...)
 
-echo "touching source"
-
-copy /b ..\*.cpp+,,
-
 echo ------------------------------------------------------------------
 echo Updating version numbers ...
 
@@ -19,6 +15,10 @@ call python prepare_resources-win.py %1
 call python update_installer_version.py %1
 
 cd ..\
+
+echo "touching source"
+
+copy /b *.cpp+,,
 
 echo ------------------------------------------------------------------
 echo Building ...
@@ -51,11 +51,12 @@ REM -copy ".\resources\img\AboutBox_Registered.png" ".\resources\img\AboutBox.pn
 REM - Could build individual targets like this:
 REM - msbuild IPlugEffect-app.vcxproj /p:configuration=release /p:platform=win32
 
-echo Building 32 bit binaries...
-msbuild IPlugEffect.sln /p:configuration=release /p:platform=win32 /nologo /verbosity:minimal /fileLogger /m /flp:logfile=build-win.log;errorsonly 
+REM echo Building 32 bit binaries...
+REM msbuild IPlugEffect.sln /p:configuration=release /p:platform=win32 /nologo /verbosity:minimal /fileLogger /m /flp:logfile=build-win.log;errorsonly 
 
-echo Building 64 bit binaries...
-msbuild IPlugEffect.sln /p:configuration=release /p:platform=x64 /nologo /verbosity:minimal /fileLogger /m /flp:logfile=build-win.log;errorsonly;append
+REM echo Building 64 bit binaries...
+REM add projects with /t to build VST2 and AAX
+msbuild IPlugEffect.sln /t:IPlugEffect-app;IPlugEffect-vst3 /p:configuration=release /p:platform=x64 /nologo /verbosity:minimal /fileLogger /m /flp:logfile=build-win.log;errorsonly;append
 
 REM --echo Copying AAX Presets
 
@@ -73,11 +74,11 @@ echo Making Installer ...
 if exist "%ProgramFiles(x86)%" (goto 64-Bit-is) else (goto 32-Bit-is)
 
 :32-Bit-is
-"%ProgramFiles%\Inno Setup 5\iscc" /Q /cc ".\installer\IPlugEffect.iss"
+"%ProgramFiles%\Inno Setup 6\iscc" /Q ".\installer\IPlugEffect.iss"
 goto END-is
 
 :64-Bit-is
-"%ProgramFiles(x86)%\Inno Setup 5\iscc" /Q /cc ".\installer\IPlugEffect.iss"
+"%ProgramFiles(x86)%\Inno Setup 6\iscc" /Q ".\installer\IPlugEffect.iss"
 goto END-is
 
 :END-is
