@@ -235,6 +235,11 @@ def main():
   print("\ncopying gitignore template into project folder\n")
 
   copy(GLOBAL_SCRIPTS_PATH + 'templates/gitignore_template', outputpath + "/.gitignore")
+  copytree(GLOBAL_SCRIPTS_PATH + 'templates/github/workflows', outputpath + "/.github/workflows")
+
+  #replace workflow placeholder
+  for dir in dirwalk(outputpath + "/.github/workflows", "PROJECT_TEMPLATE_PLACEHOLDER", outputprojectname, "AcmeInc", manufacturer, oldroot, newroot):
+    pass
 
   config = parse_config(outputpath)
 

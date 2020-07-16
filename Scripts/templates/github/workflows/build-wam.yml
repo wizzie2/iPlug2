@@ -1,0 +1,74 @@
+name: Build WAM
+
+on: [push]
+
+env:
+  PROJECT_NAME: PROJECT_TEMPLATE_PLACEHOLDER
+  URL: https://$GITHUB_ACTOR.github.io/PROJECT_TEMPLATE_PLACEHOLDER/
+
+jobs:
+
+  build:
+ 
+    runs-on: ubuntu-latest
+ 
+    steps:
+    - name: Check out repository
+      uses: actions/checkout@v1
+    
+    # - name: Setup Emscripten
+    #   uses: lovasoa/setup-emscripten@master
+    #   with:
+    #     emscripten-version: '1.38.47'
+    
+    # - name: Get emscripten
+    #   run: docker pull trzeci/emscripten
+
+    - name: Get emscripten
+      run: |
+        git clone https://github.com/emscripten-core/emsdk.git
+        cd emsdk
+        ./emsdk install latest 
+        ./emsdk activate latest
+
+    - name: Checkout iPlug2
+      uses: actions/checkout@v2
+      with:
+        repository: iPlug2/iPlug2
+        path: iPlug2
+
+    - name: Check out repository
+      uses: actions/checkout@v2
+      with:
+        path: iPlug2/Projects/$PROJECT_NAME
+
+    - name: Get WAM SDKS
+      run: |
+        cd iPlug2/Dependencies/IPlug
+        ./download-iplug-libs.sh
+      shell: bash
+
+    - name: Compile WAM
+      run: |
+        cd emsdk
+        source ./emsdk_env.sh
+        cd ../iPlug2/Projects/$PROJECT_NAME/scripts
+        ./makedist-web.sh off $URL
+        
+    # - name: Compile WAM
+    #   run: |
+    #     sudo docker run --rm -v iPlug2:/src -e URL=$URL trzeci/emscripten /bin/bash -c "cd Projects/$PROJECT_NAME/scripts;./makedist-web.sh off $URL"
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: $PROJECT_NAME-web
+        path: iPlug2/Projects/$PROJECT_NAME/build-web
+
+    - name: Publish to pages
+      uses: JamesIves/github-pages-deploy-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        BASE_BRANCH: master
+        BRANCH: gh-pages
+        FOLDER: iPlug2/Projects/$PROJECT_NAME/build-web
