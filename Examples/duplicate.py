@@ -30,7 +30,9 @@ from os.path import join
 
 scriptpath = os.path.dirname(os.path.realpath(__file__))
 
-sys.path.insert(0, scriptpath + '/../Scripts/')
+GLOBAL_SCRIPTS_PATH = scriptpath + '/../Scripts/'
+
+sys.path.insert(0, GLOBAL_SCRIPTS_PATH)
 
 from parse_config import parse_config, parse_xcconfig, set_uniqueid
 
@@ -232,7 +234,7 @@ def main():
 
   print("\ncopying gitignore template into project folder\n")
 
-  copy('gitignore_template', outputpath + "/.gitignore")
+  copy(GLOBAL_SCRIPTS_PATH + 'templates/gitignore_template', outputpath + "/.gitignore")
 
   config = parse_config(outputpath)
 
