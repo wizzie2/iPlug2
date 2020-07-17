@@ -6,6 +6,20 @@
 	objectVersion = 47;
 	objects = {
 
+/* Begin PBXAggregateTarget section */
+		B87FD2032351C90C00CF7307 /* Update plists */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = B87FD2062351C90C00CF7307 /* Build configuration list for PBXAggregateTarget "Update plists" */;
+			buildPhases = (
+				B87FD2072351C91100CF7307 /* ShellScript */,
+			);
+			dependencies = (
+			);
+			name = "Update plists";
+			productName = PLists;
+		};
+/* End PBXAggregateTarget section */
+
 /* Begin PBXBuildFile section */
 		4F0BA47B24698DC900DB93AC /* IGraphicsIOS_src.m in Sources */ = {isa = PBXBuildFile; fileRef = 4F0BA47A24698DC900DB93AC /* IGraphicsIOS_src.m */; settings = {COMPILER_FLAGS = "-fobjc-arc"; }; };
 		4F0D965B23099F5A00BFDED0 /* IPlugProcessor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4FFF103420A0E55900D3092F /* IPlugProcessor.cpp */; };
@@ -61,6 +75,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 91236D761B08F59300734C5E;
 			remoteInfo = "FilterDemoAppExtension-iOS";
+		};
+		B87FD2082351C94400CF7307 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 91D3DA0C1B023C03008FFFBB /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B87FD2032351C90C00CF7307;
+			remoteInfo = PLists;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -626,6 +647,7 @@
 			dependencies = (
 				91236D801B08F59300734C5E /* PBXTargetDependency */,
 				4FA61F7422E899B500A92C58 /* PBXTargetDependency */,
+				B87FD2092351C94400CF7307 /* PBXTargetDependency */,
 			);
 			name = App;
 			productName = "FilterDemoApp-iOS";
@@ -707,6 +729,7 @@
 				91236D0C1B08F42B00734C5E /* App */,
 				91236D761B08F59300734C5E /* AUv3 */,
 				4FA61F6D22E899B500A92C58 /* AUv3Framework */,
+				B87FD2032351C90C00CF7307 /* Update plists */,
 			);
 		};
 /* End PBXProject section */
@@ -746,18 +769,27 @@
 			buildActionMask = 2147483647;
 			files = (
 			);
-			inputFileListPaths = (
-			);
 			inputPaths = (
 			);
 			name = "Run Script - prepare_resources-ios.py";
-			outputFileListPaths = (
-			);
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "python ../scripts/prepare_resources-ios.py app\n";
+		};
+		B87FD2072351C91100CF7307 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "python ../scripts/prepare_plists.py\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -823,6 +855,11 @@
 			isa = PBXTargetDependency;
 			target = 91236D761B08F59300734C5E /* AUv3 */;
 			targetProxy = 91236D7F1B08F59300734C5E /* PBXContainerItemProxy */;
+		};
+		B87FD2092351C94400CF7307 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B87FD2032351C90C00CF7307 /* Update plists */;
+			targetProxy = B87FD2082351C94400CF7307 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -1226,6 +1263,22 @@
 			};
 			name = Release;
 		};
+		B87FD2042351C90C00CF7307 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		B87FD2052351C90C00CF7307 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1261,6 +1314,15 @@
 			buildConfigurations = (
 				91D3DA101B023C03008FFFBB /* Debug */,
 				91D3DA111B023C03008FFFBB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B87FD2062351C90C00CF7307 /* Build configuration list for PBXAggregateTarget "Update plists" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B87FD2042351C90C00CF7307 /* Debug */,
+				B87FD2052351C90C00CF7307 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
