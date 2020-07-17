@@ -139,6 +139,9 @@ def dirwalk(dir, searchproject, replaceproject, searchman, replaceman, oldroot= 
         print("Replacing manufacturer name strings in file " + filename)
         replacestrs(fullpath, searchman, replaceman)
 
+        print("Replacing lower case manufacturer name strings in file " + filename)
+        replacestrs(fullpath, searchman.lower(), replaceman.lower())
+
         if (oldroot and newroot):
           print ("Replacing iPlug2 root folder in file  " + filename)
           replacestrs(fullpath, oldroot, newroot)
