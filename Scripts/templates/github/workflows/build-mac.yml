@@ -22,7 +22,7 @@ jobs:
     - name: Check out repository
       uses: actions/checkout@v2
       with:
-        path: iPlug2/Projects/$PROJECT_NAME
+        path: iPlug2/Projects/${{env.PROJECT_NAME}}
 
     - name: Get VST3_SDK
       run: |
@@ -38,19 +38,19 @@ jobs:
 
     - name: Build it
       run: |
-        cd iPlug2\Projects\$PROJECT_NAME\scripts
+        cd iPlug2\Projects\${{env.PROJECT_NAME}}\scripts
         .\makedist-mac.sh
       shell: pwsh
 
     - name: Move files
       run: |
-        mkdir -p iPlug2/Projects/$PROJECT_NAME/build-mac/zip/
-        mv iPlug2/Projects/$PROJECT_NAME/installer/*.zip iPlug2/Projects/$PROJECT_NAME/build-mac/zip/
-        mv iPlug2/Projects/$PROJECT_NAME/installer/*.dmg iPlug2/Projects/$PROJECT_NAME/build-mac/zip/
+        mkdir -p iPlug2/Projects/${{env.PROJECT_NAME}}/build-mac/zip/
+        mv iPlug2/Projects/${{env.PROJECT_NAME}}/installer/*.zip iPlug2/Projects/${{env.PROJECT_NAME}}/build-mac/zip/
+        mv iPlug2/Projects/${{env.PROJECT_NAME}}/installer/*.dmg iPlug2/Projects/${{env.PROJECT_NAME}}/build-mac/zip/
       shell: bash
 
     - name: Upload artifact
       uses: actions/upload-artifact@v1
       with:
-        name: $PROJECT_NAME-mac
-        path: iPlug2\Projects\$PROJECT_NAME/build-mac/zip/
+        name: ${{env.PROJECT_NAME}}-mac
+        path: iPlug2\Projects\${{env.PROJECT_NAME}}/build-mac/zip/

@@ -4,7 +4,7 @@ on: [push]
 
 env:
   PROJECT_NAME: PROJECT_TEMPLATE_PLACEHOLDER
-  URL: https://$GITHUB_ACTOR.github.io/PROJECT_TEMPLATE_PLACEHOLDER/
+  URL: https://olilarkin.github.io/PROJECT_TEMPLATE_PLACEHOLDER/
 
 jobs:
 
@@ -40,7 +40,7 @@ jobs:
     - name: Check out repository
       uses: actions/checkout@v2
       with:
-        path: iPlug2/Projects/$PROJECT_NAME
+        path: iPlug2/Projects/${{env.PROJECT_NAME}}
 
     - name: Get WAM SDKS
       run: |
@@ -52,18 +52,18 @@ jobs:
       run: |
         cd emsdk
         source ./emsdk_env.sh
-        cd ../iPlug2/Projects/$PROJECT_NAME/scripts
+        cd ../iPlug2/Projects/${{env.PROJECT_NAME}}/scripts
         ./makedist-web.sh off $URL
         
     # - name: Compile WAM
     #   run: |
-    #     sudo docker run --rm -v iPlug2:/src -e URL=$URL trzeci/emscripten /bin/bash -c "cd Projects/$PROJECT_NAME/scripts;./makedist-web.sh off $URL"
+    #     sudo docker run --rm -v iPlug2:/src -e URL=$URL trzeci/emscripten /bin/bash -c "cd Projects/${{env.PROJECT_NAME}}/scripts;./makedist-web.sh off $URL"
 
     - name: Upload artifact
       uses: actions/upload-artifact@v1
       with:
-        name: $PROJECT_NAME-web
-        path: iPlug2/Projects/$PROJECT_NAME/build-web
+        name: ${{env.PROJECT_NAME}}-web
+        path: iPlug2/Projects/${{env.PROJECT_NAME}}/build-web
 
     - name: Publish to pages
       uses: JamesIves/github-pages-deploy-action@master
@@ -71,4 +71,4 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         BASE_BRANCH: master
         BRANCH: gh-pages
-        FOLDER: iPlug2/Projects/$PROJECT_NAME/build-web
+        FOLDER: iPlug2/Projects/${{env.PROJECT_NAME}}/build-web

@@ -18,6 +18,6 @@
 build-*
 ipch/*
 gui/*
-
+!.github/workflows/*
 Icon?
 .DS_Stor*

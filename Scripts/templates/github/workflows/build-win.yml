@@ -25,7 +25,7 @@ jobs:
     - name: Check out repository
       uses: actions/checkout@v2
       with:
-        path: iPlug2/Projects/$PROJECT_NAME
+        path: iPlug2/Projects/${{env.PROJECT_NAME}}
 
     - name: Get VST3_SDK
       run: |
@@ -41,17 +41,17 @@ jobs:
 
     - name: Build it
       run: |
-        cd iPlug2\Projects\$PROJECT_NAME\scripts
+        cd iPlug2\Projects\${{env.PROJECT_NAME}}\scripts
         .\makedist-win.bat 0
       shell: pwsh
 
     - name: Move pdb files
       run: |
-        mv iPlug2/Projects/$PROJECT_NAME/build-win/pdbs/*.pdb iPlug2/Projects/$PROJECT_NAME/build-win/zip/
+        mv iPlug2/Projects/${{env.PROJECT_NAME}}/build-win/pdbs/*.pdb iPlug2/Projects/${{env.PROJECT_NAME}}/build-win/zip/
       shell: bash
 
     - name: Upload artifact
       uses: actions/upload-artifact@v1
       with:
-        name: $PROJECT_NAME-win
-        path: iPlug2\Projects\$PROJECT_NAME\build-win\zip
+        name: ${{env.PROJECT_NAME}}-win
+        path: iPlug2\Projects\${{env.PROJECT_NAME}}\build-win\zip
