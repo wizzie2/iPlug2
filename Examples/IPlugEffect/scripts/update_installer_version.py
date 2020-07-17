@@ -6,7 +6,7 @@ import plistlib, os, datetime, fileinput, glob, sys, string
 scriptpath = os.path.dirname(os.path.realpath(__file__))
 projectpath = os.path.abspath(os.path.join(scriptpath, os.pardir))
 
-IPLUG2_ROOT = "../../.."
+IPLUG2_ROOT = "../.."
 
 sys.path.insert(0, os.path.join(os.getcwd(), IPLUG2_ROOT + '/Scripts'))
 
@@ -31,27 +31,6 @@ def main():
 
   config = parse_config(projectpath)
 
-# MAC INSTALLER
-
-  print("Updating Mac Installer version info...")
-  
-  plistpath = projectpath + "/installer/" + config['BUNDLE_NAME'] + ".pkgproj"
-  installer = plistlib.readPlist(plistpath)
-  
-  # range  = number of items in the installer (VST 2, VST 3, app, audiounit, aax)
-  for x in range(0,5):
-    installer['PACKAGES'][x]['PACKAGE_SETTINGS']['VERSION'] = config['FULL_VER_STR']
-
-  if demo:
-    installer['PROJECT']['PROJECT_PRESENTATION']['TITLE']['LOCALIZATIONS'][0]['VALUE'] = config['BUNDLE_NAME'] + " Demo"
-    installer['PROJECT']['PROJECT_PRESENTATION']['INTRODUCTION']['LOCALIZATIONS'][0]['VALUE']['PATH'] = "intro-demo.rtf"
-  else:
-    installer['PROJECT']['PROJECT_PRESENTATION']['TITLE']['LOCALIZATIONS'][0]['VALUE'] = config['BUNDLE_NAME']
-    installer['PROJECT']['PROJECT_PRESENTATION']['INTRODUCTION']['LOCALIZATIONS'][0]['VALUE']['PATH'] = "intro.rtf"
-
-  plistlib.writePlist(installer, plistpath)
-#   replacestrs(plistpath, "//Apple//", "//Apple Computer//");
-  
 # WIN INSTALLER
   print("Updating Windows Installer version info...")
   
