@@ -38,19 +38,19 @@ jobs:
 
     - name: Build it
       run: |
-        cd iPlug2\Projects\${{env.PROJECT_NAME}}\scripts
-        .\makedist-mac.sh
-      shell: pwsh
+        cd iPlug2/Projects/${{env.PROJECT_NAME}}/scripts
+        ./makedist-mac.sh
+      shell: bash
 
     - name: Move files
       run: |
-        mkdir -p iPlug2/Projects/${{env.PROJECT_NAME}}/build-mac/zip/
-        mv iPlug2/Projects/${{env.PROJECT_NAME}}/installer/*.zip iPlug2/Projects/${{env.PROJECT_NAME}}/build-mac/zip/
-        mv iPlug2/Projects/${{env.PROJECT_NAME}}/installer/*.dmg iPlug2/Projects/${{env.PROJECT_NAME}}/build-mac/zip/
+        mkdir -p iPlug2/Projects/${{env.PROJECT_NAME}}/build-mac/zip
+        mv iPlug2/Projects/${{env.PROJECT_NAME}}/installer/*.zip iPlug2/Projects/${{env.PROJECT_NAME}}/build-mac/zip
+        mv iPlug2/Projects/${{env.PROJECT_NAME}}/installer/*.dmg iPlug2/Projects/${{env.PROJECT_NAME}}/build-mac/zip
       shell: bash
 
     - name: Upload artifact
       uses: actions/upload-artifact@v1
       with:
         name: ${{env.PROJECT_NAME}}-mac
-        path: iPlug2\Projects\${{env.PROJECT_NAME}}/build-mac/zip/
+        path: iPlug/Projects/${{env.PROJECT_NAME}}/build-mac/zip
