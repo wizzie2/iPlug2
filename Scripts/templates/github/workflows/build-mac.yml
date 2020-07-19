@@ -53,4 +53,4 @@ jobs:
       uses: actions/upload-artifact@v1
       with:
         name: ${{env.PROJECT_NAME}}-mac
-        path: iPlug/Projects/${{env.PROJECT_NAME}}/build-mac/zip
+        path: iPlug2/Projects/${{env.PROJECT_NAME}}/build-mac/zip
