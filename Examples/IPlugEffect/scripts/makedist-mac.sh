@@ -198,6 +198,15 @@ fi
 
 #---------------------------------------------------------------------------------------------------------
 
+# echo "code-sign binaries with hardened runtime"
+# echo ""
+# codesign --force -s "Developer ID Application: ${CERT_ID}" -v $APP --deep --strict --options=runtime
+# xattr -cr $AU 
+# codesign --force -s "Developer ID Application: ${CERT_ID}" -v $AU --deep --strict --options=runtime
+# xattr -cr $VST2 
+# codesign --force -s "Developer ID Application: ${CERT_ID}" -v $VST2 --deep --strict --options=runtime
+# xattr -cr $VST3 
+# codesign --force -s "Developer ID Application: ${CERT_ID}" -v $VST3 --deep --strict --options=runtime
 
 #---------------------------------------------------------------------------------------------------------
 # installer
@@ -232,6 +241,18 @@ else
 fi
 
 # sudo rm -R -f installer/build-mac/
+
+#---------------------------------------------------------------------------------------------------------
+# echo "notarizing dmg"
+# echo ""
+
+# see notarise.sh for DEMO_BUNDLE_ID APP_SPECIFIC_APPLE_USERNAME APP_SPECIFIC_APPLE_PASSWORD args
+
+# if [ $DEMO == 1 ]; then
+#   $SCRIPTS/notarise.sh ../installer/$DMG_NAME.dmg DEMO_BUNDLE_ID APP_SPECIFIC_APPLE_USERNAME APP_SPECIFIC_APPLE_PASSWORD
+# else
+#   $SCRIPTS/notarise.sh ../installer/$DMG_NAME.dmg FULL_BUNDLE_ID APP_SPECIFIC_APPLE_USERNAME APP_SPECIFIC_APPLE_PASSWORD
+# fi
 
 #---------------------------------------------------------------------------------------------------------
 # dSYMs
