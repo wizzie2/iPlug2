@@ -82,3 +82,16 @@
 #define CACHE_ALIGN(x) __attribute__((aligned(x)))
 #define __cplusplus
 #define _MSC_VER
+#define PRAGMA_MESSAGE(msg) PRAGMA(message(msg))
+#define BEGIN_FACTORY_DEF(vendor, url, email) using namespace Steinberg; EXPORT_FACTORY IPluginFactory* PLUGIN_API GetPluginFactory () { if (!gPluginFactory) { static PFactoryInfo factoryInfo (vendor,url,email,Vst::kDefaultFactoryFlags); gPluginFactory = new CPluginFactory (factoryInfo);
+#define EXPORT_FACTORY __attribute__ ((visibility ("default")))
+#define EXPORT_FACTORY
+#define PLUG_MFR
+#define PLUG_URL_STR
+#define PLUG_EMAIL_STR
+#define PLUG_VERSION_STR
+#define VST3_SUBCATEGORY
+#define kVstVersionString
+#define PLUG_NAME
+#define kVstAudioEffectClass
+#define END_FACTORY } else gPluginFactory->addRef (); return gPluginFactory; }
