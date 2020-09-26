@@ -177,10 +177,10 @@ macro(iplug_add_aax _target)
         _iplug_add_config_variable(CONFIG_AAX AAX ${_var} "${_arg_${_var}}")
     endforeach()
 
-    iplug_validate_string(AAX_TYPE_IDS             PREFIX CONFIG_AAX NOTEMPTY ALPHA NUMERIC SPACE APOSTROPHE COMMA)
-    iplug_validate_string(AAX_TYPE_IDS_AUDIOSUITE  PREFIX CONFIG_AAX NOTEMPTY ALPHA NUMERIC SPACE APOSTROPHE COMMA)
-    iplug_validate_string(AAX_DOES_AUDIOSUITE      PREFIX CONFIG_AAX NOTEMPTY STREQUAL 0 1)
-    iplug_validate_string(AAX_PLUG_CATEGORY_STR    PREFIX CONFIG_AAX NOTEMPTY STREQUAL None EQ Dynamics PitchShift Reverb Delay Modulation Harmonic NoiseReduction Dither SoundField Effect)
+    iplug_validate_string(TYPE_IDS             PREFIX CONFIG_AAX NOTEMPTY ALPHA NUMERIC SPACE APOSTROPHE COMMA)
+    iplug_validate_string(TYPE_IDS_AUDIOSUITE  PREFIX CONFIG_AAX NOTEMPTY ALPHA NUMERIC SPACE APOSTROPHE COMMA)
+    iplug_validate_string(DOES_AUDIOSUITE      PREFIX CONFIG_AAX NOTEMPTY STREQUAL 0 1)
+    iplug_validate_string(PLUG_CATEGORY_STR    PREFIX CONFIG_AAX NOTEMPTY STREQUAL None EQ Dynamics PitchShift Reverb Delay Modulation Harmonic NoiseReduction Dither SoundField Effect)
 
     _iplug_add_config_variable(CONFIG_AAX AAX PLUG_MFR_STR  "${CONFIG_PLUG_MFR}")
     _iplug_add_config_variable(CONFIG_AAX AAX PLUG_NAME_STR "${CONFIG_PLUG_CLASS_NAME}\\n${CONFIG_PLUG_NAME_SHORT}")
@@ -210,9 +210,9 @@ macro(iplug_add_au _target)
     _iplug_add_config_variable(CONFIG_AU AUV2 VIEW_CLASS_STR  "${CONFIG_AU_AUV2_VIEW_CLASS}")
     _iplug_add_config_variable(CONFIG_AU AUV2 FACTORY         "${CONFIG_PLUG_CLASS_NAME}_Factory")
 
-    # iplug_validate_string(AUV2_ENTRY      PREFIX CONFIG_AU_ ALPHAFIRST ALPHA NUMERIC UNDERSCORE)
-    # iplug_validate_string(AUV2_VIEW_CLASS PREFIX CONFIG_AU_ ALPHAFIRST ALPHA NUMERIC UNDERSCORE)
-    # iplug_validate_string(AUV2_FACTORY    PREFIX CONFIG_AU_ ALPHAFIRST ALPHA NUMERIC UNDERSCORE)
+    # iplug_validate_string(ENTRY      PREFIX CONFIG_AU_ ALPHAFIRST ALPHA NUMERIC UNDERSCORE)
+    # iplug_validate_string(VIEW_CLASS PREFIX CONFIG_AU_ ALPHAFIRST ALPHA NUMERIC UNDERSCORE)
+    # iplug_validate_string(FACTORY    PREFIX CONFIG_AU_ ALPHAFIRST ALPHA NUMERIC UNDERSCORE)
 endmacro()
 
 #------------------------------------------------------------------------------
@@ -292,7 +292,7 @@ macro(iplug_add_application _target)
     target_compile_definitions(${_target}-static PUBLIC ${APP_CONFIG_DEFINITIONS})
     target_link_libraries(${_target} PRIVATE ${_target}-static)
 
-    if(PLATFORM_WINDOWS AND ${CONFIG_APP_SUBSYSTEM} STREQUAL "GUI")
+    if(PLATFORM_WINDOWS AND "${CONFIG_APP_SUBSYSTEM}" STREQUAL "GUI")
         set_target_properties(${_target} PROPERTIES WIN32_EXECUTABLE TRUE)
     endif()
 
@@ -348,22 +348,22 @@ macro(iplug_add_vst3 _target)
         target_compile_definitions(${_target}-static PUBLIC ${VST3_CONFIG_DEFINITIONS})
         target_link_libraries(${_target} PRIVATE ${_target}-static)
 
-        set(PLUGIN_NAME ${CONFIG_PLUG_NAME})
-        set(PLUGIN_EXT ${CONFIG_VST3_EXTENSION})
+        set(PLUGIN_NAME "${CONFIG_PLUG_NAME}")
+        set(PLUGIN_EXT "${CONFIG_VST3_EXTENSION}")
         set(PLUGIN_NAME_EXT "${PLUGIN_NAME}.${PLUGIN_EXT}")
         set(VST3_CONFIG_PATH $<$<CONFIG:$<CONFIG>>:VST3-$<CONFIG>>)
-        set(PLUGIN_PACKAGE_PATH ${PROJECT_BINARY_DIR}/bin/${VST3_CONFIG_PATH}/${CONFIG_BUNDLE_NAME})
+        set(PLUGIN_PACKAGE_PATH "${PROJECT_BINARY_DIR}/bin/${VST3_CONFIG_PATH}/${CONFIG_BUNDLE_NAME}")
         set(_path "${VST3_SDK_PATH}/public.sdk/source/main")
 
         set_target_properties(${_target} PROPERTIES
-            LIBRARY_OUTPUT_NAME                            ${PLUGIN_NAME}
-            SUFFIX                                         .${PLUGIN_EXT}
-            LIBRARY_OUTPUT_DIRECTORY                       ${PLUGIN_PACKAGE_PATH}
-            PDB_OUTPUT_DIRECTORY                           ${PROJECT_BINARY_DIR}/PDB/${VST3_CONFIG_PATH}
-            VS_DEBUGGER_COMMAND                            ${VST3_DEFAULT_DEBUG_APPLICATION}
+            LIBRARY_OUTPUT_NAME                            "${PLUGIN_NAME}"
+            SUFFIX                                         ".${PLUGIN_EXT}"
+            LIBRARY_OUTPUT_DIRECTORY                       "${PLUGIN_PACKAGE_PATH}"
+            PDB_OUTPUT_DIRECTORY                           "${PROJECT_BINARY_DIR}/PDB/${VST3_CONFIG_PATH}"
+            VS_DEBUGGER_COMMAND                            "${VST3_DEFAULT_DEBUG_APPLICATION}"
             BUNDLE                                         TRUE
-            BUNDLE_EXTENSION                               ${PLUGIN_EXT}
-            XCODE_ATTRIBUTE_WRAPPER_EXTENSION              ${PLUGIN_EXT}
+            BUNDLE_EXTENSION                               "${PLUGIN_EXT}"
+            XCODE_ATTRIBUTE_WRAPPER_EXTENSION              "${PLUGIN_EXT}"
             XCODE_ATTRIBUTE_GENERATE_PKGINFO_FILE          YES
             XCODE_ATTRIBUTE_GCC_GENERATE_DEBUGGING_SYMBOLS $<$<CONFIG:Debug>YES>$<$<CONFIG:Release>:NO>$<$<CONFIG:Distributed>:NO>
             XCODE_ATTRIBUTE_DEBUG_INFORMATION_FORMAT       $<$<CONFIG:Debug>:dwarf>
@@ -404,14 +404,14 @@ macro(iplug_add_vst3 _target)
                     COMMENT "Copy PlugIn.ico and desktop.ini and change their attributes."
                     POST_BUILD
                     COMMAND ${CMAKE_COMMAND} -E copy
-                        ${VST3_ICON}
-                        ${PLUGIN_PACKAGE_PATH}/PlugIn.ico
+                        "${VST3_ICON}"
+                        "${PLUGIN_PACKAGE_PATH}/PlugIn.ico"
                     COMMAND ${CMAKE_COMMAND} -E copy
-                        ${CMAKE_BINARY_DIR}/desktop.ini  #${SMTG_DESKTOP_INI_PATH}
-                        ${PLUGIN_PACKAGE_PATH}/desktop.ini
-                    COMMAND attrib +h +s ${PLUGIN_PACKAGE_PATH}/desktop.ini
-                    COMMAND attrib +h +s ${PLUGIN_PACKAGE_PATH}/PlugIn.ico
-                    COMMAND attrib +s ${PLUGIN_PACKAGE_PATH}
+                        "${CMAKE_BINARY_DIR}/desktop.ini"  #${SMTG_DESKTOP_INI_PATH}
+                        "${PLUGIN_PACKAGE_PATH}/desktop.ini"
+                    COMMAND attrib +h +s "${PLUGIN_PACKAGE_PATH}/desktop.ini"
+                    COMMAND attrib +h +s "${PLUGIN_PACKAGE_PATH}/PlugIn.ico"
+                    COMMAND attrib +s "${PLUGIN_PACKAGE_PATH}"
                 )
             endif()
 
