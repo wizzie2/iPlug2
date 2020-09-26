@@ -53,11 +53,9 @@ macro(iplug_configure_project)
     string_assert(${PROJECT_NAME} "PROJECT_NAME is empty. Make sure to call configure after project declarations.")
 
     set(_oneValueArgs
-
         "BUNDLE_NAME"
         "BUNDLE_DOMAIN"
         "BUNDLE_ICON"
-
         "PLUG_NAME"
         "PLUG_NAME_SHORT"
         "PLUG_CLASS_NAME"
@@ -82,8 +80,8 @@ macro(iplug_configure_project)
         "PLUG_SHARED_RESOURCES"
         "PLUG_TYPE"
         "PLUG_HOST_RESIZE"
-
         "SHARED_RESOURCES_SUBPATH"
+        "PCH_FOLDER_NAME"
     )
 
     set(_multiValueArgs "RESOURCE_DEFINITIONS")

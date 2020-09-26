@@ -528,6 +528,12 @@ endfunction()
 function(_iplug_generate_source_groups)
     # Set up source groups for IDE
 
+    # Move precompiled headers into their own IDE group
+    if(CONFIG_PCH_FOLDER_NAME STREQUAL "")
+        set(CONFIG_PCH_FOLDER_NAME "resources/Precompiled Headers")
+    endif()
+    source_group("${CONFIG_PCH_FOLDER_NAME}" REGULAR_EXPRESSION "^${CMAKE_CURRENT_BINARY_DIR}/.*cmake_pch\\..*xx$")
+
     get_target_property(_src_list IPlug INTERFACE_SOURCES)
     source_group(TREE "${IPLUG2_ROOT_PATH}" FILES ${_src_list})
 
