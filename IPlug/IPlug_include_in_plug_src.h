@@ -85,14 +85,6 @@ HINSTANCE gHINSTANCE = 0;
 		#define VST3_CONTROLLER_UID 0xF2AEE70E, 0x00DE4F4F, PLUG_MFR_ID, PLUG_UNIQUE_ID
 	#endif
 
-	#ifndef EFFECT_TYPE_VST3
-		#if PLUG_TYPE == Instrument
-			#define EFFECT_TYPE_VST3 kInstrumentSynth
-		#else
-			#define EFFECT_TYPE_VST3 kFx
-		#endif
-	#endif
-
 	#if defined VST3P_API || defined VST3_API
 		bool InitModule()
 		{
