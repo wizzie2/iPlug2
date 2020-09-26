@@ -45,18 +45,24 @@
 // Global compiler specific preprocessor definitions
 
 #if PLATFORM_COMPILER_MSVC
-	#define PRAGMA(...)       __pragma(__VA_ARGS__)
 	#define IPLUG_APIENTRY    __stdcall
+	#define PRAGMA(...)       __pragma(__VA_ARGS__)
+	#define FORCEINLINE       __forceinline
 	#define NOINLINE          __declspec(noinline)
 	#define CACHE_ALIGN(x)    __declspec(align(x))
 #elif PLATFORM_COMPILER_GCC || PLATFORM_COMPILER_CLANG || PLATFORM_COMPILER_APPLECLANG
-	#define PRAGMA(...)       _Pragma(__VA_ARGS__)
 	#define IPLUG_APIENTRY
-	#define NOINLINE          __attribute__((noinline))
+	#define PRAGMA(...)       _Pragma(__VA_ARGS__)
+	#define FORCEINLINE       inline __attribute__((__always_inline__))
+	#define NOINLINE          __attribute__((__noinline__))
 	#define CACHE_ALIGN(x)    __attribute__((aligned(x)))
 #else
 	#error "Unsupported compiler."
 #endif
+
+#define NODISCARD [[nodiscard]]
+#define NORETURN  [[noreturn]]
+
 
 //---------------------------------------------------------
 // Set 32/64 bit platform architecture via the hail mary method (should probably get this from cmake instead)

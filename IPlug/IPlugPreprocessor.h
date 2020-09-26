@@ -37,7 +37,6 @@
 #define PRAGMA_MESSAGE(msg)                     PRAGMA(message(msg))
 
 #define DEPRECATED(version, message)            [[deprecated(message)]]
-#define NODISCARD                               [[nodiscard]]
 
 #ifdef PARAMS_MUTEX
 	#define ENTER_PARAMS_MUTEX                  mParams_mutex.Enter();        Trace(TRACELOC, "%s", "ENTER_PARAMS_MUTEX");
