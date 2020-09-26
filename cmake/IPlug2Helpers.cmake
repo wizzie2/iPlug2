@@ -125,11 +125,11 @@ function(iplug_validate_string _variable)
     set(_var "${_variable}")
 
     if(OPTION_PREFIX)
-        string(PREPEND _var "${OPTION_PREFIX}")
+        string(PREPEND _var "${OPTION_PREFIX}_")
     endif()
 
     if(OPTION_SUFFIX)
-        string(APPEND _var "${OPTION_SUFFIX}")
+        string(APPEND _var "_${OPTION_SUFFIX}")
     endif()
 
     set(_value "${${_var}}")
@@ -151,6 +151,22 @@ function(iplug_validate_string _variable)
     endif()
 
     string(LENGTH "${_value}" _len)
+
+    if(OPTION_NOTEMPTY AND NOT OPTION_MINLENGTH)
+        set(OPTION_MINLENGTH 1)
+    endif()
+
+    if(OPTION_MINLENGTH AND _len LESS OPTION_MINLENGTH)
+        iplug_syntax_error("${_defined}. String length is less than ${OPTION_MINLENGTH} characters.")
+    endif()
+
+    if(OPTION_MAXLENGTH AND _len GREATER OPTION_MAXLENGTH)
+        iplug_syntax_error("${_defined}. String length exceedes ${OPTION_MAXLENGTH} characters.")
+    endif()
+
+    if(_len EQUAL 0)
+        return()
+    endif()
 
     if(OPTION_VERSION)
         set(_regex "^[^\\.]+")
@@ -174,24 +190,12 @@ function(iplug_validate_string _variable)
 
     if(OPTION_STREQUAL)
         foreach(_str IN LISTS OPTION_STREQUAL)
-            if(${_value} STREQUAL ${_str})
+            if("${_value}" STREQUAL "${_str}")
                 return()
             endif()
         endforeach()
         string(REPLACE ";" "\", \"" _str "${OPTION_STREQUAL}")
         iplug_syntax_error("${_defined} is invalid. Valid options are \"${_str}\".")
-    endif()
-
-    if(OPTION_NOTEMPTY AND NOT OPTION_MINLENGTH)
-        set(OPTION_MINLENGTH 1)
-    endif()
-
-    if(OPTION_MINLENGTH AND _len LESS OPTION_MINLENGTH)
-        iplug_syntax_error("${_defined}. String length is less than ${OPTION_MINLENGTH} characters.")
-    endif()
-
-    if(OPTION_MAXLENGTH AND _len GREATER OPTION_MAXLENGTH)
-        iplug_syntax_error("${_defined}. String length exceedes ${OPTION_MAXLENGTH} characters.")
     endif()
 
     if(OPTION_FILE_EXISTS OR OPTION_PATH_EXISTS)

@@ -8,49 +8,34 @@ project(IPlugControls)
 
 # Project configuration
 iplug_configure_project(
-    PLUG_NAME                   "IPlugControls"                 #
-    PLUG_NAME_ABBREVIATION      "IPCT"                          #
-    PLUG_MFR                    "AcmeInc"                       #
-    PLUG_VERSION_HEX            0x00010000                      #
-    PLUG_VERSION_STR            "1.0.0"                         #
-    PLUG_UNIQUE_ID              'Ipct'                          #
-    PLUG_MFR_ID                 'Acme'                          #
-    PLUG_URL_STR                "https://iplug2.github.io"      #
-    PLUG_EMAIL_STR              "spam@me.com"                   #
-    PLUG_COPYRIGHT_STR          "Copyright 2020 Acme Inc"       #
-    PLUG_TYPE                   Instrument                      # [Effect|Instrument|MIDIEffect]
-    PLUG_CHANNEL_IO             "0-2"                           #
-    PLUG_LATENCY                0                               #
-    PLUG_DOES_MIDI_IN           1                               #
-    PLUG_DOES_MIDI_OUT          0                               #
-    PLUG_DOES_MPE               0                               #
-    PLUG_DOES_STATE_CHUNKS      0                               #
-    PLUG_HAS_UI                 1                               #
-    PLUG_WIDTH                  1024                            #
-    PLUG_HEIGHT                 768                             #
-    PLUG_HOST_RESIZE            0                               #
-    PLUG_FPS                    60                              #
-    PLUG_SHARED_RESOURCES       0                               #
-    PLUG_ICON                   "resources/IPlugControls.ico"   #
+    BUNDLE_NAME                 "IPlugControls"
+    BUNDLE_DOMAIN               "com"
+    BUNDLE_ICON                 "resources/IPlugControls.ico"
 
-    BUNDLE_NAME                 "IPlugControls"                 #
-    BUNDLE_DOMAIN               "com"                           #
-
-    VST3_SUBCATEGORY            "Instrument|Synth"              # TODO: move to vst3 config
-
-    APP_NUM_CHANNELS            2                               # TODO: move to app config
-    APP_N_VECTOR_WAIT           0                               #
-    APP_COPY_AUV3               0                               #
-    APP_SIGNAL_VECTOR_SIZE      64                              #
-
-    AAX_TYPE_IDS                "'IPCT'"                        # TODO: move to aax config
-    AAX_TYPE_IDS_AUDIOSUITE     "'EFA1', 'EFA2'"                #
-    AAX_PLUG_CATEGORY_STR       "None"                          #
-    AAX_DOES_AUDIOSUITE         0                               #
-
-    AUV2_ENTRY                  IPlugControls_Entry             # TODO: move to auv2 config
-    AUV2_VIEW_CLASS             IPlugControls_View              #
-    AUV2_FACTORY                IPlugControls_Factory           #
+    PLUG_CLASS_NAME             IPlugControls
+    PLUG_NAME                   "IPlugControls"
+    PLUG_NAME_SHORT             "IPCT"
+    PLUG_MFR                    "AcmeInc"
+    PLUG_VERSION_HEX            0x00010000
+    PLUG_VERSION_STR            "1.0.0"
+    PLUG_UNIQUE_ID              'Ipct'
+    PLUG_MFR_ID                 'Acme'
+    PLUG_URL_STR                "https://iplug2.github.io"
+    PLUG_EMAIL_STR              "spam@me.com"
+    PLUG_COPYRIGHT_STR          "Copyright 2020 Acme Inc"
+    PLUG_TYPE                   Instrument
+    PLUG_CHANNEL_IO             "0-2"
+    PLUG_LATENCY                0
+    PLUG_DOES_MIDI_IN           1
+    PLUG_DOES_MIDI_OUT          0
+    PLUG_DOES_MPE               0
+    PLUG_DOES_STATE_CHUNKS      0
+    PLUG_HAS_UI                 1
+    PLUG_WIDTH                  1024
+    PLUG_HEIGHT                 768
+    PLUG_HOST_RESIZE            0
+    PLUG_FPS                    60
+    PLUG_SHARED_RESOURCES       0
 
     RESOURCE_DEFINITIONS
         ROBOTO_FN               "Roboto-Regular.ttf"
@@ -80,7 +65,6 @@ set(SOURCE_LIST
         "IconsForkAwesome.h"
         "IPlugControls.cpp"
         "IPlugControls.h"
-
         "resources/main.rc"
         "resources/IPlugControls.ico"
 )
@@ -94,8 +78,24 @@ set(INCLUDE_DIRECTORIES
 )
 
 # Add targets
-iplug_add_application(IPlugControls-app)
-iplug_add_vst3(IPlugControls-vst3)
+iplug_add_application(IPlugControls-app
+    NUM_CHANNELS            2
+    N_VECTOR_WAIT           0
+    COPY_AUV3               0
+    SIGNAL_VECTOR_SIZE      64
+)
+
+iplug_add_vst3(IPlugControls-vst3
+    EXTENSION               vst3
+    SUBCATEGORY             Instrument|Synth
+)
+
+# iplug_add_aax(IPlugControls-aax
+#     AAX_TYPE_IDS                "'IPCT'"
+#     AAX_TYPE_IDS_AUDIOSUITE     "'EFA1', 'EFA2'"
+#     AAX_PLUG_CATEGORY_STR       None
+#     AAX_DOES_AUDIOSUITE         0
+# )
 
 target_sources(IPlugControls-app ${SOURCE_LIST})
 target_sources(IPlugControls-vst3 ${SOURCE_LIST})

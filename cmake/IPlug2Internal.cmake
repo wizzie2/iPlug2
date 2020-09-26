@@ -14,6 +14,7 @@ set(_iplug_config_string_variables
     BUNDLE_MFR
     BUNDLE_DOMAIN
     SHARED_RESOURCES_SUBPATH
+
     VST3_SUBCATEGORY
     AAX_PLUG_MFR_STR
     AAX_PLUG_NAME_STR
@@ -24,7 +25,9 @@ set(_iplug_config_string_variables
 
 # list of config variables excluded from being defined in code
 set(_iplug_config_definition_exclude
-    ICON
+    BUNDLE_ICON
+    APP_SUBSYSTEM
+    VST3_EXTENSION
 )
 
 
@@ -472,25 +475,51 @@ endfunction()
 
 
 #------------------------------------------------------------------------------
+# _iplug_warn_unparsed_arguments
+
+function(_iplug_warn_unparsed_arguments _list)
+    set(_list ${${_list}})
+    if(_list)
+        while(TRUE)
+            list(LENGTH _list _len)
+            if(NOT _len OR _len EQUAL 0)
+                break()
+            endif()
+            list(POP_FRONT _list _item_name)
+            list(POP_FRONT _list _item_val)
+            iplug_warning("Unknown configuration ${_item_name} = \"${_item_val}\".")
+        endwhile()
+    endif()
+endfunction()
+
+#------------------------------------------------------------------------------
 # _iplug_add_config_variable
 
-macro(_iplug_add_config_variable _name _value)
+function(_iplug_add_config_variable _config_prefix _name_prefix _name _value)
         string(REPLACE "\n" "\\n" _str "${_value}")
         string(REPLACE "\r" "\\r" _str "${_str}")
         string(REPLACE "\t" "\\t" _str "${_str}")
-        set(CONFIG_${_name} "${_str}")
+        if(NOT ${_config_prefix} STREQUAL "")
+            string(APPEND _config_prefix "_")
+        endif()
+        if(NOT ${_name_prefix} STREQUAL "")
+            string(APPEND _name_prefix "_")
+        endif()
+        set(${_config_prefix}${_name} "${_str}" PARENT_SCOPE)
+        set(_deflist ${_name_prefix}CONFIG_DEFINITIONS)
         if(NOT _str STREQUAL "")
-            list(FIND _iplug_config_definition_exclude ${_name} _result)
+            list(FIND _iplug_config_definition_exclude ${_name_prefix}${_name} _result)
             if(${_result} EQUAL -1)
-                list(FIND _iplug_config_string_variables ${_name} _result)
+                list(FIND _iplug_config_string_variables ${_name_prefix}${_name} _result)
                 if(${_result} EQUAL -1)
-                    list(APPEND CONFIG_DEFINITIONS "${_name}=${_str}")
+                    list(APPEND ${_deflist} "${_name_prefix}${_name}=${_str}")
                 else()
-                    list(APPEND CONFIG_DEFINITIONS "${_name}=\"${_str}\"")
+                    list(APPEND ${_deflist} "${_name_prefix}${_name}=\"${_str}\"")
                 endif()
+                set(${_deflist} "${${_deflist}}" PARENT_SCOPE)
             endif()
         endif()
-endmacro()
+endfunction()
 
 
 #------------------------------------------------------------------------------
@@ -629,7 +658,7 @@ function(_iplug_add_target_lib _target _pluginapi_lib)
     set(_libName "${_target}-static")
     add_library(${_libName})
 
-    # Add access to target specific resources and config.h
+    # Add access to target specific resources
     target_include_directories(${_libName}
         PRIVATE
             ${CMAKE_CURRENT_LIST_DIR}
@@ -645,7 +674,7 @@ function(_iplug_add_target_lib _target _pluginapi_lib)
     # out some of the source files depending on what the target type is.
     get_target_property(_iplug_src_list IPlug INTERFACE_SOURCES)
     get_target_property(_igraphics_src_list IGraphics INTERFACE_SOURCES)
-    set(_src_list ${_iplug_src_list} ${_igraphics_src_list} )
+    set(_src_list ${_iplug_src_list} ${_igraphics_src_list})
 
     # Filter out unused sources from compiling.
     # Don't like this solution, but since you can only set flags per 'source file'
@@ -727,17 +756,17 @@ function(_iplug_add_target_lib _target _pluginapi_lib)
     target_sources(${_libName} PRIVATE ${_src_list})
 
 	# Add IPLUG2_STATIC definition when we're compiling the library
-    target_compile_definitions(${_libName} PRIVATE IPLUG2_STATIC)
+    target_compile_definitions(${_libName}
+        PRIVATE
+            IPLUG2_STATIC
+        PUBLIC
+            ${CONFIG_DEFINITIONS}
+    )
 
     # Configure precompiled headers for the static library
     target_precompile_headers(${_libName}
         PUBLIC
             "${IPLUG2_ROOT_PATH}/IPlug/IPlugPCH.h"
-    )
-
-    target_compile_definitions(${_libName}
-        PUBLIC
-            ${CONFIG_DEFINITIONS}
     )
 
     target_link_libraries(${_libName}
