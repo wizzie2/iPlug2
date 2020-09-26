@@ -389,8 +389,8 @@ macro(iplug_add_vst3 _target)
                     COMMAND ${CMAKE_COMMAND} -E copy
                         ${CMAKE_BINARY_DIR}/desktop.ini  #${SMTG_DESKTOP_INI_PATH}
                         ${PLUGIN_PACKAGE_PATH}/desktop.ini
-                    COMMAND attrib +h ${PLUGIN_PACKAGE_PATH}/desktop.ini
-                    COMMAND attrib +h ${PLUGIN_PACKAGE_PATH}/PlugIn.ico
+                    COMMAND attrib +h +s ${PLUGIN_PACKAGE_PATH}/desktop.ini
+                    COMMAND attrib +h +s ${PLUGIN_PACKAGE_PATH}/PlugIn.ico
                     COMMAND attrib +s ${PLUGIN_PACKAGE_PATH}
                 )
             endif()
