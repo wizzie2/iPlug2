@@ -92,8 +92,8 @@ endfunction()
 #   [PATH_EXISTS]           Refering to an existing path.
 #   [ALPHAFIRST]            First character must be an alphabetic character.
 #   [SINGLE_QUOTED]         Required to be surrounded by single quote marks.
-#   [PREFIX <prefix>]       Prepend <prefix> to the variable name from which the string value is read.
-#   [SUFFIX <suffix>]       Append <suffix> to the variable name from which the string value is read.
+#   [PREFIX <prefix>]       Prepend <prefix>_ to the variable name from which the string value is read.
+#   [SUFFIX <suffix>]       Append _<suffix> to the variable name from which the string value is read.
 #   [MINLENGTH <length>]    Minimum length allowed. Ignoring apostophes if [SINGLE_QUOTED] is set.
 #   [MAXLENGTH <length>]    Maximum length allowed. Ignoring apostophes if [SINGLE_QUOTED] is set.
 #   [STREQUAL <string>...]  Required to be equal to one of the provided strings.
