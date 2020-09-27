@@ -24,11 +24,13 @@ using namespace iplug;
 
 #if defined _DEBUG && !defined NO_IGRAPHICS
 	#include "IGraphics.h"
-	using namespace igraphics;
+using namespace igraphics;
 #endif
 
 // check the input and output devices, find matching srs
-void IPlugAPPHost::PopulateSampleRateList(HWND hwndDlg, RtAudio::DeviceInfo* inputDevInfo, RtAudio::DeviceInfo* outputDevInfo)
+void IPlugAPPHost::PopulateSampleRateList(HWND hwndDlg,
+										  RtAudio::DeviceInfo* inputDevInfo,
+										  RtAudio::DeviceInfo* outputDevInfo)
 {
 	WDL_String buf;
 
@@ -292,7 +294,7 @@ void IPlugAPPHost::PopulatePreferencesDialog(HWND hwndDlg)
 void IPlugAPPHost::PopulatePreferencesDialog(HWND hwndDlg)
 {
 	SendDlgItemMessage(hwndDlg, IDC_COMBO_AUDIO_DRIVER, CB_ADDSTRING, 0, (LPARAM) "CoreAudio");
-	//SendDlgItemMessage(hwndDlg,IDC_COMBO_AUDIO_DRIVER,CB_ADDSTRING,0,(LPARAM)"Jack");
+	// SendDlgItemMessage(hwndDlg,IDC_COMBO_AUDIO_DRIVER,CB_ADDSTRING,0,(LPARAM)"Jack");
 	SendDlgItemMessage(hwndDlg, IDC_COMBO_AUDIO_DRIVER, CB_SETCURSEL, mState.mAudioDriverType, 0);
 
 	PopulateAudioDialogs(hwndDlg);
@@ -335,7 +337,9 @@ WDL_DLGRET IPlugAPPHost::PreferencesDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 
 					EndDialog(hwndDlg, IDOK);  // INI file will be changed see MainDialogProc
 					break;
-				case IDAPPLY: _this->TryToChangeAudio(); break;
+				case IDAPPLY:
+					_this->TryToChangeAudio();
+					break;
 				case IDCANCEL:
 					EndDialog(hwndDlg, IDCANCEL);
 
@@ -413,7 +417,7 @@ WDL_DLGRET IPlugAPPHost::PreferencesDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 						mState.mAudioInChanL =
 							(int) SendDlgItemMessage(hwndDlg, IDC_COMBO_AUDIO_IN_L, CB_GETCURSEL, 0, 0) + 1;
 
-						//TEMP
+						// TEMP
 						mState.mAudioInChanR = mState.mAudioInChanL + 1;
 						SendDlgItemMessage(hwndDlg, IDC_COMBO_AUDIO_IN_R, CB_SETCURSEL, mState.mAudioInChanR - 1, 0);
 						//
@@ -433,7 +437,7 @@ WDL_DLGRET IPlugAPPHost::PreferencesDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 						mState.mAudioOutChanL =
 							(int) SendDlgItemMessage(hwndDlg, IDC_COMBO_AUDIO_OUT_L, CB_GETCURSEL, 0, 0) + 1;
 
-						//TEMP
+						// TEMP
 						mState.mAudioOutChanR = mState.mAudioOutChanL + 1;
 						SendDlgItemMessage(hwndDlg, IDC_COMBO_AUDIO_OUT_R, CB_SETCURSEL, mState.mAudioOutChanR - 1, 0);
 						//
@@ -514,10 +518,12 @@ WDL_DLGRET IPlugAPPHost::PreferencesDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wPar
 							(int) SendDlgItemMessage(hwndDlg, IDC_COMBO_MIDI_OUT_CHAN, CB_GETCURSEL, 0, 0);
 					break;
 
-				default: break;
+				default:
+					break;
 			}
 			break;
-		default: return FALSE;
+		default:
+			return FALSE;
 	}
 	return TRUE;
 }
@@ -545,10 +551,10 @@ static void ClientResize(HWND hWnd, int nWidth, int nHeight)
 }
 
 #if PLATFORM_WINDOWS
-extern const int GetScaleForHWND(const HWND hWnd, const bool useCachedResult=true);
+extern const int GetScaleForHWND(const HWND hWnd, const bool useCachedResult = true);
 #endif
 
-//static
+// static
 WDL_DLGRET IPlugAPPHost::MainDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	IPlugAPPHost* pAppHost = IPlugAPPHost::sInstance.get();
@@ -586,7 +592,9 @@ WDL_DLGRET IPlugAPPHost::MainDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
 #endif
 
 			return 0;
-		case WM_CLOSE: DestroyWindow(hwndDlg); return 0;
+		case WM_CLOSE:
+			DestroyWindow(hwndDlg);
+			return 0;
 		case WM_COMMAND:
 			switch (LOWORD(wParam))
 			{
@@ -653,7 +661,8 @@ WDL_DLGRET IPlugAPPHost::MainDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
 						{
 							bool enabled = pGraphics->LiveEditEnabled();
 							pGraphics->EnableLiveEdit(!enabled);
-							CheckMenuItem(GET_MENU(), ID_LIVE_EDIT, MF_BYCOMMAND | enabled ? MF_UNCHECKED : MF_CHECKED);
+							CheckMenuItem(
+								GET_MENU(), ID_LIVE_EDIT, (MF_BYCOMMAND | enabled) ? MF_UNCHECKED : MF_CHECKED);
 						}
 					}
 
@@ -672,7 +681,7 @@ WDL_DLGRET IPlugAPPHost::MainDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
 							bool enabled = pGraphics->ShowAreaDrawnEnabled();
 							pGraphics->ShowAreaDrawn(!enabled);
 							CheckMenuItem(
-								GET_MENU(), ID_SHOW_DRAWN, MF_BYCOMMAND | enabled ? MF_UNCHECKED : MF_CHECKED);
+								GET_MENU(), ID_SHOW_DRAWN, (MF_BYCOMMAND | enabled) ? MF_UNCHECKED : MF_CHECKED);
 						}
 					}
 
@@ -691,7 +700,7 @@ WDL_DLGRET IPlugAPPHost::MainDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
 							bool enabled = pGraphics->ShowControlBoundsEnabled();
 							pGraphics->ShowControlBounds(!enabled);
 							CheckMenuItem(
-								GET_MENU(), ID_SHOW_BOUNDS, MF_BYCOMMAND | enabled ? MF_UNCHECKED : MF_CHECKED);
+								GET_MENU(), ID_SHOW_BOUNDS, (MF_BYCOMMAND | enabled) ? MF_UNCHECKED : MF_CHECKED);
 						}
 					}
 
@@ -709,21 +718,22 @@ WDL_DLGRET IPlugAPPHost::MainDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
 						{
 							bool enabled = pGraphics->ShowingFPSDisplay();
 							pGraphics->ShowFPSDisplay(!enabled);
-							CheckMenuItem(GET_MENU(), ID_SHOW_FPS, MF_BYCOMMAND | enabled ? MF_UNCHECKED : MF_CHECKED);
+							CheckMenuItem(
+								GET_MENU(), ID_SHOW_FPS, (MF_BYCOMMAND | enabled) ? MF_UNCHECKED : MF_CHECKED);
 						}
 					}
 
 					return 0;
 				}
 #endif
-      }
-      return 0;
-    case WM_GETMINMAXINFO:
-    {
-      if(!pAppHost)
-        return 1;
-      
-      IPlugAPP* pPlug = pAppHost->GetPlug();
+			}
+			return 0;
+		case WM_GETMINMAXINFO:
+		{
+			if (!pAppHost)
+				return 1;
+
+			IPlugAPP* pPlug = pAppHost->GetPlug();
 
 			MINMAXINFO* mmi       = (MINMAXINFO*) lParam;
 			mmi->ptMinTrackSize.x = pPlug->GetMinWidth();
@@ -765,7 +775,8 @@ WDL_DLGRET IPlugAPPHost::MainDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
 					pPlug->OnParentWindowResize(r.right / scale, r.bottom / scale);
 					return 1;
 				}
-				default: return 0;
+				default:
+					return 0;
 			}
 		}
 	}
