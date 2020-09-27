@@ -25,6 +25,9 @@ set(_iplug_config_string_variables
 
 # list of config variables excluded from being defined in code
 set(_iplug_config_definition_exclude
+    INCLUDE_DIRECTORIES
+    SOURCES
+    LINK_LIBRARIES
     BUNDLE_ICON
     APP_SUBSYSTEM
     VST3_EXTENSION
@@ -496,6 +499,7 @@ endfunction()
 # _iplug_add_config_variable
 
 function(_iplug_add_config_variable _config_prefix _name_prefix _name _value)
+    if(NOT "${_value}" STREQUAL "")
         string(REPLACE "\n" "\\n" _str "${_value}")
         string(REPLACE "\r" "\\r" _str "${_str}")
         string(REPLACE "\t" "\\t" _str "${_str}")
@@ -506,8 +510,8 @@ function(_iplug_add_config_variable _config_prefix _name_prefix _name _value)
             string(APPEND _name_prefix "_")
         endif()
         set(${_config_prefix}${_name} "${_str}" PARENT_SCOPE)
-        set(_deflist ${_name_prefix}CONFIG_DEFINITIONS)
         if(NOT "${_str}" STREQUAL "")
+            set(_deflist ${_name_prefix}CONFIG_DEFINITIONS)
             list(FIND _iplug_config_definition_exclude "${_name_prefix}${_name}" _result)
             if(${_result} EQUAL -1)
                 list(FIND _iplug_config_string_variables "${_name_prefix}${_name}" _result)
@@ -519,6 +523,7 @@ function(_iplug_add_config_variable _config_prefix _name_prefix _name _value)
                 set(${_deflist} "${${_deflist}}" PARENT_SCOPE)
             endif()
         endif()
+    endif()
 endfunction()
 
 
@@ -529,10 +534,10 @@ function(_iplug_generate_source_groups)
     # Set up source groups for IDE
 
     # Move precompiled headers into their own IDE group
-    if(CONFIG_PCH_FOLDER_NAME STREQUAL "")
+    if("${CONFIG_PCH_FOLDER_NAME}" STREQUAL "")
         set(CONFIG_PCH_FOLDER_NAME "resources/Precompiled Headers")
     endif()
-    source_group("${CONFIG_PCH_FOLDER_NAME}" REGULAR_EXPRESSION "^${CMAKE_CURRENT_BINARY_DIR}/.*cmake_pch\\..*xx$")
+    source_group("${CONFIG_PCH_FOLDER_NAME}" REGULAR_EXPRESSION "^.*CMakeFiles.*cmake_pch\\..*xx$")
 
     get_target_property(_src_list IPlug INTERFACE_SOURCES)
     source_group(TREE "${IPLUG2_ROOT_PATH}" FILES ${_src_list})
@@ -784,6 +789,21 @@ function(_iplug_add_target_lib _target _pluginapi_lib)
             IPlug_SharedIncludes
             ${_pluginapi_lib}
     )
+
+    # add sources to the target if defined in project config
+    if(CONFIG_SOURCES)
+        target_sources(${_target} ${CONFIG_SOURCES})
+    endif()
+
+    # add include directories to the target if defined in project config
+    if(CONFIG_INCLUDE_DIRECTORIES)
+        target_include_directories(${_target} ${CONFIG_INCLUDE_DIRECTORIES})
+    endif()
+
+    # add include directories to the target if defined in project config
+    if(CONFIG_LINK_LIBRARIES)
+        target_link_libraries(${_target} ${CONFIG_INCLUDE_DIRECTORIES} "")
+    endif()
 
     if(NOT IPLUG2_EXTERNAL_PROJECT)
         set_target_properties(${_libName} PROPERTIES FOLDER "Examples/${PROJECT_NAME}/Libraries")

@@ -56,26 +56,26 @@ iplug_configure_project(
         SVGKNOBROTATE_FN        "vector-knob.svg"
         SVGHSLIDERHANDLE_FN     "hslider-handle.svg"
         SVGHSLIDERTRACK_FN      "hslider-track.svg"
-)
 
 
-set(SOURCE_LIST
-    PRIVATE
-        "IconsFontaudio.h"
-        "IconsForkAwesome.h"
-        "IPlugControls.cpp"
-        "IPlugControls.h"
-        "resources/main.rc"
-        "resources/IPlugControls.ico"
+    # Optional ways to add include directories, source files and link libraries to all targets
+    INCLUDE_DIRECTORIES
+        PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}
+            resources
+            resources/fonts
+            resources/img
+
+    SOURCES
+        PRIVATE
+            FROM_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            FROM_DIRECTORY ./resources
+
+    LINK_LIBRARIES
+        PRIVATE
+            # additional libraries if needed
 )
 
-set(INCLUDE_DIRECTORIES
-    PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}
-        "resources"
-        "resources/fonts"
-        "resources/img"
-)
 
 # Add targets
 iplug_add_application(IPlugControls-app
@@ -97,15 +97,7 @@ iplug_add_vst3(IPlugControls-vst3
 #     AAX_DOES_AUDIOSUITE         0
 # )
 
-target_sources(IPlugControls-app ${SOURCE_LIST})
-target_sources(IPlugControls-vst3 ${SOURCE_LIST})
-
-target_include_directories(IPlugControls-app PRIVATE ${INCLUDE_DIRECTORIES})
-target_include_directories(IPlugControls-vst3 PRIVATE ${INCLUDE_DIRECTORIES})
-
-# extra libraries to link if needed
-target_link_libraries(IPlugControls-app PRIVATE )
-target_link_libraries(IPlugControls-vst3 PRIVATE )
 
 # Generate source list for IDE
+get_target_property(SOURCE_LIST IPlugControls-app SOURCES)
 source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}" FILES ${SOURCE_LIST})
