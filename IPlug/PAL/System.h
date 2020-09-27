@@ -33,17 +33,18 @@ namespace iplug
 	};
 }  // namespace iplug
 
+
 namespace iplug::generic
 {
 	struct GenericSystem
 	{
-		// Returns cache line size used when compiling as an integer
+		//!< @retval int Pre-defined cache line size
 		static inline constexpr int CacheLineSize()
 		{
 			return static_cast<int>(ECacheLineSize::Native);
 		}
 
-		//! @retval #EEndian Current runtime endianness
+		//!< @retval #EEndian Current runtime endianness
 		static inline const EEndian GetEndianness()
 		{
 			static volatile const union
