@@ -1,8 +1,6 @@
 #pragma once
 
-#include "IPlug_include_in_plug_hdr.h"
 #include "IPlugDrumSynth_DSP.h"
-#include "ISender.h"
 
 const int kNumPresets = 1;
 
