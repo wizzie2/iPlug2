@@ -80,13 +80,13 @@ public:
     switch(stage)
     {
       case kAttack:
-        mAttackIncr = CalcIncrFromTimeLinear(Clip(timeMS, MIN_ENV_TIME_MS, MAX_ENV_TIME_MS), mSampleRate);
+        mAttackIncr = CalcIncrFromTimeLinear(math::Clamp(timeMS, MIN_ENV_TIME_MS, MAX_ENV_TIME_MS), mSampleRate);
         break;
       case kDecay:
-        mDecayIncr = CalcIncrFromTimeExp(Clip(timeMS, MIN_ENV_TIME_MS, MAX_ENV_TIME_MS), mSampleRate);
+        mDecayIncr = CalcIncrFromTimeExp(math::Clamp(timeMS, MIN_ENV_TIME_MS, MAX_ENV_TIME_MS), mSampleRate);
         break;
       case kRelease:
-        mReleaseIncr = CalcIncrFromTimeExp(Clip(timeMS, MIN_ENV_TIME_MS, MAX_ENV_TIME_MS), mSampleRate);
+        mReleaseIncr = CalcIncrFromTimeExp(math::Clamp(timeMS, MIN_ENV_TIME_MS, MAX_ENV_TIME_MS), mSampleRate);
         break;
       default:
         //error

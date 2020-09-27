@@ -64,14 +64,14 @@ public:
   inline T Process()
   {
     IOscillator<T>::mPhase = IOscillator<T>::mPhase + IOscillator<T>::mPhaseIncr;
-    return std::sin(IOscillator<T>::mPhase * PI * 2.);
+    return std::sin(IOscillator<T>::mPhase * math::constants::pi_v<double> * 2.);
   }
 
   inline T Process(double freqHz) override
   {
     IOscillator<T>::SetFreqCPS(freqHz);
     IOscillator<T>::mPhase = IOscillator<T>::mPhase + IOscillator<T>::mPhaseIncr;
-    return std::sin(IOscillator<T>::mPhase * PI * 2.);
+    return std::sin(IOscillator<T>::mPhase * math::constants::pi_v<double> * 2.);
   }
 };
 
@@ -157,7 +157,7 @@ public:
 
   static inline T Lookup(double phaseRadians)
   {
-    double tPhase = phaseRadians / (PI * 2.) * tableSizeM1;
+    double tPhase = phaseRadians / (math::constants::pi_v<double> * 2.) * tableSizeM1;
 
     tPhase += (double) UNITBIT32;
 
