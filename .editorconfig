@@ -32,5 +32,4 @@ indent_size = 2
 indent_style = space
 
 [*.rc]
-charset = utf-16
-indent_style = space
+end_of_line = crlf
