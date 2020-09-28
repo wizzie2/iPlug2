@@ -43,7 +43,7 @@ macro(_iplug_pre_project_setup)
     validate_path("${IPLUG2_ROOT_PATH}" "IPLUG2_ROOT_PATH path not set correctly")
 
     # Standard in-source build prevention
-    if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+    if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
         iplug_syntax_error(
             "Generating build files in source tree is not allowed to prevent sleepless nights and lots of tears."
             "Create a build directory outside of the source code and call cmake from there.")
@@ -109,11 +109,10 @@ macro(_iplug_post_project_setup)
         set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/${CMAKE_BUILD_TYPE}")
     endif()
 
-
     find_package(Git)
 
-    if(PLATFORM_WINDOWS AND NOT EXISTS "${CMAKE_BINARY_DIR}/desktop.ini")
-        file(GENERATE OUTPUT "${CMAKE_BINARY_DIR}/desktop.ini"
+    if(PLATFORM_WINDOWS AND NOT EXISTS "${CMAKE_BINARY_DIR}/desktop.ini.in")
+        file(GENERATE OUTPUT "${CMAKE_BINARY_DIR}/desktop.ini.in"
             CONTENT "[.ShellClassInfo]\nIconResource=PlugIn.ico,0\n")
     endif()
 
@@ -499,30 +498,35 @@ endfunction()
 # _iplug_add_config_variable
 
 function(_iplug_add_config_variable _config_prefix _name_prefix _name _value)
-    if(NOT "${_value}" STREQUAL "")
-        string(REPLACE "\n" "\\n" _str "${_value}")
-        string(REPLACE "\r" "\\r" _str "${_str}")
-        string(REPLACE "\t" "\\t" _str "${_str}")
-        if(NOT "${_config_prefix}" STREQUAL "")
-            string(APPEND _config_prefix "_")
+    if(NOT "${_config_prefix}" STREQUAL "")
+        string(APPEND _config_prefix "_")
+    endif()
+
+    if(NOT "${_name_prefix}" STREQUAL "")
+        string(APPEND _name_prefix "_")
+    endif()
+
+    if("${_value}" STREQUAL "")
+        set(${_config_prefix}${_name} "" PARENT_SCOPE)
+        return()
+    endif()
+
+    string(REPLACE "\n" "\\n" _str "${_value}")
+    string(REPLACE "\r" "\\r" _str "${_str}")
+    string(REPLACE "\t" "\\t" _str "${_str}")
+
+    set(${_config_prefix}${_name} "${_str}" PARENT_SCOPE)
+
+    set(_deflist ${_name_prefix}CONFIG_DEFINITIONS)
+    list(FIND _iplug_config_definition_exclude "${_name_prefix}${_name}" _result)
+    if(${_result} EQUAL -1)
+        list(FIND _iplug_config_string_variables "${_name_prefix}${_name}" _result)
+        if(${_result} EQUAL -1)
+            list(APPEND ${_deflist} "${_name_prefix}${_name}=${_str}")
+        else()
+            list(APPEND ${_deflist} "${_name_prefix}${_name}=\"${_str}\"")
         endif()
-        if(NOT "${_name_prefix}" STREQUAL "")
-            string(APPEND _name_prefix "_")
-        endif()
-        set(${_config_prefix}${_name} "${_str}" PARENT_SCOPE)
-        if(NOT "${_str}" STREQUAL "")
-            set(_deflist ${_name_prefix}CONFIG_DEFINITIONS)
-            list(FIND _iplug_config_definition_exclude "${_name_prefix}${_name}" _result)
-            if(${_result} EQUAL -1)
-                list(FIND _iplug_config_string_variables "${_name_prefix}${_name}" _result)
-                if(${_result} EQUAL -1)
-                    list(APPEND ${_deflist} "${_name_prefix}${_name}=${_str}")
-                else()
-                    list(APPEND ${_deflist} "${_name_prefix}${_name}=\"${_str}\"")
-                endif()
-                set(${_deflist} "${${_deflist}}" PARENT_SCOPE)
-            endif()
-        endif()
+        set(${_deflist} "${${_deflist}}" PARENT_SCOPE)
     endif()
 endfunction()
 

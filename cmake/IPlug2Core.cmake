@@ -165,6 +165,11 @@ macro(iplug_configure_project)
         list(LENGTH _arg_RESOURCE_DEFINITIONS _len)
     endwhile()
 
+    if(NOT "${CONFIG_BUNDLE_ICON}" STREQUAL "")
+        get_filename_component(_icon "${CONFIG_BUNDLE_ICON}" ABSOLUTE)
+        set(CONFIG_BUNDLE_ICON "${_icon}")
+    endif()
+
     # Check validity of config variables.
     iplug_validate_string(PLUG_NAME                PREFIX CONFIG NOTEMPTY ALPHA NUMERIC SPACE)
     iplug_validate_string(PLUG_NAME_SHORT          PREFIX CONFIG NOTEMPTY ALPHA NUMERIC MAXLENGTH 4)
@@ -388,28 +393,28 @@ macro(iplug_add_vst3 _target)
             _iplug_add_config_variable(CONFIG_VST3 VST3 ${_var} "${_arg_${_var}}")
         endforeach()
 
-        iplug_validate_string(EXTENSION   PREFIX CONFIG_VST3 ALPHA NUMERIC HYPHEN UNDERSCORE)
-        iplug_validate_string(SUBCATEGORY PREFIX CONFIG_VST3 ALPHA DELIMITER MAXLENGTH 127)
-
-        if(NOT CONFIG_VST3_EXTENSION)
+        if("${CONFIG_VST3_EXTENSION}" STREQUAL "")
             set(CONFIG_VST3_EXTENSION "vst3")
         endif()
 
-        get_filename_component(VST3_ICON "${CONFIG_BUNDLE_ICON}" ABSOLUTE)
-        if(NOT VST3_ICON OR NOT EXISTS "${VST3_ICON}")
+        set(VST3_ICON "${CONFIG_BUNDLE_ICON}")
+        if("${VST3_ICON}" STREQUAL "" AND EXISTS "${VST3_SDK_PATH}/doc/artwork/VST_Logo_Steinberg.ico")
             set(VST3_ICON "${VST3_SDK_PATH}/doc/artwork/VST_Logo_Steinberg.ico")
         endif()
+
+        iplug_validate_string(EXTENSION   PREFIX CONFIG_VST3 ALPHA NUMERIC HYPHEN UNDERSCORE)
+        iplug_validate_string(SUBCATEGORY PREFIX CONFIG_VST3 ALPHA DELIMITER MAXLENGTH 127)
 
         _iplug_add_target_lib(${_target} IPlug_VST3)
         target_compile_definitions(${_target}-static PUBLIC ${VST3_CONFIG_DEFINITIONS})
         target_link_libraries(${_target} PRIVATE ${_target}-static)
 
-        set(PLUGIN_NAME "${CONFIG_PLUG_NAME}")
-        set(PLUGIN_EXT "${CONFIG_VST3_EXTENSION}")
-        set(PLUGIN_NAME_EXT "${PLUGIN_NAME}.${PLUGIN_EXT}")
-        set(VST3_CONFIG_PATH $<$<CONFIG:$<CONFIG>>:VST3-$<CONFIG>>)
+        set(PLUGIN_NAME         "${CONFIG_PLUG_NAME}")
+        set(PLUGIN_EXT          "${CONFIG_VST3_EXTENSION}")
+        set(PLUGIN_NAME_EXT     "${PLUGIN_NAME}.${PLUGIN_EXT}")
+        set(VST3_CONFIG_PATH    $<$<CONFIG:$<CONFIG>>:VST3-$<CONFIG>>)
         set(PLUGIN_PACKAGE_PATH "${PROJECT_BINARY_DIR}/bin/${VST3_CONFIG_PATH}/${CONFIG_BUNDLE_NAME}")
-        set(_path "${VST3_SDK_PATH}/public.sdk/source/main")
+        set(_path               "${VST3_SDK_PATH}/public.sdk/source/main")
 
         set_target_properties(${_target} PROPERTIES
             LIBRARY_OUTPUT_NAME                            "${PLUGIN_NAME}"
@@ -421,7 +426,7 @@ macro(iplug_add_vst3 _target)
             BUNDLE_EXTENSION                               "${PLUGIN_EXT}"
             XCODE_ATTRIBUTE_WRAPPER_EXTENSION              "${PLUGIN_EXT}"
             XCODE_ATTRIBUTE_GENERATE_PKGINFO_FILE          YES
-            XCODE_ATTRIBUTE_GCC_GENERATE_DEBUGGING_SYMBOLS $<$<CONFIG:Debug>YES>$<$<CONFIG:Release>:NO>$<$<CONFIG:Distributed>:NO>
+            XCODE_ATTRIBUTE_GCC_GENERATE_DEBUGGING_SYMBOLS $<IF:$<CONFIG:Debug>,YES,NO>
             XCODE_ATTRIBUTE_DEBUG_INFORMATION_FORMAT       $<$<CONFIG:Debug>:dwarf>
         )
 
@@ -444,8 +449,8 @@ macro(iplug_add_vst3 _target)
                 set_target_properties(${_target} PROPERTIES XCODE_ATTRIBUTE_OSX_ARCHITECTURES "x86_64;i386")
                 set_target_properties(${_target} PROPERTIES XCODE_ATTRIBUTE_ARCHS "$(ARCHS_STANDARD_32_64_BIT)")
             endif()
-            # diff: adding $<$<CONFIG:Distributed>:NO>
-            set_target_properties(${_target} PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH "$<$<CONFIG:Debug>:YES>$<$<CONFIG:Release>:NO>$<$<CONFIG:Distributed>:NO>")
+            # diff: adding 'NO' by default unless it's debug build
+            set_target_properties(${_target} PROPERTIES XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH $<IF:$<CONFIG:Debug>,YES,NO>)
         endif()
 
         if(SMTG_IOS_DEVELOPMENT_TEAM)
@@ -455,7 +460,7 @@ macro(iplug_add_vst3 _target)
         endif()
 
         if(PLATFORM_WINDOWS)
-            if(EXISTS ${VST3_ICON})
+            if(NOT "${VST3_ICON}" STREQUAL "")
                 add_custom_command(TARGET ${_target}
                     COMMENT "Copy PlugIn.ico and desktop.ini and change their attributes."
                     POST_BUILD
@@ -463,14 +468,13 @@ macro(iplug_add_vst3 _target)
                         "${VST3_ICON}"
                         "${PLUGIN_PACKAGE_PATH}/PlugIn.ico"
                     COMMAND ${CMAKE_COMMAND} -E copy
-                        "${CMAKE_BINARY_DIR}/desktop.ini"  #${SMTG_DESKTOP_INI_PATH}
+                        "${CMAKE_BINARY_DIR}/desktop.ini.in"  #${SMTG_DESKTOP_INI_PATH}
                         "${PLUGIN_PACKAGE_PATH}/desktop.ini"
                     COMMAND attrib +h +s "${PLUGIN_PACKAGE_PATH}/desktop.ini"
                     COMMAND attrib +h +s "${PLUGIN_PACKAGE_PATH}/PlugIn.ico"
                     COMMAND attrib +s "${PLUGIN_PACKAGE_PATH}"
                 )
             endif()
-
         elseif(PLATFORM_LINUX)
             # !!! this is untested code
             smtg_get_linux_architecture_name() # Sets var LINUX_ARCHITECTURE_NAME
@@ -495,8 +499,6 @@ macro(iplug_add_vst3 _target)
             if(SMTG_WIN)
                 file(TO_NATIVE_PATH "${TARGET_SOURCE}" SOURCE_NATIVE_PATH)
                 file(TO_NATIVE_PATH "${TARGET_DESTINATION}" DESTINATION_NATIVE_PATH)
-                # file(TO_NATIVE_PATH "${TARGET_SOURCE}/${PLUGIN_NAME_EXT}" SOURCE_PLUGIN_NATIVE)
-                # file(TO_NATIVE_PATH "${TARGET_DESTINATION}/${PLUGIN_NAME_EXT}" DESTINATION_PLUGIN_NATIVE)
                 add_custom_command(
                     TARGET ${_target} POST_BUILD
                     COMMAND rmdir "${DESTINATION_NATIVE_PATH}"
@@ -514,7 +516,6 @@ macro(iplug_add_vst3 _target)
         endif()
 
     endif()
-
 
     if(NOT IPLUG2_EXTERNAL_PROJECT)
         set_target_properties(${_target} PROPERTIES FOLDER "Examples/${PROJECT_NAME}")
