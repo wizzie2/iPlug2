@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.16)
 
 # Include the IPlug2.cmake module. Path can be absolute or relative.
 include("../../cmake/IPlug2.cmake")
@@ -57,8 +57,8 @@ iplug_configure_project(
         SVGHSLIDERHANDLE_FN     "hslider-handle.svg"
         SVGHSLIDERTRACK_FN      "hslider-track.svg"
 
-
-    # Optional ways to add include directories, source files and link libraries to all targets
+    # Optional way to automatically add include directories, source files and
+    # link libraries to all targets created by iplug_add_<type>(<target name> ...)
     INCLUDE_DIRECTORIES
         PRIVATE
             ${CMAKE_CURRENT_SOURCE_DIR}
@@ -68,8 +68,8 @@ iplug_configure_project(
 
     SOURCES
         PRIVATE
-            FROM_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-            FROM_DIRECTORY ./resources
+            FROM_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}  # Adds source files from current source directory
+            FROM_DIRECTORY ./resources                  # Same as ${CMAKE_CURRENT_SOURCE_DIR}/resources
 
     LINK_LIBRARIES
         PRIVATE
@@ -77,24 +77,24 @@ iplug_configure_project(
 )
 
 
-# Add targets
+# Add targets.
 iplug_add_application(IPlugControls-app
-    NUM_CHANNELS            2
-    N_VECTOR_WAIT           0
-    COPY_AUV3               0
-    SIGNAL_VECTOR_SIZE      64
+    NUM_CHANNELS        2
+    N_VECTOR_WAIT       0
+    COPY_AUV3           0
+    SIGNAL_VECTOR_SIZE  64
 )
 
 iplug_add_vst3(IPlugControls-vst3
-    EXTENSION               vst3
-    SUBCATEGORY             Instrument|Synth
+    EXTENSION           vst3
+    SUBCATEGORY         Instrument|Synth
 )
 
 # iplug_add_aax(IPlugControls-aax
-#     AAX_TYPE_IDS                "'IPCT'"
-#     AAX_TYPE_IDS_AUDIOSUITE     "'EFA1', 'EFA2'"
-#     AAX_PLUG_CATEGORY_STR       None
-#     AAX_DOES_AUDIOSUITE         0
+#     TYPE_IDS                "'IPCT'"
+#     TYPE_IDS_AUDIOSUITE     "'EFA1', 'EFA2'"
+#     PLUG_CATEGORY_STR       None
+#     DOES_AUDIOSUITE         0
 # )
 
 

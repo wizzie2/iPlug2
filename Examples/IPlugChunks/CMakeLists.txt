@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.16)
 
 # Include the IPlug2.cmake module. Path can be absolute or relative.
 include("../../cmake/IPlug2.cmake")
