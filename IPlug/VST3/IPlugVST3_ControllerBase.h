@@ -37,7 +37,7 @@ public:
     
     Steinberg::Vst::UnitID unitID = Steinberg::Vst::kRootUnitId;
     
-    #ifdef VST3_PRESET_LIST
+    #if VST3_PRESET_LIST
     if (pPlug->NPresets())
     {
       unitInfo.programListId = kPresetParam;

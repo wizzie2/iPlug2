@@ -378,6 +378,7 @@ macro(iplug_add_vst3 _target)
         "NUM_CC_CHANS"
         "NUM_MIDI_IN_CHANS"
         "NUM_MIDI_OUT_CHANS"
+        "PRESET_LIST"
     )
     set(_multiValueArgs "")
     cmake_parse_arguments(_arg "" "${_oneValueArgs}" "${_multiValueArgs}" ${ARGN})
@@ -415,6 +416,7 @@ macro(iplug_add_vst3 _target)
         iplug_validate_string(NUM_MIDI_IN_CHANS  PREFIX CONFIG_VST3 MINVALUE 1 MAXVALUE 16)
         iplug_validate_string(NUM_MIDI_OUT_CHANS PREFIX CONFIG_VST3 MINVALUE 1 MAXVALUE 16)
         iplug_validate_string(NUM_CC_CHANS       PREFIX CONFIG_VST3 MINVALUE 0 MAXVALUE ${CONFIG_VST3_NUM_MIDI_IN_CHANS})
+        iplug_validate_string(PRESET_LIST        PREFIX CONFIG_VST3 STREQUAL 0 1)
 
         _iplug_add_target_lib(${_target} IPlug_VST3)
         target_compile_definitions(${_target}-static PUBLIC ${VST3_CONFIG_DEFINITIONS})

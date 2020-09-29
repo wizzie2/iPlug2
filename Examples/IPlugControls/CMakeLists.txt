@@ -92,6 +92,7 @@ iplug_add_vst3(IPlugControls-vst3
     NUM_CC_CHANS        1
     NUM_MIDI_IN_CHANS   1
     NUM_MIDI_OUT_CHANS  1
+    PRESET_LIST         0
 )
 
 # iplug_add_aax(IPlugControls-aax
