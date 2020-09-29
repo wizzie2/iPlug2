@@ -96,8 +96,10 @@ endfunction()
 #   [SUFFIX <suffix>]       Append _<suffix> to the variable name from which the string value is read.
 #   [MINLENGTH <length>]    Minimum length allowed. Ignoring apostophes if [SINGLE_QUOTED] is set.
 #   [MAXLENGTH <length>]    Maximum length allowed. Ignoring apostophes if [SINGLE_QUOTED] is set.
+#   [MINVALUE <min>]        Minimum numeric integral or floating point value allowed.
+#   [MAXVALUE <max>]        Maximum numeric integral or floating point value allowed.
 #   [STREQUAL <string>...]  Required to be equal to one of the provided strings.
-#   [VERSION <x>]           Valid version format of <x> amount of numbers and a dot between each number.
+#   [VERSION <n>]           Valid version format of <n> amount of numbers and a dot between each number.
 #                           (Implies [DOT] if testing for invalid characters)
 #
 #   If any of the following options are set, the function will validate if the string value is allowed
@@ -116,7 +118,7 @@ endfunction()
 function(iplug_validate_string _variable)
     set(_options      NOTEMPTY FILE_EXISTS PATH_EXISTS ALPHAFIRST SINGLE_QUOTED)
     set(_char_options ALPHA NUMERIC SPACE HYPHEN DOT SLASH APOSTROPHE COMMA DELIMITER UNDERSCORE)
-    set(_onevalue     PREFIX SUFFIX MINLENGTH MAXLENGTH VERSION)
+    set(_onevalue     PREFIX SUFFIX MINLENGTH MAXLENGTH VERSION MINVALUE MAXVALUE)
     set(_multivalue   STREQUAL)
     cmake_parse_arguments(OPTION "${_options};${_char_options}" "${_onevalue}" "${_multivalue}" ${ARGN})
 
@@ -135,36 +137,41 @@ function(iplug_validate_string _variable)
     set(_value "${${_var}}")
     set(_defined "${_variable} = \"${_value}\"")
 
-    set(_noinvalid FALSE)
-    foreach(_val IN LISTS _char_options)
-        if(OPTION_${_val})
-            set(_noinvalid TRUE)
-            break()
-        endif()
-    endforeach()
-
     if(OPTION_SINGLE_QUOTED)
         if(NOT ${_value} MATCHES "^'.*'$")
-            iplug_syntax_error("${_defined}. String must be surrounded by single quote marks.")
+            iplug_syntax_error("${_defined}. Must be surrounded by single quote marks.")
         endif()
         string(REGEX REPLACE "^'(.*)'$" "\\1" _value "${_value}")
     endif()
 
     string(LENGTH "${_value}" _len)
 
-    if(OPTION_NOTEMPTY AND NOT OPTION_MINLENGTH)
-        set(OPTION_MINLENGTH 1)
+    if(OPTION_NOTEMPTY AND _len EQUAL 0)
+        iplug_syntax_error("${_defined}. Can not be an empty string.")
     endif()
 
     if(OPTION_MINLENGTH AND _len LESS OPTION_MINLENGTH)
-        iplug_syntax_error("${_defined}. String length is less than ${OPTION_MINLENGTH} characters.")
+        iplug_syntax_error("${_defined}. Length is less than ${OPTION_MINLENGTH} characters.")
     endif()
 
     if(OPTION_MAXLENGTH AND _len GREATER OPTION_MAXLENGTH)
-        iplug_syntax_error("${_defined}. String length exceedes ${OPTION_MAXLENGTH} characters.")
+        iplug_syntax_error("${_defined}. Length exceedes ${OPTION_MAXLENGTH} characters.")
     endif()
 
     if(_len EQUAL 0)
+        return()
+    endif()
+
+    if(OPTION_MINVALUE OR OPTION_MAXVALUE)
+        if(NOT "${_value}" MATCHES "^[\\+-]?[0-9]*\\.?[0-9]+$")
+            iplug_syntax_error("${_defined}. Must be a numeric value.")
+        endif()
+        if(OPTION_MINVALUE AND ${_value} LESS ${OPTION_MINVALUE})
+            iplug_syntax_error("${_defined}. Value must be equal or greater than '${OPTION_MINVALUE}'.")
+        endif()
+        if(OPTION_MAXVALUE AND ${_value} GREATER ${OPTION_MAXVALUE})
+            iplug_syntax_error("${_defined}. Value must be equal or less than '${OPTION_MAXVALUE}'.")
+        endif()
         return()
     endif()
 
@@ -184,7 +191,7 @@ function(iplug_validate_string _variable)
         endwhile()
         string(APPEND _regex "$")
         if(NOT ${_value} MATCHES "${_regex}")
-            iplug_syntax_error("${_defined}. String must be a valid version format. \"${_validstr}\"")
+            iplug_syntax_error("${_defined}. Invalid version format. Requires \"${_validstr}\".")
         endif()
     endif()
 
@@ -213,9 +220,17 @@ function(iplug_validate_string _variable)
 
     if(OPTION_ALPHAFIRST)
         if(${_value} MATCHES "^[^A-Za-z]")
-            iplug_syntax_error("${_defined}. String must begin with an alphabetic character.")
+            iplug_syntax_error("${_defined}. Must begin with an alphabetic character.")
         endif()
     endif()
+
+    set(_noinvalid FALSE)
+    foreach(_val IN LISTS _char_options)
+        if(OPTION_${_val})
+            set(_noinvalid TRUE)
+            break()
+        endif()
+    endforeach()
 
     if(_noinvalid)
         if(OPTION_ALPHA)
@@ -261,7 +276,7 @@ function(iplug_validate_string _variable)
         set(_regex "[^${_chars}\\${_esc_chars}]")
         iplug_debug_message("${_variable}=\"${_value}\" ${_regex}")
         if(${_value} MATCHES "${_regex}")
-            iplug_syntax_error("${_defined}. String contains invalid characters.")
+            iplug_syntax_error("${_defined}. Contains invalid characters.")
         endif()
     endif()
 endfunction()
