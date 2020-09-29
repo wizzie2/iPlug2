@@ -25,7 +25,7 @@ namespace iplug::math
 	//-----------------------------------------------------------------------------
 
 	template <class T>
-	NODISCARD inline constexpr T Abs(const T& value)
+	NODISCARD inline constexpr auto Abs(const T& value)
 	{
 		static_assert(type::IsArithmetic<T>);
 		if constexpr (type::IsUnsigned<T>)
@@ -35,7 +35,7 @@ namespace iplug::math
 
 
 	template <class T>
-	NODISCARD inline constexpr T Tan(const T& value)
+	NODISCARD inline constexpr auto Tan(const T& value)
 	{
 		static_assert(type::IsArithmetic<T>);
 		return tan(value);
@@ -43,7 +43,7 @@ namespace iplug::math
 
 
 	template <class T>
-	NODISCARD inline constexpr T Round(const T& value)
+	NODISCARD inline constexpr auto Round(const T& value)
 	{
 		static_assert(type::IsFloatingPoint<T>);
 		if constexpr (type::IsSame<T, float>)
@@ -54,7 +54,7 @@ namespace iplug::math
 
 
 	template <class T>
-	NODISCARD inline constexpr T Ceil(const T& value)
+	NODISCARD inline constexpr auto Ceil(const T& value)
 	{
 		static_assert(type::IsFloatingPoint<T>);
 		return ceil(value);
@@ -62,7 +62,7 @@ namespace iplug::math
 
 
 	template <class T>
-	NODISCARD inline constexpr T Floor(const T& value)
+	NODISCARD inline constexpr auto Floor(const T& value)
 	{
 		static_assert(type::IsFloatingPoint<T>);
 		return floor(value);
@@ -92,7 +92,7 @@ namespace iplug::math
 
 	// Returns the signed fractional portion of value
 	template <class T>
-	NODISCARD inline constexpr T Fraction(const T& value)
+	NODISCARD inline constexpr auto Fraction(const T& value)
 	{
 		static_assert(type::IsFloatingPoint<T>);
 		return value - FloorToInt(value) + -(value < 0);
@@ -100,7 +100,7 @@ namespace iplug::math
 
 
 	template <class T>
-	NODISCARD inline constexpr T FractionAbs(const T& value)
+	NODISCARD inline constexpr auto FractionAbs(const T& value)
 	{
 		static_assert(type::IsFloatingPoint<T>);
 		return value - Floor(value);
@@ -239,7 +239,7 @@ namespace iplug::math
 	 * @param max Maximum value to be allowed
 	 * If value is outside given range, it will be set to one of the boundaries */
 	template <class T>
-	NODISCARD inline constexpr const T& Clamp(const T& value, const T& min, const T& max)
+	NODISCARD inline constexpr const auto& Clamp(const T& value, const T& min, const T& max)
 	{
 		static_assert(type::IsArithmetic<T>);
 		DEBUG_ASSERT(!(max < min));
@@ -253,7 +253,7 @@ namespace iplug::math
 	 * @param max Maximum value to be allowed
 	 * If value is outside given range, it will be set to one of the boundaries */
 	template <class T, class Tx>
-	NODISCARD inline constexpr T Clamp(const T& value, const Tx& min, const Tx& max)
+	NODISCARD inline constexpr auto Clamp(const T& value, const Tx& min, const Tx& max)
 	{
 		static_assert(type::IsArithmetic<T>);
 		static_assert(type::IsArithmetic<Tx>);
@@ -292,7 +292,7 @@ namespace iplug::math
 
 
 	template <class T, class Ta>
-	NODISCARD inline constexpr T Align(const T& value, const Ta& alignment)
+	NODISCARD inline constexpr auto Align(const T& value, const Ta& alignment)
 	{
 		static_assert(type::IsArithmetic<T>);
 		static_assert(type::IsArithmetic<Ta>);
@@ -334,7 +334,7 @@ namespace iplug::math
 
 	// Return integral value aligned to a pow2 alignment value.
 	template <class T, class Ta = uint32>
-	NODISCARD inline constexpr T AlignPow2(const T& value, const Ta& alignment = (1 << 4))
+	NODISCARD inline constexpr auto AlignPow2(const T& value, const Ta& alignment = (1 << 4))
 	{
 		static_assert(type::IsArithmetic<T>);
 		static_assert(type::IsIntegral<Ta>);
@@ -354,7 +354,7 @@ namespace iplug::math
 
 	// Returns nearest power of two value
 	template <class T>
-	NODISCARD inline constexpr T Pow2Nearest(const T& value)
+	NODISCARD inline constexpr auto Pow2Nearest(const T& value)
 	{
 		static_assert(type::IsArithmetic<T>);
 		DEBUG_ASSERT(value >= 1);
@@ -380,7 +380,7 @@ namespace iplug::math
 
 	// Returns nearest power of two value that is greater than or equal to value
 	template <class T>
-	NODISCARD inline constexpr T Pow2Ceil(const T& value)
+	NODISCARD inline constexpr auto Pow2Ceil(const T& value)
 	{
 		static_assert(type::IsArithmetic<T>);
 		DEBUG_ASSERT(value >= 1);
@@ -405,7 +405,7 @@ namespace iplug::math
 
 	// Returns nearest power of two value that is less than or equal to value
 	template <class T>
-	NODISCARD inline constexpr T Pow2Floor(const T& value)
+	NODISCARD inline constexpr auto Pow2Floor(const T& value)
 	{
 		static_assert(type::IsArithmetic<T>);
 		DEBUG_ASSERT(value >= 1);
