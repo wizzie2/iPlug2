@@ -88,6 +88,10 @@ iplug_add_application(IPlugControls-app
 iplug_add_vst3(IPlugControls-vst3
     EXTENSION           vst3
     SUBCATEGORY         Instrument|Synth
+    CC_UNITNAME         "MIDI CCs"
+    NUM_CC_CHANS        1
+    NUM_MIDI_IN_CHANS   1
+    NUM_MIDI_OUT_CHANS  1
 )
 
 # iplug_add_aax(IPlugControls-aax

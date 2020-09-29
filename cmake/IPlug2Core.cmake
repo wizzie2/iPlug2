@@ -371,10 +371,13 @@ endmacro()
 
 macro(iplug_add_vst3 _target)
     _iplug_check_initialized()
-
     set(_oneValueArgs
         "EXTENSION"
         "SUBCATEGORY"
+        "CC_UNITNAME"
+        "NUM_CC_CHANS"
+        "NUM_MIDI_IN_CHANS"
+        "NUM_MIDI_OUT_CHANS"
     )
     set(_multiValueArgs "")
     cmake_parse_arguments(_arg "" "${_oneValueArgs}" "${_multiValueArgs}" ${ARGN})
@@ -402,8 +405,16 @@ macro(iplug_add_vst3 _target)
             set(VST3_ICON "${VST3_SDK_PATH}/doc/artwork/VST_Logo_Steinberg.ico")
         endif()
 
-        iplug_validate_string(EXTENSION   PREFIX CONFIG_VST3 ALPHA NUMERIC HYPHEN UNDERSCORE)
-        iplug_validate_string(SUBCATEGORY PREFIX CONFIG_VST3 ALPHA DELIMITER MAXLENGTH 127)
+        if(NOT CONFIG_VST3_NUM_MIDI_IN_CHANS)
+            set(CONFIG_VST3_NUM_MIDI_IN_CHANS 1)
+        endif()
+
+        iplug_validate_string(EXTENSION          PREFIX CONFIG_VST3 ALPHA NUMERIC HYPHEN UNDERSCORE)
+        iplug_validate_string(SUBCATEGORY        PREFIX CONFIG_VST3 ALPHA DELIMITER MAXLENGTH 127)
+        iplug_validate_string(CC_UNITNAME        PREFIX CONFIG_VST3 MAXLENGTH 127)
+        iplug_validate_string(NUM_MIDI_IN_CHANS  PREFIX CONFIG_VST3 MINVALUE 1 MAXVALUE 16)
+        iplug_validate_string(NUM_MIDI_OUT_CHANS PREFIX CONFIG_VST3 MINVALUE 1 MAXVALUE 16)
+        iplug_validate_string(NUM_CC_CHANS       PREFIX CONFIG_VST3 MINVALUE 0 MAXVALUE ${CONFIG_VST3_NUM_MIDI_IN_CHANS})
 
         _iplug_add_target_lib(${_target} IPlug_VST3)
         target_compile_definitions(${_target}-static PUBLIC ${VST3_CONFIG_DEFINITIONS})
@@ -468,7 +479,7 @@ macro(iplug_add_vst3 _target)
                         "${VST3_ICON}"
                         "${PLUGIN_PACKAGE_PATH}/PlugIn.ico"
                     COMMAND ${CMAKE_COMMAND} -E copy
-                        "${CMAKE_BINARY_DIR}/desktop.ini.in"  #${SMTG_DESKTOP_INI_PATH}
+                        "${CMAKE_BINARY_DIR}/desktop.ini.in"
                         "${PLUGIN_PACKAGE_PATH}/desktop.ini"
                     COMMAND attrib +h +s "${PLUGIN_PACKAGE_PATH}/desktop.ini"
                     COMMAND attrib +h +s "${PLUGIN_PACKAGE_PATH}/PlugIn.ico"
