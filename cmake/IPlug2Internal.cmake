@@ -700,73 +700,45 @@ function(_iplug_add_target_lib _target _pluginapi_lib)
     # we can have multiple targets for the same source file per project, it's not
     # possible until such option is implemented in cmake.
 
+    list(FILTER _src_list EXCLUDE REGEX "\\.pch$")
+
     # AAX
-    if(NOT ${_pluginapi_lib} STREQUAL "IPlug_AAX")
-        list(REMOVE_ITEM _src_list
-            "${IPLUG2_ROOT_PATH}/IPlug/AAX/IPlugAAX.cpp"
-            "${IPLUG2_ROOT_PATH}/IPlug/AAX/IPlugAAX_Describe.cpp"
-            "${IPLUG2_ROOT_PATH}/IPlug/AAX/IPlugAAX_Parameters.cpp"
-        )
+    if(HAVE_AAX AND NOT _pluginapi_lib STREQUAL "IPlug_AAX")
+        list(FILTER _src_list EXCLUDE REGEX "^${IPLUG2_ROOT_PATH}/IPlug/AAX/.*\\.cpp$")
     endif()
 
     # APP
     if(NOT ${_pluginapi_lib} STREQUAL "IPlug_APP")
-        list(REMOVE_ITEM _src_list
-            "${IPLUG2_ROOT_PATH}/IPlug/APP/IPlugAPP.cpp"
-            "${IPLUG2_ROOT_PATH}/IPlug/APP/IPlugAPP_dialog.cpp"
-            "${IPLUG2_ROOT_PATH}/IPlug/APP/IPlugAPP_host.cpp"
-            "${IPLUG2_ROOT_PATH}/IPlug/APP/IPlugAPP_main.cpp"
-        )
+        list(FILTER _src_list EXCLUDE REGEX "^${IPLUG2_ROOT_PATH}/IPlug/APP/.*\\.cpp$")
     endif()
 
     # AUv2
-    if(NOT ${_pluginapi_lib} STREQUAL "IPlug_AU")
-        list(REMOVE_ITEM _src_list
-            "${IPLUG2_ROOT_PATH}/IPlug/AUv2/dfx-au-utilities.c"
-            "${IPLUG2_ROOT_PATH}/IPlug/AUv2/IPlugAU.cpp"
-            "${IPLUG2_ROOT_PATH}/IPlug/AUv2/IPlugAU_view_factory.mm"
-        )
+    if(HAVESDK_AU AND NOT ${_pluginapi_lib} STREQUAL "IPlug_AU")
+        list(FILTER _src_list EXCLUDE REGEX "^${IPLUG2_ROOT_PATH}/IPlug/AUv2/.*\\.(mm|c|cpp)$")
     endif()
 
     # AUv3
-    if(NOT ${_pluginapi_lib} STREQUAL "IPlug_AUv3")
-        list(REMOVE_ITEM _src_list
-            "${IPLUG2_ROOT_PATH}/IPlug/AUv3/GenericUI.mm"
-            "${IPLUG2_ROOT_PATH}/IPlug/AUv3/iOSApp/AppDelegate.m"
-            "${IPLUG2_ROOT_PATH}/IPlug/AUv3/iOSApp/AppViewController.mm"
-            "${IPLUG2_ROOT_PATH}/IPlug/AUv3/iOSApp/IPlugAUPlayer.mm"
-            "${IPLUG2_ROOT_PATH}/IPlug/AUv3/iOSApp/main.m"
-            "${IPLUG2_ROOT_PATH}/IPlug/AUv3/IPlugAUAudioUnit.mm"
-            "${IPLUG2_ROOT_PATH}/IPlug/AUv3/IPlugAUv3.mm"
-            "${IPLUG2_ROOT_PATH}/IPlug/AUv3/IPlugAUv3Appex.m"
-            "${IPLUG2_ROOT_PATH}/IPlug/AUv3/IPlugAUViewController.mm"
-        )
+    if(HAVESDK_AUv3 AND NOT ${_pluginapi_lib} STREQUAL "IPlug_AUv3")
+        list(FILTER _src_list EXCLUDE REGEX "^${IPLUG2_ROOT_PATH}/IPlug/AUv3/.*\\.(m|mm|cpp)$")
     endif()
 
     # VST2
-    if(NOT ${_pluginapi_lib} STREQUAL "IPlug_VST2")
-        list(REMOVE_ITEM _src_list
-            "${IPLUG2_ROOT_PATH}/IPlug/VST2/IPlugVST2.cpp"
-        )
+    if(HAVESDK_VST2 AND NOT ${_pluginapi_lib} STREQUAL "IPlug_VST2")
+        list(FILTER _src_list EXCLUDE REGEX "^${IPLUG2_ROOT_PATH}/IPlug/VST2/.*\\.cpp$")
     endif()
 
     # VST3
-    if(NOT ${_pluginapi_lib} STREQUAL "IPlug_VST3")
-        list(REMOVE_ITEM _src_list
-            "${IPLUG2_ROOT_PATH}/IPlug/VST3/IPlugVST3.cpp"
-            "${IPLUG2_ROOT_PATH}/IPlug/VST3/IPlugVST3_Controller.cpp"
-            "${IPLUG2_ROOT_PATH}/IPlug/VST3/IPlugVST3_Processor.cpp"
-            "${IPLUG2_ROOT_PATH}/IPlug/VST3/IPlugVST3_ProcessorBase.cpp"
-        )
+    if(HAVESDK_VST3 AND NOT ${_pluginapi_lib} STREQUAL "IPlug_VST3")
+        list(FILTER _src_list EXCLUDE REGEX "^${IPLUG2_ROOT_PATH}/IPlug/VST3/.*\\.cpp$")
     endif()
 
     # WEB
-    if(NOT ${_pluginapi_lib} STREQUAL "IPlug_WEB")
-        list(REMOVE_ITEM _src_list
-            "${IPLUG2_ROOT_PATH}/IPlug/WEB/IPlugWAM.cpp"
-            "${IPLUG2_ROOT_PATH}/IPlug/WEB/IPlugWeb.cpp"
-        )
-    endif()
+    # if(NOT ${_pluginapi_lib} STREQUAL "IPlug_WEB")
+    #     list(REMOVE_ITEM _src_list
+    #         "${IPLUG2_ROOT_PATH}/IPlug/WEB/IPlugWAM.cpp"
+    #         "${IPLUG2_ROOT_PATH}/IPlug/WEB/IPlugWeb.cpp"
+    #     )
+    # endif()
 
     # Add remaining source files
     target_sources(${_libName} PRIVATE ${_src_list})

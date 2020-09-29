@@ -1,10 +1,10 @@
 /*
  ==============================================================================
- 
- This file is part of the iPlug 2 library. Copyright (C) the iPlug 2 developers. 
- 
+
+ This file is part of the iPlug 2 library. Copyright (C) the iPlug 2 developers.
+
  See LICENSE.txt for more info.
- 
+
  ==============================================================================
 */
 
@@ -90,4 +90,36 @@
 // Default floating-point type to use for variables and functions unless explicitly specified
 #ifndef IPLUG2_TFLOAT_TYPE
 	#define IPLUG2_TFLOAT_TYPE float
+#endif
+
+#ifdef __OBJC__
+	#import <Cocoa/Cocoa.h>
+
+	#if defined(VST2_API)
+		#define API_SUFFIX _vst
+	#elif defined(AU_API)
+		#define API_SUFFIX _au
+	#elif defined(AUv3_API)
+		#define API_SUFFIX _auv3
+	#elif defined(AAX_API)
+		#define API_SUFFIX _aax
+	#elif defined(VST3_API)
+		#define API_SUFFIX _vst3
+	#elif defined(APP_API)
+		#define API_SUFFIX _app
+	#endif
+
+	#define IGRAPHICS_VIEW          IGraphicsView_vIPLUG2_##API_SUFFIX
+	#define IGRAPHICS_MENU          IGraphicsMenu_vIPLUG2_##API_SUFFIX
+	#define IGRAPHICS_MENU_RCVR     IGraphicsMenuRcvr_vIPLUG2_##API_SUFFIX
+	#define IGRAPHICS_FORMATTER     IGraphicsFormatter_vIPLUG2_##API_SUFFIX
+	#define IGRAPHICS_TEXTFIELD     IGraphicsTextField_vIPLUG2_##API_SUFFIX
+	#define IGRAPHICS_TEXTFIELDCELL IGraphicsTextFieldCell_vIPLUG2_##API_SUFFIX
+	#define IGRAPHICS_GLLAYER       IGraphicsLayer_vIPLUG2_##API_SUFFIX
+	#define IGRAPHICS_IMGUIVIEW     IGraphicsImGuiView_vIPLUG2_##API_SUFFIX
+	#define MNVGtexture             MNVGtexture_vIPLUG2_##API_SUFFIX
+	#define MNVGbuffers             MNVGbuffers_vIPLUG2_##API_SUFFIX
+	#define MNVGcontext             MNVGcontext_vIPLUG2_##API_SUFFIX
+
+	#undef API_SUFFIX
 #endif
