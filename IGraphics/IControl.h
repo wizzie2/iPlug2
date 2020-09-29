@@ -679,10 +679,11 @@ class IControl
 		return mAnimationDuration;
 	}
 
-	/** Helper function to dynamic cast an IControl to a subclass */
-	template <class T> T* As()
+	/** Helper function to cast an IControl to a subclass */
+	template <class T, std::enable_if_t<std::is_base_of_v<IControl, T>, int> = 0>
+	T* As()
 	{
-		return dynamic_cast<T*>(this);
+		return static_cast<T*>(this);
 	}
 
 #if defined VST3_API || defined VST3C_API
@@ -700,7 +701,8 @@ class IControl
 	 * function for all values
 	 * @param func A function that takes a single integer argument, the valIdx \todo
 	 * @param args Arguments to the function */
-	template <typename T, typename... Args> void ForValIdx(int valIdx, T func, Args... args)
+	template <typename T, typename... Args>
+	void ForValIdx(int valIdx, T func, Args... args)
 	{
 		if (valIdx > kNoValIdx)
 			func(valIdx, args...);
