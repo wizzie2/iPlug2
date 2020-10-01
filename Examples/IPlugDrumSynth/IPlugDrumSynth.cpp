@@ -71,7 +71,9 @@ IPlugDrumSynth::IPlugDrumSynth(const InstanceInfo& info) : Plugin(info, MakeConf
 		const IRECT buttons = b.ReduceFromTop(50.f);
 		const IRECT pads    = b.GetPadded(-5.f);
 
-		pGraphics->AttachControl(new IVToggleControl(buttons.GetGridCell(0, 1, 4), kParamMultiOuts));
+		if constexpr (EPlugApi::Native != EPlugApi::APP)
+			pGraphics->AttachControl(new IVToggleControl(buttons.GetGridCell(0, 1, 4), kParamMultiOuts));
+
 		pGraphics->AttachControl(new IVMeterControl<8>(buttons.GetGridCell(1, 1, 4, EDirection::Horizontal, 3), ""),
 								 kCtrlTagMeter);
 		IVStyle style = DEFAULT_STYLE.WithRoundness(0.1f).WithFrameThickness(3.f);
@@ -135,8 +137,7 @@ void IPlugDrumSynth::ProcessBlock(sample** inputs, sample** outputs, int nFrames
 			outputs[c][s] = outputs[c][s] * gain;
 		}
 	}
-
-	mSender.ProcessBlock(outputs, nFrames, kCtrlTagMeter);
+	mSender.ProcessBlock(outputs, nFrames, kCtrlTagMeter, std::min(MaxNChannels(ERoute::kOutput), 8));
 }
 
 void IPlugDrumSynth::OnIdle()
