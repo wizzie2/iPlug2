@@ -238,6 +238,35 @@ namespace iplug
 			   : (PLATFORM_CACHE_LINE_SIZE == 64) ? _64 : _128
 		// clang-format on
 	};
+
+	enum class EPlugApi
+	{   // clang-format off
+		APP,
+		VST3,
+		VST3C,
+		VST3P,
+		AAX,
+		AUV2,
+		AUV3,
+		Native = 
+			#if defined APP_API
+				APP
+			#elif defined VST3_API
+				VST3
+			#elif defined VST3C_API
+				VST3C
+			#elif defined VST3P_API
+				VST3P
+			#elif defined AAX_API
+				AAX
+			#elif defined AUV2_API
+				AUV2
+			#elif defined AUV3_API
+				AUV3
+			#endif
+		// clang-format on
+	};
+
 }  // namespace iplug
 
 // Cleanup, but keeping PLATFORM_NAME & PLATFORM_<ID>
