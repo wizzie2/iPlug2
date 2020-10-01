@@ -8,12 +8,7 @@ project(IPlugControls)
 
 # Project configuration
 iplug_configure_project(
-    BUNDLE_NAME                 "IPlugControls"
-    BUNDLE_DOMAIN               "com"
-    BUNDLE_ICON                 "resources/IPlugControls.ico"
-
-    PLUG_CLASS_NAME             IPlugControls
-    PLUG_NAME                   "IPlugControls"
+    PLUG_NAME                   "My Plugin"
     PLUG_NAME_SHORT             "IPCT"
     PLUG_MFR                    "AcmeInc"
     PLUG_VERSION_HEX            0x00010000
@@ -23,6 +18,7 @@ iplug_configure_project(
     PLUG_URL_STR                "https://iplug2.github.io"
     PLUG_EMAIL_STR              "spam@me.com"
     PLUG_COPYRIGHT_STR          "Copyright 2020 Acme Inc"
+    PLUG_CLASS_NAME             IPlugControls
     PLUG_TYPE                   Instrument
     PLUG_CHANNEL_IO             "0-2"
     PLUG_LATENCY                0
@@ -37,6 +33,11 @@ iplug_configure_project(
     PLUG_FPS                    60
     PLUG_SHARED_RESOURCES       0
 
+    BUNDLE_NAME                 "IPlugControls"
+    BUNDLE_DOMAIN               "com"
+    BUNDLE_ICON                 "resources/IPlugControls.ico"
+
+    # Resource definitions can also be used to add custom definitions before precompiled headers
     RESOURCE_DEFINITIONS
         ROBOTO_FN               "Roboto-Regular.ttf"
         FORK_AWESOME_FN         "forkawesome-webfont.ttf"
@@ -79,6 +80,9 @@ iplug_configure_project(
 
 # Add targets.
 iplug_add_application(IPlugControls-app
+    OVERRIDE
+        PLUG_NAME     "IPlugControls"   # Overrides PLUG_NAME set in project configuration for this target
+
     NUM_CHANNELS        2
     N_VECTOR_WAIT       0
     COPY_AUV3           0
@@ -86,6 +90,9 @@ iplug_add_application(IPlugControls-app
 )
 
 iplug_add_vst3(IPlugControls-vst3
+    OVERRIDE
+        PLUG_NAME     "IPlugControls"   # Overrides PLUG_NAME set in project configuration for this target
+
     EXTENSION           vst3
     SUBCATEGORY         Instrument|Synth
     CC_UNITNAME         "MIDI CCs"

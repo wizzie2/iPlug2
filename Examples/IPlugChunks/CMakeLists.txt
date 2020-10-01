@@ -87,3 +87,4 @@ target_link_libraries(IPlugChunks-vst3 PRIVATE )
 
 # Generate source list for IDE
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_LIST})
+

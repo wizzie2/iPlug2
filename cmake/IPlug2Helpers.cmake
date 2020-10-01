@@ -87,6 +87,7 @@ endfunction()
 #   Reads the string value from a variable passed as argument to the function and
 #   validates if its conformant to specified options.
 #
+#   [DEFINED]               Only validates if the variable is defined.
 #   [NOTEMPTY]              Not allowed to be empty.
 #   [FILE_EXISTS]           Refering to an existing file.
 #   [PATH_EXISTS]           Refering to an existing path.
@@ -116,7 +117,7 @@ endfunction()
 #       [UNDERSCORE]        _
 
 function(iplug_validate_string _variable)
-    set(_options      NOTEMPTY FILE_EXISTS PATH_EXISTS ALPHAFIRST SINGLE_QUOTED)
+    set(_options      DEFINED NOTEMPTY FILE_EXISTS PATH_EXISTS ALPHAFIRST SINGLE_QUOTED)
     set(_char_options ALPHA NUMERIC SPACE HYPHEN DOT SLASH APOSTROPHE COMMA DELIMITER UNDERSCORE)
     set(_onevalue     PREFIX SUFFIX MINLENGTH MAXLENGTH VERSION MINVALUE MAXVALUE)
     set(_multivalue   STREQUAL)
@@ -131,6 +132,10 @@ function(iplug_validate_string _variable)
 
     if(DEFINED OPTION_SUFFIX)
         string(APPEND _var "_${OPTION_SUFFIX}")
+    endif()
+
+    if(OPTION_DEFINED AND NOT DEFINED ${_var})
+        return()
     endif()
 
     set(_value "${${_var}}")

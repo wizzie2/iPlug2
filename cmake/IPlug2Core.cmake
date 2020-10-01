@@ -52,38 +52,6 @@ macro(iplug_configure_project)
 
     string_assert(${PROJECT_NAME} "PROJECT_NAME is empty. Make sure to call configure after project declarations.")
 
-    set(_oneValueArgs
-        "BUNDLE_NAME"
-        "BUNDLE_DOMAIN"
-        "BUNDLE_ICON"
-        "PLUG_NAME"
-        "PLUG_NAME_SHORT"
-        "PLUG_CLASS_NAME"
-        "PLUG_MFR"
-        "PLUG_VERSION_HEX"
-        "PLUG_VERSION_STR"
-        "PLUG_UNIQUE_ID"
-        "PLUG_MFR_ID"
-        "PLUG_URL_STR"
-        "PLUG_EMAIL_STR"
-        "PLUG_COPYRIGHT_STR"
-        "PLUG_CHANNEL_IO"
-        "PLUG_LATENCY"
-        "PLUG_DOES_MIDI_IN"
-        "PLUG_DOES_MIDI_OUT"
-        "PLUG_DOES_MPE"
-        "PLUG_DOES_STATE_CHUNKS"
-        "PLUG_HAS_UI"
-        "PLUG_WIDTH"
-        "PLUG_HEIGHT"
-        "PLUG_FPS"
-        "PLUG_SHARED_RESOURCES"
-        "PLUG_TYPE"
-        "PLUG_HOST_RESIZE"
-        "SHARED_RESOURCES_SUBPATH"
-        "PCH_FOLDER_NAME"
-    )
-
     set(_multiValueArgs
         "RESOURCE_DEFINITIONS"
         "INCLUDE_DIRECTORIES"
@@ -91,15 +59,15 @@ macro(iplug_configure_project)
         "LINK_LIBRARIES"
     )
 
-    set(CONFIG_DEFINITIONS "")
+    set(CONFIG_VARIABLES "")
     set(CONFIG_INCLUDE_DIRECTORIES "")
     set(CONFIG_SOURCES "")
     set(CONFIG_LINK_LIBRARIES "")
 
-    cmake_parse_arguments(_arg "" "${_oneValueArgs}" "${_multiValueArgs}" ${ARGN})
+    cmake_parse_arguments(_arg "" "${_projectConfigArgs}" "${_multiValueArgs}" ${ARGN})
     _iplug_warn_unparsed_arguments(_arg_UNPARSED_ARGUMENTS)
 
-    foreach(_var IN LISTS _oneValueArgs)
+    foreach(_var IN LISTS _projectConfigArgs)
         _iplug_add_config_variable(CONFIG "" ${_var} "${_arg_${_var}}")
     endforeach()
 
@@ -171,33 +139,7 @@ macro(iplug_configure_project)
     endif()
 
     # Check validity of config variables.
-    iplug_validate_string(PLUG_NAME                PREFIX CONFIG NOTEMPTY ALPHA NUMERIC SPACE)
-    iplug_validate_string(PLUG_NAME_SHORT          PREFIX CONFIG NOTEMPTY ALPHA NUMERIC MAXLENGTH 4)
-    iplug_validate_string(PLUG_CLASS_NAME          PREFIX CONFIG NOTEMPTY ALPHAFIRST ALPHA NUMERIC UNDERSCORE)
-    iplug_validate_string(PLUG_MFR                 PREFIX CONFIG NOTEMPTY MAXLENGTH 127)
-    iplug_validate_string(PLUG_VERSION_STR         PREFIX CONFIG NOTEMPTY NUMERIC VERSION 3)
-    iplug_validate_string(PLUG_URL_STR             PREFIX CONFIG MAXLENGTH 255)
-    iplug_validate_string(PLUG_EMAIL_STR           PREFIX CONFIG MAXLENGTH 127)
-    iplug_validate_string(PLUG_COPYRIGHT_STR       PREFIX CONFIG MAXLENGTH 127)
-    iplug_validate_string(PLUG_UNIQUE_ID           PREFIX CONFIG NOTEMPTY SINGLE_QUOTED ALPHA NUMERIC MAXLENGTH 4)
-    iplug_validate_string(PLUG_MFR_ID              PREFIX CONFIG NOTEMPTY SINGLE_QUOTED ALPHA NUMERIC MAXLENGTH 4)
-    iplug_validate_string(PLUG_CHANNEL_IO          PREFIX CONFIG NOTEMPTY NUMERIC HYPHEN DOT SPACE)
-    iplug_validate_string(PLUG_LATENCY             PREFIX CONFIG MINVALUE 0)
-    iplug_validate_string(PLUG_DOES_MIDI_IN        PREFIX CONFIG STREQUAL 0 1)
-    iplug_validate_string(PLUG_DOES_MIDI_OUT       PREFIX CONFIG STREQUAL 0 1)
-    iplug_validate_string(PLUG_DOES_MPE            PREFIX CONFIG STREQUAL 0 1)
-    iplug_validate_string(PLUG_DOES_STATE_CHUNKS   PREFIX CONFIG STREQUAL 0 1)
-    iplug_validate_string(PLUG_HAS_UI              PREFIX CONFIG STREQUAL 0 1)
-    iplug_validate_string(PLUG_WIDTH               PREFIX CONFIG MINVALUE 256)
-    iplug_validate_string(PLUG_HEIGHT              PREFIX CONFIG MINVALUE 256)
-    iplug_validate_string(PLUG_HOST_RESIZE         PREFIX CONFIG NOTEMPTY STREQUAL 0 1)
-    iplug_validate_string(PLUG_FPS                 PREFIX CONFIG MINVALUE 10 MAXVALUE 1000)
-    iplug_validate_string(PLUG_SHARED_RESOURCES    PREFIX CONFIG STREQUAL 0 1)
-    iplug_validate_string(PLUG_TYPE                PREFIX CONFIG NOTEMPTY STREQUAL Effect Instrument MIDIEffect)
-    iplug_validate_string(BUNDLE_ICON              PREFIX CONFIG FILE_EXISTS)
-    iplug_validate_string(BUNDLE_DOMAIN            PREFIX CONFIG NOTEMPTY ALPHAFIRST ALPHA NUMERIC HYPHEN)
-    iplug_validate_string(BUNDLE_NAME              PREFIX CONFIG NOTEMPTY ALPHAFIRST ALPHA NUMERIC HYPHEN)
-    iplug_validate_string(SHARED_RESOURCES_SUBPATH PREFIX CONFIG PATH_EXISTS)
+    _iplug_validate_config_variables(CONFIG)
 
     # additional variables that are based on existing variables
     # _iplug_add_config_variable(PLUG_VERSION_HEX    "")  # TODO: generate information from PLUG_VERSION_STR
@@ -229,14 +171,21 @@ macro(iplug_add_aax _target)
         "PLUG_CATEGORY_STR"
         "DOES_AUDIOSUITE"
     )
-    set(_multiValueArgs "")
+    set(_multiValueArgs "OVERRIDE")
     cmake_parse_arguments(_arg "" "${_oneValueArgs}" "${_multiValueArgs}" ${ARGN})
     _iplug_warn_unparsed_arguments(_arg_UNPARSED_ARGUMENTS)
-    set(AAX_CONFIG_DEFINITIONS "")
 
     foreach(_var IN LISTS _oneValueArgs)
         _iplug_add_config_variable(CONFIG_AAX AAX ${_var} "${_arg_${_var}}")
     endforeach()
+
+    cmake_parse_arguments(_override  "" "${_projectConfigArgs}" "" ${_arg_OVERRIDE})
+    foreach(_var IN LISTS _projectConfigArgs)
+        if(DEFINED _override_${_var})
+            _iplug_add_config_variable(CONFIG_OVERRIDE OVERRIDE ${_var} "${_override_${_var}}")
+        endif()
+    endforeach()
+    _iplug_validate_config_variables(CONFIG_OVERRIDE DEFINED)
 
     iplug_validate_string(TYPE_IDS             PREFIX CONFIG_AAX NOTEMPTY ALPHA NUMERIC SPACE APOSTROPHE COMMA)
     iplug_validate_string(TYPE_IDS_AUDIOSUITE  PREFIX CONFIG_AAX NOTEMPTY ALPHA NUMERIC SPACE APOSTROPHE COMMA)
@@ -245,8 +194,8 @@ macro(iplug_add_aax _target)
 
     _iplug_add_config_variable(CONFIG_AAX AAX PLUG_MFR_STR  "${CONFIG_PLUG_MFR}")
     _iplug_add_config_variable(CONFIG_AAX AAX PLUG_NAME_STR "${CONFIG_PLUG_CLASS_NAME}\\n${CONFIG_PLUG_NAME_SHORT}")
-
 endmacro()
+
 
 #------------------------------------------------------------------------------
 # iplug_add_au
@@ -256,14 +205,21 @@ macro(iplug_add_au _target)
 
     set(_oneValueArgs
     )
-    set(_multiValueArgs "")
+    set(_multiValueArgs "OVERRIDE")
     cmake_parse_arguments(_arg "" "${_oneValueArgs}" "${_multiValueArgs}" ${ARGN})
     _iplug_warn_unparsed_arguments(_arg_UNPARSED_ARGUMENTS)
-    set(AUV2_CONFIG_DEFINITIONS "")
 
     foreach(_var IN LISTS _oneValueArgs)
         _iplug_add_config_variable(CONFIG_AU AUV2 ${_var} "${_arg_${_var}}")
     endforeach()
+
+    cmake_parse_arguments(_override  "" "${_projectConfigArgs}" "" ${_arg_OVERRIDE})
+    foreach(_var IN LISTS _projectConfigArgs)
+        if(DEFINED _override_${_var})
+            _iplug_add_config_variable(CONFIG_OVERRIDE OVERRIDE ${_var} "${_override_${_var}}")
+        endif()
+    endforeach()
+    _iplug_validate_config_variables(CONFIG_OVERRIDE DEFINED)
 
     _iplug_add_config_variable(CONFIG_AU AUV2 ENTRY           "${CONFIG_PLUG_CLASS_NAME}_Entry")
     _iplug_add_config_variable(CONFIG_AU AUV2 ENTRY_STR       "${CONFIG_AU_AUV2_ENTRY}")
@@ -275,6 +231,7 @@ macro(iplug_add_au _target)
     # iplug_validate_string(VIEW_CLASS PREFIX CONFIG_AU_ ALPHAFIRST ALPHA NUMERIC UNDERSCORE)
     # iplug_validate_string(FACTORY    PREFIX CONFIG_AU_ ALPHAFIRST ALPHA NUMERIC UNDERSCORE)
 endmacro()
+
 
 #------------------------------------------------------------------------------
 # iplug_add_auv3
@@ -325,14 +282,21 @@ macro(iplug_add_application _target)
         "COPY_AUV3"
         "SIGNAL_VECTOR_SIZE"
     )
-    set(_multiValueArgs "")
+    set(_multiValueArgs "OVERRIDE")
     cmake_parse_arguments(_arg "" "${_oneValueArgs}" "${_multiValueArgs}" ${ARGN})
     _iplug_warn_unparsed_arguments(_arg_UNPARSED_ARGUMENTS)
-    set(APP_CONFIG_DEFINITIONS "")
 
     foreach(_var IN LISTS _oneValueArgs)
         _iplug_add_config_variable(CONFIG_APP APP ${_var} "${_arg_${_var}}")
     endforeach()
+
+    cmake_parse_arguments(_override  "" "${_projectConfigArgs}" "" ${_arg_OVERRIDE})
+    foreach(_var IN LISTS _projectConfigArgs)
+        if(DEFINED _override_${_var})
+            _iplug_add_config_variable(CONFIG_OVERRIDE OVERRIDE ${_var} "${_override_${_var}}")
+        endif()
+    endforeach()
+    _iplug_validate_config_variables(CONFIG_OVERRIDE DEFINED)
 
     string(TOUPPER "${CONFIG_APP_SUBSYSTEM}" CONFIG_APP_SUBSYSTEM)
 
@@ -380,10 +344,9 @@ macro(iplug_add_vst3 _target)
         "NUM_MIDI_OUT_CHANS"
         "PRESET_LIST"
     )
-    set(_multiValueArgs "")
+    set(_multiValueArgs "OVERRIDE")
     cmake_parse_arguments(_arg "" "${_oneValueArgs}" "${_multiValueArgs}" ${ARGN})
     _iplug_warn_unparsed_arguments(_arg_UNPARSED_ARGUMENTS)
-    set(VST3_CONFIG_DEFINITIONS "")
 
     add_library(${_target} MODULE)
 
@@ -396,6 +359,14 @@ macro(iplug_add_vst3 _target)
         foreach(_var IN LISTS _oneValueArgs)
             _iplug_add_config_variable(CONFIG_VST3 VST3 ${_var} "${_arg_${_var}}")
         endforeach()
+
+        cmake_parse_arguments(_override  "" "${_projectConfigArgs}" "" ${_arg_OVERRIDE})
+        foreach(_var IN LISTS _projectConfigArgs)
+            if(DEFINED _override_${_var})
+                _iplug_add_config_variable(CONFIG_OVERRIDE OVERRIDE ${_var} "${_override_${_var}}")
+            endif()
+        endforeach()
+        _iplug_validate_config_variables(CONFIG_OVERRIDE DEFINED)
 
         if("${CONFIG_VST3_EXTENSION}" STREQUAL "")
             set(CONFIG_VST3_EXTENSION "vst3")

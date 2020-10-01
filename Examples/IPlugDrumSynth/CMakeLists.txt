@@ -59,6 +59,9 @@ iplug_configure_project(
 
 # Add targets
 iplug_add_application(IPlugDrumSynth-app
+    OVERRIDE
+        PLUG_CHANNEL_IO             "0-2"
+
     NUM_CHANNELS        2
     N_VECTOR_WAIT       0
     COPY_AUV3           0
@@ -77,7 +80,6 @@ iplug_add_vst3(IPlugDrumSynth-vst3
 #     PLUG_CATEGORY_STR "Synth"
 #     AOS_STRS "Drum2", "Drum3", "Drum4"
 # )
-
 
 # Generate source list for IDE
 get_target_property(SOURCE_LIST IPlugDrumSynth-app SOURCES)

@@ -1,5 +1,37 @@
 include_guard(GLOBAL)
 
+set(_projectConfigArgs
+    "BUNDLE_NAME"
+    "BUNDLE_DOMAIN"
+    "BUNDLE_ICON"
+    "PLUG_NAME"
+    "PLUG_NAME_SHORT"
+    "PLUG_CLASS_NAME"
+    "PLUG_MFR"
+    "PLUG_VERSION_HEX"
+    "PLUG_VERSION_STR"
+    "PLUG_UNIQUE_ID"
+    "PLUG_MFR_ID"
+    "PLUG_URL_STR"
+    "PLUG_EMAIL_STR"
+    "PLUG_COPYRIGHT_STR"
+    "PLUG_CHANNEL_IO"
+    "PLUG_LATENCY"
+    "PLUG_DOES_MIDI_IN"
+    "PLUG_DOES_MIDI_OUT"
+    "PLUG_DOES_MPE"
+    "PLUG_DOES_STATE_CHUNKS"
+    "PLUG_HAS_UI"
+    "PLUG_WIDTH"
+    "PLUG_HEIGHT"
+    "PLUG_FPS"
+    "PLUG_SHARED_RESOURCES"
+    "PLUG_TYPE"
+    "PLUG_HOST_RESIZE"
+    "SHARED_RESOURCES_SUBPATH"
+    "PCH_FOLDER_NAME"
+)
+
 # configuration variables that are considered string values and gets quotation marks applied in the definition
 set(_iplug_config_string_variables
     PLUG_NAME
@@ -14,7 +46,6 @@ set(_iplug_config_string_variables
     BUNDLE_MFR
     BUNDLE_DOMAIN
     SHARED_RESOURCES_SUBPATH
-
     VST3_SUBCATEGORY
     VST3_CC_UNITNAME
     AAX_PLUG_MFR_STR
@@ -142,7 +173,7 @@ macro(_iplug_post_project_setup)
     endforeach()
 
     if(HAVESDK_VST3)
-        # Find a suitable application to use as default when lanching debugger for VST3 plugins
+        # Find a suitable application to use as default when launching debugger for VST3 plugins
         if(${CMAKE_GENERATOR} MATCHES "^Visual Studio")
             set(_reg_tests
                 "[HKEY_LOCAL_MACHINE\\SOFTWARE\\REAPER]"
@@ -517,20 +548,51 @@ function(_iplug_add_config_variable _config_prefix _name_prefix _name _value)
     string(REPLACE "\t" "\\t" _str "${_str}")
 
     set(${_config_prefix}${_name} "${_str}" PARENT_SCOPE)
-
-    set(_deflist ${_name_prefix}CONFIG_DEFINITIONS)
-    list(FIND _iplug_config_definition_exclude "${_name_prefix}${_name}" _result)
-    if(_result EQUAL -1)
-        list(FIND _iplug_config_string_variables "${_name_prefix}${_name}" _result)
-        if(_result EQUAL -1)
-            list(APPEND ${_deflist} "${_name_prefix}${_name}=${_str}")
-        else()
-            list(APPEND ${_deflist} "${_name_prefix}${_name}=\"${_str}\"")
-        endif()
-        set(${_deflist} "${${_deflist}}" PARENT_SCOPE)
+    if(NOT "${_name_prefix}${_name}" MATCHES "^OVERRIDE_.*")
+        set(CONFIG_VARIABLES ${CONFIG_VARIABLES} "${_name_prefix}${_name}" PARENT_SCOPE)
     endif()
 endfunction()
 
+
+#------------------------------------------------------------------------------
+# _iplug_validate_config_variables
+
+function(_iplug_validate_config_variables _prefix)
+    cmake_parse_arguments(_arg  "" "" "" ${ARGN})
+    set(_extraFlags ${_arg_UNPARSED_ARGUMENTS})
+
+    set(VALIDATION_PLUG_NAME                NOTEMPTY ALPHA NUMERIC SPACE)
+    set(VALIDATION_PLUG_NAME_SHORT          NOTEMPTY ALPHA NUMERIC MAXLENGTH 4)
+    set(VALIDATION_PLUG_CLASS_NAME          NOTEMPTY ALPHAFIRST ALPHA NUMERIC UNDERSCORE)
+    set(VALIDATION_PLUG_MFR                 NOTEMPTY MAXLENGTH 127)
+    set(VALIDATION_PLUG_VERSION_STR         NOTEMPTY NUMERIC VERSION 3)
+    set(VALIDATION_PLUG_URL_STR             MAXLENGTH 255)
+    set(VALIDATION_PLUG_EMAIL_STR           MAXLENGTH 127)
+    set(VALIDATION_PLUG_COPYRIGHT_STR       MAXLENGTH 127)
+    set(VALIDATION_PLUG_UNIQUE_ID           NOTEMPTY SINGLE_QUOTED ALPHA NUMERIC MAXLENGTH 4)
+    set(VALIDATION_PLUG_MFR_ID              NOTEMPTY SINGLE_QUOTED ALPHA NUMERIC MAXLENGTH 4)
+    set(VALIDATION_PLUG_CHANNEL_IO          NOTEMPTY NUMERIC HYPHEN DOT SPACE)
+    set(VALIDATION_PLUG_LATENCY             MINVALUE 0)
+    set(VALIDATION_PLUG_DOES_MIDI_IN        STREQUAL 0 1)
+    set(VALIDATION_PLUG_DOES_MIDI_OUT       STREQUAL 0 1)
+    set(VALIDATION_PLUG_DOES_MPE            STREQUAL 0 1)
+    set(VALIDATION_PLUG_DOES_STATE_CHUNKS   STREQUAL 0 1)
+    set(VALIDATION_PLUG_HAS_UI              STREQUAL 0 1)
+    set(VALIDATION_PLUG_WIDTH               MINVALUE 256)
+    set(VALIDATION_PLUG_HEIGHT              MINVALUE 256)
+    set(VALIDATION_PLUG_HOST_RESIZE         NOTEMPTY STREQUAL 0 1)
+    set(VALIDATION_PLUG_FPS                 MINVALUE 10 MAXVALUE 1000)
+    set(VALIDATION_PLUG_SHARED_RESOURCES    STREQUAL 0 1)
+    set(VALIDATION_PLUG_TYPE                NOTEMPTY STREQUAL Effect Instrument MIDIEffect)
+    set(VALIDATION_BUNDLE_ICON              FILE_EXISTS)
+    set(VALIDATION_BUNDLE_DOMAIN            NOTEMPTY ALPHAFIRST ALPHA NUMERIC HYPHEN)
+    set(VALIDATION_BUNDLE_NAME              NOTEMPTY ALPHAFIRST ALPHA NUMERIC HYPHEN)
+    set(VALIDATION_SHARED_RESOURCES_SUBPATH PATH_EXISTS)
+
+    foreach(_cfg IN LISTS _projectConfigArgs)
+        iplug_validate_string(${_cfg} PREFIX ${_prefix} ${_extraFlags} ${VALIDATION_${_cfg}})
+    endforeach()
+endfunction()
 
 #------------------------------------------------------------------------------
 # _iplug_generate_source_groups
@@ -742,6 +804,24 @@ function(_iplug_add_target_lib _target _pluginapi_lib)
 
     # Add remaining source files
     target_sources(${_libName} PRIVATE ${_src_list})
+
+
+    # Build the config definition list
+    set(CONFIG_DEFINITIONS "")
+    list(REMOVE_ITEM CONFIG_VARIABLES ${_iplug_config_definition_exclude})
+    foreach(_name IN LISTS CONFIG_VARIABLES)
+        set(_value ${CONFIG_${_name}})
+        if(DEFINED CONFIG_OVERRIDE_${_name})
+            set(_value ${CONFIG_OVERRIDE_${_name}})
+            unset(CONFIG_OVERRIDE_${_name} PARENT_SCOPE)
+        endif()
+        list(FIND _iplug_config_string_variables "${_name}" _result)
+        if(_result EQUAL -1)
+            list(APPEND CONFIG_DEFINITIONS "${_name}=${_value}")
+        else()
+            list(APPEND CONFIG_DEFINITIONS "${_name}=\"${_value}\"")
+        endif()
+    endforeach()
 
 	# Add IPLUG2_STATIC definition when we're compiling the library
     target_compile_definitions(${_libName}
