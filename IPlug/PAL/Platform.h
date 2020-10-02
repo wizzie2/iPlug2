@@ -247,6 +247,8 @@ namespace iplug
 		AAX,
 		AUV2,
 		AUV3,
+		WAM,
+		WEB,
 		Native = 
 			#if defined APP_API
 				APP
@@ -260,10 +262,13 @@ namespace iplug
 				AUV2
 			#elif defined AUV3_API
 				AUV3
+			#elif defined WAM_API
+				WAM
+			#elif defined WEB_API
+				WEB
 			#endif
 		// clang-format on
 	};
-
 	enum class EPlugApiState
 	{   // clang-format off
 		None,
