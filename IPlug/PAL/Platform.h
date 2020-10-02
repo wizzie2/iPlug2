@@ -129,8 +129,8 @@ namespace iplug
 	static_assert(std::is_floating_point_v<tfloat> && (std::is_same_v<tfloat, float> || std::is_same_v<tfloat, double>),
 				  "tfloat is invalid type. Only float and double are valid");
 
-	static_assert(false == 0, "bool false value failed.");
-	static_assert(true == 1, "bool true value failed.");
+	static_assert(false == 0, "bool false value failed. false is not 0");
+	static_assert(true == 1, "bool true value failed. true is not 1");
 
 	static_assert(sizeof(uint8) == 1, "uint8 type size failed.");
 	static_assert(sizeof(uint16) == 2, "uint16 type size failed.");
@@ -166,10 +166,10 @@ namespace iplug
 	//-----------------------------------------------------------------------------
 	// templates
 
-	// Return number of elements in an array.
-	// TODO: temporary, move to template header later
-	template <typename T>
-	inline constexpr size_t TArrayCount(T&& array)
+	// Return number of elements in an array at compile time.
+	// TODO: temporary, move to Array class later
+	template <class T>
+	constexpr auto ArrayCount(T&& array)
 	{
 		return sizeof(uint8(&)[sizeof(array) / sizeof(array[0])]);
 	}
@@ -242,27 +242,40 @@ namespace iplug
 	enum class EPlugApi
 	{   // clang-format off
 		APP,
+		VST2,
 		VST3,
-		VST3C,
-		VST3P,
 		AAX,
 		AUV2,
 		AUV3,
 		Native = 
 			#if defined APP_API
 				APP
-			#elif defined VST3_API
+			#elif defined VST2_API
+				VST2
+			#elif defined VST3_API || defined VST3C_API || defined VST3P_API
 				VST3
-			#elif defined VST3C_API
-				VST3C
-			#elif defined VST3P_API
-				VST3P
 			#elif defined AAX_API
 				AAX
 			#elif defined AUV2_API
 				AUV2
 			#elif defined AUV3_API
 				AUV3
+			#endif
+		// clang-format on
+	};
+
+	enum class EPlugApiState
+	{   // clang-format off
+		None,
+		Controller,
+		Processor,
+		Native = 
+			#if defined VST3C_API
+				Controller
+			#elif defined VST3P_API
+				Processor
+			#else
+				None
 			#endif
 		// clang-format on
 	};
