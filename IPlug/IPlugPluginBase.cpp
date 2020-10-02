@@ -1,10 +1,10 @@
 /*
  ==============================================================================
- 
- This file is part of the iPlug 2 library. Copyright (C) the iPlug 2 developers. 
- 
+
+ This file is part of the iPlug 2 library. Copyright (C) the iPlug 2 developers.
+
  See LICENSE.txt for  more info.
- 
+
  ==============================================================================
 */
 
@@ -65,15 +65,24 @@ const char* IPluginBase::GetAPIStr() const
 {
 	switch (GetAPI())
 	{
-		case kAPIVST2: return "VST2";
-		case kAPIVST3: return "VST3";
-		case kAPIAU: return "AU";
-		case kAPIAUv3: return "AUv3";
-		case kAPIAAX: return "AAX";
-		case kAPIAPP: return "APP";
-		case kAPIWAM: return "WAM";
-		case kAPIWEB: return "WEB";
-		default: return "";
+		case kAPIVST2:
+			return "VST2";
+		case kAPIVST3:
+			return "VST3";
+		case kAPIAU:
+			return "AU";
+		case kAPIAUv3:
+			return "AUv3";
+		case kAPIAAX:
+			return "AAX";
+		case kAPIAPP:
+			return "APP";
+		case kAPIWAM:
+			return "WAM";
+		case kAPIWEB:
+			return "WEB";
+		default:
+			return "";
 	}
 }
 
@@ -530,7 +539,7 @@ bool IPluginBase::SerializePresets(IByteChunk& chunk) const
 	return savedOK;
 }
 
-int IPluginBase::UnserializePresets(IByteChunk& chunk, int startPos)
+int IPluginBase::UnserializePresets(const IByteChunk& chunk, int startPos)
 {
 	TRACE
 	WDL_String name;
@@ -578,11 +587,19 @@ void IPluginBase::DumpMakePresetSrc(const char* filename) const
 			char paramVal[32];
 			switch (pParam->Type())
 			{
-				case IParam::kTypeBool: sprintf(paramVal, "%s", (pParam->Bool() ? "true" : "false")); break;
-				case IParam::kTypeInt: sprintf(paramVal, "%d", pParam->Int()); break;
-				case IParam::kTypeEnum: sprintf(paramVal, "%d", pParam->Int()); break;
+				case IParam::kTypeBool:
+					sprintf(paramVal, "%s", (pParam->Bool() ? "true" : "false"));
+					break;
+				case IParam::kTypeInt:
+					sprintf(paramVal, "%d", pParam->Int());
+					break;
+				case IParam::kTypeEnum:
+					sprintf(paramVal, "%d", pParam->Int());
+					break;
 				case IParam::kTypeDouble:
-				default: sprintf(paramVal, "%.6f", pParam->Value()); break;
+				default:
+					sprintf(paramVal, "%.6f", pParam->Value());
+					break;
 			}
 			fprintf(fp, ", %s", paramVal);
 		}
@@ -593,7 +610,6 @@ void IPluginBase::DumpMakePresetSrc(const char* filename) const
 
 void IPluginBase::DumpMakePresetFromNamedParamsSrc(const char* filename, const char* paramEnumNames[]) const
 {
-	// static bool sDumped = false;
 	bool sDumped = false;
 
 	if (!sDumped)
@@ -613,11 +629,19 @@ void IPluginBase::DumpMakePresetFromNamedParamsSrc(const char* filename, const c
 			char paramVal[32];
 			switch (pParam->Type())
 			{
-				case IParam::kTypeBool: sprintf(paramVal, "%s", (pParam->Bool() ? "true" : "false")); break;
-				case IParam::kTypeInt: sprintf(paramVal, "%d", pParam->Int()); break;
-				case IParam::kTypeEnum: sprintf(paramVal, "%d", pParam->Int()); break;
+				case IParam::kTypeBool:
+					sprintf(paramVal, "%s", (pParam->Bool() ? "true" : "false"));
+					break;
+				case IParam::kTypeInt:
+					sprintf(paramVal, "%d", pParam->Int());
+					break;
+				case IParam::kTypeEnum:
+					sprintf(paramVal, "%d", pParam->Int());
+					break;
 				case IParam::kTypeDouble:
-				default: sprintf(paramVal, "%.6f", pParam->Value()); break;
+				default:
+					sprintf(paramVal, "%.6f", pParam->Value());
+					break;
 			}
 			fprintf(fp, ",\n    %s, %s", paramEnumNames[i], paramVal);
 		}
@@ -644,54 +668,6 @@ void IPluginBase::DumpPresetBlob(const char* filename) const
 	wdl_base64encode(byteStart, buf, pPresetChunk->Size());
 
 	fprintf(fp, "%s\", %i);\n", buf, pPresetChunk->Size());
-	fclose(fp);
-}
-
-void IPluginBase::DumpAllPresetsBlob(const char* filename) const
-{
-	FILE* fp = fopen(filename, "w");
-
-	if (!fp)
-		return;
-
-	char buf[MAX_BLOB_LENGTH] = "";
-	IByteChunk chnk;
-
-	for (int i = 0; i < NPresets(); i++)
-	{
-		IPreset* pPreset = mPresets.Get(i);
-		fprintf(fp, "MakePresetFromBlob(\"%s\", \"", pPreset->mName);
-
-		chnk.Clear();
-		chnk.PutChunk(&(pPreset->mChunk));
-		wdl_base64encode(chnk.GetData(), buf, chnk.Size());
-
-		fprintf(fp, "%s\", %i);\n", buf, chnk.Size());
-	}
-
-	fclose(fp);
-}
-
-void IPluginBase::DumpBankBlob(const char* filename) const
-{
-	FILE* fp = fopen(filename, "w");
-
-	if (!fp)
-		return;
-
-	char buf[MAX_BLOB_LENGTH] = "";
-
-	for (int i = 0; i < NPresets(); i++)
-	{
-		IPreset* pPreset = mPresets.Get(i);
-		fprintf(fp, "MakePresetFromBlob(\"%s\", \"", pPreset->mName);
-
-		IByteChunk* pPresetChunk = &pPreset->mChunk;
-		wdl_base64encode(pPresetChunk->GetData(), buf, pPresetChunk->Size());
-
-		fprintf(fp, "%s\", %i);\n", buf, pPresetChunk->Size());
-	}
-
 	fclose(fp);
 }
 
@@ -746,7 +722,7 @@ bool IPluginBase::SavePresetAsFXP(const char* file) const
 		else
 		{
 			fxpMagic = WDL_bswap32('FxCk');
-			//byteSize = WDL_bswap32(20 + 28 + (NParams() * 4) );
+			// byteSize = WDL_bswap32(20 + 28 + (NParams() * 4) );
 			pgm.Put(&byteSize);
 			pgm.Put(&fxpMagic);
 			pgm.Put(&fxpVersion);
@@ -844,7 +820,7 @@ bool IPluginBase::SaveBankAsFXB(const char* file) const
 				strcpy(prgName, pPreset->mName);
 
 				bnk.Put(&chunkMagic);
-				//byteSize = WDL_bswap32(20 + 28 + (NParams() * 4) );
+				// byteSize = WDL_bswap32(20 + 28 + (NParams() * 4) );
 				bnk.Put(&byteSize);
 				bnk.Put(&fxpMagic);
 				bnk.Put(&fxpVersion);
@@ -930,8 +906,9 @@ bool IPluginBase::LoadPresetFromFXP(const char* file)
 				return false;  // TODO: what if a host saves as a different version?
 			if (pluginID != GetUniqueID())
 				return false;
-			//if (pluginVersion != GetPluginVersion(true)) return false; // TODO: provide mechanism for loading earlier versions
-			//if (numParams != NParams()) return false; // TODO: provide mechanism for loading earlier versions with less params
+			// if (pluginVersion != GetPluginVersion(true)) return false; // TODO: provide mechanism for loading earlier
+			// versions if (numParams != NParams()) return false; // TODO: provide mechanism for loading earlier versions
+			// with less params
 
 			if (DoesStateChunks() && fxpMagic == 'FPCh')
 			{
@@ -1025,11 +1002,12 @@ bool IPluginBase::LoadBankFromFXB(const char* file)
 
 			if (chunkMagic != 'CcnK')
 				return false;
-			//if (fxbVersion != kFXBVersionNum) return false; // TODO: what if a host saves as a different version?
+			// if (fxbVersion != kFXBVersionNum) return false; // TODO: what if a host saves as a different version?
 			if (pluginID != GetUniqueID())
 				return false;
-			//if (pluginVersion != GetPluginVersion(true)) return false; // TODO: provide mechanism for loading earlier versions
-			//if (numPgms != NPresets()) return false; // TODO: provide mechanism for loading earlier versions with less params
+			// if (pluginVersion != GetPluginVersion(true)) return false; // TODO: provide mechanism for loading earlier
+			// versions if (numPgms != NPresets()) return false; // TODO: provide mechanism for loading earlier versions
+			// with less params
 
 			if (DoesStateChunks() && fxbMagic == 'FBCh')
 			{
@@ -1039,7 +1017,7 @@ bool IPluginBase::LoadBankFromFXB(const char* file)
 
 				IByteChunk::GetIPlugVerFromChunk(bnk, pos);
 				UnserializePresets(bnk, pos);
-				//RestorePreset(currentPgm);
+				// RestorePreset(currentPgm);
 				InformHostOfPresetChange();
 				return true;
 			}
@@ -1136,7 +1114,7 @@ bool IPluginBase::LoadPresetFromVSTPreset(const char* path)
 		char classString[kClassIDSize + 1] = {0};
 		//    FUID cID;
 
-		//HEADER
+		// HEADER
 		ChunkID chunkID;
 		int32_t version    = 0;
 		int64_t listOffset = 0;
@@ -1155,7 +1133,7 @@ bool IPluginBase::LoadPresetFromVSTPreset(const char* path)
 
 		pos = pgm.Get(&listOffset, pos);
 
-		//CHUNK LIST
+		// CHUNK LIST
 		pos = pgm.Get(&chunkID, (int) listOffset);  // jump forward to chunklist start
 
 		if (!isEqualID(chunkID, commonChunks[kChunkList]))
@@ -1189,10 +1167,10 @@ bool IPluginBase::LoadPresetFromVSTPreset(const char* path)
 		int64_t ctrlrStateSize = 0;
 		pos                    = pgm.Get(&ctrlrStateSize, pos);
 
-		//Forget about kMetaInfo chunk
+		// Forget about kMetaInfo chunk
 
 		pos = (int) offsetToComponentState;
-		//DATA AREA
+		// DATA AREA
 		int componentChunkSizeIPlug;
 		pos = pgm.Get(&componentChunkSizeIPlug, pos);
 		IByteChunk::GetIPlugVerFromChunk(pgm, pos /* updates pos */);
@@ -1230,7 +1208,7 @@ void IPluginBase::MakeVSTPresetChunk(IByteChunk& chunk, IByteChunk& componentSta
 		1024, "\t<Attribute id=\"plugtype\" value=\"%s\" type=\"string\" flags=\"\"/>\n", mVST3ProductCategory.Get());
 	metaInfo.Append("</MetaInfo>\n", 1024);
 
-	//HEADER
+	// HEADER
 	chunk.Put(&commonChunks[kHeader]);
 	int32_t version = kFormatVersion;
 	chunk.Put(&version);
@@ -1239,7 +1217,7 @@ void IPluginBase::MakeVSTPresetChunk(IByteChunk& chunk, IByteChunk& componentSta
 								(2 * sizeof(int) /* 2 ints for sizes */) + strlen(metaInfo.Get()) + kHeaderSize;
 	chunk.Put(&offsetToChunkList);
 
-	//DATA AREA
+	// DATA AREA
 	int componentSize = componentState.Size();
 	chunk.Put(&componentSize);
 	chunk.PutChunk(&componentState);
@@ -1248,7 +1226,7 @@ void IPluginBase::MakeVSTPresetChunk(IByteChunk& chunk, IByteChunk& componentSta
 	chunk.PutChunk(&controllerState);
 	chunk.PutBytes(metaInfo.Get(), metaInfo.GetLength());
 
-	//CHUNK LIST
+	// CHUNK LIST
 	chunk.Put(&commonChunks[kChunkList]);
 	int32_t entryCount = 3;
 	chunk.Put(&entryCount);
