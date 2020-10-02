@@ -4,6 +4,7 @@ cmake_policy(SET CMP0046 NEW)  # Error on non-existent dependency in add_depende
 cmake_policy(SET CMP0054 NEW)  # Only interpret if() arguments as variables or keywords when unquoted
 cmake_policy(SET CMP0063 NEW)  # Honor visibility properties for all target types
 cmake_policy(SET CMP0091 NEW)  # MSVC runtime library flags are selected by an abstraction
+cmake_policy(SET CMP0102 NEW)  # The mark_as_advanced() command no longer creates a cache entry if one does not already exist.
 
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
