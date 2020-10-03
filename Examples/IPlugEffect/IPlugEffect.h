@@ -1,7 +1,5 @@
 #pragma once
 
-#include "IPlug_include_in_plug_hdr.h"
-
 const int kNumPresets = 1;
 
 enum EParams

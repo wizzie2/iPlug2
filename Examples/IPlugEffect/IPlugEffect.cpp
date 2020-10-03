@@ -1,6 +1,5 @@
 #include "IPlugEffect.h"
 #include "IPlug_include_in_plug_src.h"
-#include "IControls.h"
 
 IPlugEffect::IPlugEffect(const InstanceInfo& info)
 : Plugin(info, MakeConfig(kNumParams, kNumPresets))
