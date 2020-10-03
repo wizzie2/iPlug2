@@ -24,6 +24,10 @@ set(_projectConfigArgs
     "PLUG_HAS_UI"
     "PLUG_WIDTH"
     "PLUG_HEIGHT"
+    "PLUG_MIN_WIDTH"
+    "PLUG_MIN_HEIGHT"
+    "PLUG_MAX_WIDTH"
+    "PLUG_MAX_HEIGHT"
     "PLUG_FPS"
     "PLUG_SHARED_RESOURCES"
     "PLUG_TYPE"
@@ -57,6 +61,7 @@ set(_iplug_config_string_variables
 
 # list of config variables excluded from being defined in code
 set(_iplug_config_definition_exclude
+    PCH_FOLDER_NAME
     INCLUDE_DIRECTORIES
     SOURCES
     LINK_LIBRARIES
@@ -538,11 +543,6 @@ function(_iplug_add_config_variable _config_prefix _name_prefix _name _value)
         string(APPEND _name_prefix "_")
     endif()
 
-    if(_value STREQUAL "")
-        set(${_config_prefix}${_name} "" PARENT_SCOPE)
-        return()
-    endif()
-
     string(REPLACE "\n" "\\n" _str "${_value}")
     string(REPLACE "\r" "\\r" _str "${_str}")
     string(REPLACE "\t" "\\t" _str "${_str}")
@@ -557,42 +557,45 @@ endfunction()
 #------------------------------------------------------------------------------
 # _iplug_validate_config_variables
 
-function(_iplug_validate_config_variables _prefix)
+macro(_iplug_validate_config_variables _prefix)
     cmake_parse_arguments(_arg  "" "" "" ${ARGN})
     set(_extraFlags ${_arg_UNPARSED_ARGUMENTS})
 
-    set(VALIDATION_PLUG_NAME                NOTEMPTY ALPHA NUMERIC SPACE)
-    set(VALIDATION_PLUG_NAME_SHORT          NOTEMPTY ALPHA NUMERIC MAXLENGTH 4)
-    set(VALIDATION_PLUG_CLASS_NAME          NOTEMPTY ALPHAFIRST ALPHA NUMERIC UNDERSCORE)
-    set(VALIDATION_PLUG_MFR                 NOTEMPTY MAXLENGTH 127)
-    set(VALIDATION_PLUG_VERSION_STR         NOTEMPTY NUMERIC VERSION 3)
+    set(VALIDATION_PLUG_NAME                DEFAULT "${PROJECT_NAME}" NOTEMPTY ALPHA NUMERIC SPACE)
+    set(VALIDATION_PLUG_NAME_SHORT          NOTEMPTY ALPHA NUMERIC MINLENGTH 4 MAXLENGTH 4)
+    set(VALIDATION_PLUG_CLASS_NAME          DEFAULT "${PROJECT_NAME}" NOTEMPTY ALPHAFIRST ALPHA NUMERIC UNDERSCORE)
+    set(VALIDATION_PLUG_MFR                 DEFAULT "AcmeInc" NOTEMPTY MAXLENGTH 127)
+    set(VALIDATION_PLUG_VERSION_STR         DEFAULT "1.0.0" NOTEMPTY NUMERIC VERSION 3)
     set(VALIDATION_PLUG_URL_STR             MAXLENGTH 255)
     set(VALIDATION_PLUG_EMAIL_STR           MAXLENGTH 127)
     set(VALIDATION_PLUG_COPYRIGHT_STR       MAXLENGTH 127)
     set(VALIDATION_PLUG_UNIQUE_ID           NOTEMPTY SINGLE_QUOTED ALPHA NUMERIC MAXLENGTH 4)
-    set(VALIDATION_PLUG_MFR_ID              NOTEMPTY SINGLE_QUOTED ALPHA NUMERIC MAXLENGTH 4)
-    set(VALIDATION_PLUG_CHANNEL_IO          NOTEMPTY NUMERIC HYPHEN DOT SPACE)
-    set(VALIDATION_PLUG_LATENCY             MINVALUE 0)
-    set(VALIDATION_PLUG_DOES_MIDI_IN        STREQUAL 0 1)
-    set(VALIDATION_PLUG_DOES_MIDI_OUT       STREQUAL 0 1)
-    set(VALIDATION_PLUG_DOES_MPE            STREQUAL 0 1)
-    set(VALIDATION_PLUG_DOES_STATE_CHUNKS   STREQUAL 0 1)
-    set(VALIDATION_PLUG_HAS_UI              STREQUAL 0 1)
-    set(VALIDATION_PLUG_WIDTH               MINVALUE 256)
-    set(VALIDATION_PLUG_HEIGHT              MINVALUE 256)
-    set(VALIDATION_PLUG_HOST_RESIZE         NOTEMPTY STREQUAL 0 1)
-    set(VALIDATION_PLUG_FPS                 MINVALUE 10 MAXVALUE 1000)
-    set(VALIDATION_PLUG_SHARED_RESOURCES    STREQUAL 0 1)
-    set(VALIDATION_PLUG_TYPE                NOTEMPTY STREQUAL Effect Instrument MIDIEffect)
-    set(VALIDATION_BUNDLE_ICON              FILE_EXISTS)
-    set(VALIDATION_BUNDLE_DOMAIN            NOTEMPTY ALPHAFIRST ALPHA NUMERIC HYPHEN)
-    set(VALIDATION_BUNDLE_NAME              NOTEMPTY ALPHAFIRST ALPHA NUMERIC HYPHEN)
-    set(VALIDATION_SHARED_RESOURCES_SUBPATH PATH_EXISTS)
+    set(VALIDATION_PLUG_MFR_ID              DEFAULT "'Acme'" NOTEMPTY SINGLE_QUOTED ALPHA NUMERIC MAXLENGTH 4)
+    set(VALIDATION_PLUG_CHANNEL_IO          DEFAULT "0-2" NOTEMPTY NUMERIC HYPHEN DOT SPACE)
+    set(VALIDATION_PLUG_LATENCY             DEFAULT "0" MINVALUE 0)
+    set(VALIDATION_PLUG_DOES_MIDI_IN        DEFAULT "0" STREQUAL 0 1)
+    set(VALIDATION_PLUG_DOES_MIDI_OUT       DEFAULT "0" STREQUAL 0 1)
+    set(VALIDATION_PLUG_DOES_MPE            DEFAULT "0" STREQUAL 0 1)
+    set(VALIDATION_PLUG_DOES_STATE_CHUNKS   DEFAULT "0" STREQUAL 0 1)
+    set(VALIDATION_PLUG_HAS_UI              DEFAULT "1" STREQUAL 0 1)
+    set(VALIDATION_PLUG_WIDTH               DEFAULT "1024" MINVALUE 100)
+    set(VALIDATION_PLUG_HEIGHT              DEFAULT "768" MINVALUE 100)
+    set(VALIDATION_PLUG_MIN_WIDTH           DEFAULT "256" MINVALUE 100)
+    set(VALIDATION_PLUG_MIN_HEIGHT          DEFAULT "256" MINVALUE 100)
+    set(VALIDATION_PLUG_HOST_RESIZE         DEFAULT "0" NOTEMPTY STREQUAL 0 1)
+    set(VALIDATION_PLUG_FPS                 DEFAULT "60" MINVALUE 10 MAXVALUE 1000)
+    set(VALIDATION_PLUG_SHARED_RESOURCES    DEFAULT "0" STREQUAL 0 1)
+    set(VALIDATION_PLUG_TYPE                DEFAULT "Effect" NOTEMPTY STREQUAL Effect Instrument MIDIEffect)
+    set(VALIDATION_BUNDLE_ICON              DEFAULT "${DEFAULT_ICON}" FILE_EXISTS ABSOLUTE)
+    set(VALIDATION_BUNDLE_DOMAIN            DEFAULT "com" NOTEMPTY ALPHAFIRST ALPHA NUMERIC HYPHEN)
+    set(VALIDATION_BUNDLE_NAME              DEFAULT "${PROJECT_NAME}" NOTEMPTY ALPHAFIRST ALPHA NUMERIC HYPHEN)
+    set(VALIDATION_SHARED_RESOURCES_SUBPATH DEFAULT "${PROJECT_NAME}")
 
     foreach(_cfg IN LISTS _projectConfigArgs)
         iplug_validate_string(${_cfg} PREFIX ${_prefix} ${_extraFlags} ${VALIDATION_${_cfg}})
     endforeach()
-endfunction()
+endmacro()
+
 
 #------------------------------------------------------------------------------
 # _iplug_generate_source_groups
@@ -814,6 +817,9 @@ function(_iplug_add_target_lib _target _pluginapi_lib)
         if(DEFINED CONFIG_OVERRIDE_${_name})
             set(_value ${CONFIG_OVERRIDE_${_name}})
             unset(CONFIG_OVERRIDE_${_name} PARENT_SCOPE)
+        endif()
+        if(NOT DEFINED _value OR _value STREQUAL "")
+            continue()
         endif()
         list(FIND _iplug_config_string_variables "${_name}" _result)
         if(_result EQUAL -1)

@@ -88,9 +88,11 @@ endfunction()
 #   validates if its conformant to specified options.
 #
 #   [DEFINED]               Only validates if the variable is defined.
+#   [DEFAULT <string>]      If variable is empty or undefined, set it to <string> in PARENT_SCOPE.
 #   [NOTEMPTY]              Not allowed to be empty.
 #   [FILE_EXISTS]           Refering to an existing file.
 #   [PATH_EXISTS]           Refering to an existing path.
+#   [ABSOLUTE]              Stores the absolute path of path/file to specified variable in PARENT_SCOPE.
 #   [ALPHAFIRST]            First character must be an alphabetic character.
 #   [SINGLE_QUOTED]         Required to be surrounded by single quote marks.
 #   [PREFIX <prefix>]       Prepend <prefix>_ to the variable name from which the string value is read.
@@ -117,11 +119,14 @@ endfunction()
 #       [UNDERSCORE]        _
 
 function(iplug_validate_string _variable)
-    set(_options      DEFINED NOTEMPTY FILE_EXISTS PATH_EXISTS ALPHAFIRST SINGLE_QUOTED)
+    set(_options      DEFINED NOTEMPTY FILE_EXISTS PATH_EXISTS ABSOLUTE ALPHAFIRST SINGLE_QUOTED)
     set(_char_options ALPHA NUMERIC SPACE HYPHEN DOT SLASH APOSTROPHE COMMA DELIMITER UNDERSCORE)
-    set(_onevalue     PREFIX SUFFIX MINLENGTH MAXLENGTH VERSION MINVALUE MAXVALUE)
+    set(_onevalue     PREFIX SUFFIX DEFAULT MINLENGTH MAXLENGTH VERSION MINVALUE MAXVALUE)
     set(_multivalue   STREQUAL)
     cmake_parse_arguments(OPTION "${_options};${_char_options}" "${_onevalue}" "${_multivalue}" ${ARGN})
+    if(DEFINED OPTION_UNPARSED_ARGUMENTS)
+        iplug_syntax_error("Unknown arguments \"${OPTION_UNPARSED_ARGUMENTS}\"")
+    endif()
 
     set(_chars     "")
     set(_esc_chars "")
@@ -136,6 +141,11 @@ function(iplug_validate_string _variable)
 
     if(OPTION_DEFINED AND NOT DEFINED ${_var})
         return()
+    endif()
+
+    if(DEFINED OPTION_DEFAULT AND ${_var} STREQUAL "")
+        set(${_var} ${OPTION_DEFAULT})
+        set(${_var} ${OPTION_DEFAULT} PARENT_SCOPE)
     endif()
 
     set(_value "${${_var}}")
@@ -211,6 +221,10 @@ function(iplug_validate_string _variable)
     if(OPTION_FILE_EXISTS OR OPTION_PATH_EXISTS)
         if(NOT _len EQUAL 0)
             get_filename_component(_file "${_value}" ABSOLUTE)
+            if(OPTION_ABSOLUTE)
+                set(${_var} "${_file}")
+                set(${_var} "${_file}" PARENT_SCOPE)
+            endif()
             if(OPTION_FILE_EXISTS AND (IS_DIRECTORY "${_file}" OR NOT EXISTS "${_file}"))
                 iplug_syntax_error("${_defined}. File does not exist.")
             endif()

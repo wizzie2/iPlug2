@@ -64,6 +64,11 @@ macro(iplug_configure_project)
     set(CONFIG_SOURCES "")
     set(CONFIG_LINK_LIBRARIES "")
 
+    set(DEFAULT_ICON "${CMAKE_CURRENT_SOURCE_DIR}/resources/${PROJECT_NAME}.ico")
+    if(NOT EXISTS "${DEFAULT_ICON}")
+        set(DEFAULT_ICON "")
+    endif()
+
     cmake_parse_arguments(_arg "" "${_projectConfigArgs}" "${_multiValueArgs}" ${ARGN})
     _iplug_warn_unparsed_arguments(_arg_UNPARSED_ARGUMENTS)
 
@@ -160,11 +165,6 @@ macro(iplug_configure_project)
         list(LENGTH _arg_RESOURCE_DEFINITIONS _len)
     endwhile()
 
-    if(NOT "${CONFIG_BUNDLE_ICON}" STREQUAL "")
-        get_filename_component(_icon "${CONFIG_BUNDLE_ICON}" ABSOLUTE)
-        set(CONFIG_BUNDLE_ICON "${_icon}")
-    endif()
-
     # Check validity of config variables.
     _iplug_validate_config_variables(CONFIG)
 
@@ -216,8 +216,8 @@ macro(iplug_add_aax _target)
 
     iplug_validate_string(TYPE_IDS             PREFIX CONFIG_AAX NOTEMPTY ALPHA NUMERIC SPACE APOSTROPHE COMMA)
     iplug_validate_string(TYPE_IDS_AUDIOSUITE  PREFIX CONFIG_AAX NOTEMPTY ALPHA NUMERIC SPACE APOSTROPHE COMMA)
-    iplug_validate_string(DOES_AUDIOSUITE      PREFIX CONFIG_AAX NOTEMPTY STREQUAL 0 1)
-    iplug_validate_string(PLUG_CATEGORY_STR    PREFIX CONFIG_AAX NOTEMPTY STREQUAL None EQ Dynamics PitchShift Reverb Delay Modulation Harmonic NoiseReduction Dither SoundField Effect)
+    iplug_validate_string(DOES_AUDIOSUITE      DEFAULT "0" PREFIX CONFIG_AAX NOTEMPTY STREQUAL 0 1)
+    iplug_validate_string(PLUG_CATEGORY_STR    DEFAULT "None" PREFIX CONFIG_AAX NOTEMPTY STREQUAL None EQ Dynamics PitchShift Reverb Delay Modulation Harmonic NoiseReduction Dither SoundField Effect)
 
     _iplug_add_config_variable(CONFIG_AAX AAX PLUG_MFR_STR  "${CONFIG_PLUG_MFR}")
     _iplug_add_config_variable(CONFIG_AAX AAX PLUG_NAME_STR "${CONFIG_PLUG_CLASS_NAME}\\n${CONFIG_PLUG_NAME_SHORT}")
@@ -327,17 +327,13 @@ macro(iplug_add_application _target)
 
     string(TOUPPER "${CONFIG_APP_SUBSYSTEM}" CONFIG_APP_SUBSYSTEM)
 
-    iplug_validate_string(SUBSYSTEM            PREFIX CONFIG_APP STREQUAL GUI CONSOLE)
-    iplug_validate_string(NUM_CHANNELS         PREFIX CONFIG_APP NOTEMPTY NUMERIC)
-    iplug_validate_string(N_VECTOR_WAIT        PREFIX CONFIG_APP NOTEMPTY NUMERIC)
-    iplug_validate_string(COPY_AUV3            PREFIX CONFIG_APP NOTEMPTY STREQUAL 0 1)
-    iplug_validate_string(SIGNAL_VECTOR_SIZE   PREFIX CONFIG_APP NOTEMPTY NUMERIC MAXLENGTH 6)
+    iplug_validate_string(SUBSYSTEM            DEFAULT "GUI" PREFIX CONFIG_APP STREQUAL GUI CONSOLE)
+    iplug_validate_string(NUM_CHANNELS         DEFAULT "2" PREFIX CONFIG_APP NOTEMPTY NUMERIC)
+    iplug_validate_string(N_VECTOR_WAIT        DEFAULT "0" PREFIX CONFIG_APP NOTEMPTY NUMERIC)
+    iplug_validate_string(COPY_AUV3            DEFAULT "0" PREFIX CONFIG_APP NOTEMPTY STREQUAL 0 1)
+    iplug_validate_string(SIGNAL_VECTOR_SIZE   DEFAULT "64" PREFIX CONFIG_APP NOTEMPTY NUMERIC MAXLENGTH 6)
 
     _iplug_add_config_variable(CONFIG_APP APP MULT 1)  # APP_MULT should probably be removed
-
-    if(NOT CONFIG_APP_SUBSYSTEM)
-        set(CONFIG_APP_SUBSYSTEM "GUI")
-    endif()
 
     add_executable(${_target})
     _iplug_add_target_lib(${_target} IPlug_APP)
@@ -395,26 +391,18 @@ macro(iplug_add_vst3 _target)
         endforeach()
         _iplug_validate_config_variables(CONFIG_OVERRIDE DEFINED)
 
-        if("${CONFIG_VST3_EXTENSION}" STREQUAL "")
-            set(CONFIG_VST3_EXTENSION "vst3")
-        endif()
-
         set(VST3_ICON "${CONFIG_BUNDLE_ICON}")
         if("${VST3_ICON}" STREQUAL "" AND EXISTS "${VST3_SDK_PATH}/doc/artwork/VST_Logo_Steinberg.ico")
             set(VST3_ICON "${VST3_SDK_PATH}/doc/artwork/VST_Logo_Steinberg.ico")
         endif()
 
-        if(NOT CONFIG_VST3_NUM_MIDI_IN_CHANS)
-            set(CONFIG_VST3_NUM_MIDI_IN_CHANS 1)
-        endif()
-
-        iplug_validate_string(EXTENSION          PREFIX CONFIG_VST3 ALPHA NUMERIC HYPHEN UNDERSCORE)
-        iplug_validate_string(SUBCATEGORY        PREFIX CONFIG_VST3 ALPHA DELIMITER MAXLENGTH 127)
-        iplug_validate_string(CC_UNITNAME        PREFIX CONFIG_VST3 MAXLENGTH 127)
-        iplug_validate_string(NUM_MIDI_IN_CHANS  PREFIX CONFIG_VST3 MINVALUE 1 MAXVALUE 16)
-        iplug_validate_string(NUM_MIDI_OUT_CHANS PREFIX CONFIG_VST3 MINVALUE 1 MAXVALUE 16)
-        iplug_validate_string(NUM_CC_CHANS       PREFIX CONFIG_VST3 MINVALUE 0 MAXVALUE ${CONFIG_VST3_NUM_MIDI_IN_CHANS})
-        iplug_validate_string(PRESET_LIST        PREFIX CONFIG_VST3 STREQUAL 0 1)
+        iplug_validate_string(EXTENSION          DEFAULT "vst3" PREFIX CONFIG_VST3 ALPHA NUMERIC HYPHEN UNDERSCORE)
+        iplug_validate_string(SUBCATEGORY        DEFAULT "Other" PREFIX CONFIG_VST3 ALPHA DELIMITER MAXLENGTH 127)
+        iplug_validate_string(CC_UNITNAME        DEFAULT "MIDI CCs" PREFIX CONFIG_VST3 MAXLENGTH 127)
+        iplug_validate_string(NUM_MIDI_IN_CHANS  DEFAULT "1" PREFIX CONFIG_VST3 MINVALUE 1 MAXVALUE 16)
+        iplug_validate_string(NUM_MIDI_OUT_CHANS DEFAULT "1" PREFIX CONFIG_VST3 MINVALUE 1 MAXVALUE 16)
+        iplug_validate_string(NUM_CC_CHANS       DEFAULT "1" PREFIX CONFIG_VST3 MINVALUE 0 MAXVALUE ${CONFIG_VST3_NUM_MIDI_IN_CHANS})
+        iplug_validate_string(PRESET_LIST        DEFAULT "0" PREFIX CONFIG_VST3 STREQUAL 0 1)
 
         _iplug_add_target_lib(${_target} IPlug_VST3)
         target_compile_definitions(${_target}-static PUBLIC ${VST3_CONFIG_DEFINITIONS})
