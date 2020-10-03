@@ -123,3 +123,112 @@
 
 	#undef API_SUFFIX
 #endif
+
+#ifndef PLUG_VERSION_STR
+	#error You need to define PLUG_VERSION_STR in config.h - A string to identify the version number
+#endif
+
+#ifndef PLUG_URL_STR
+	#define PLUG_URL_STR ""
+#endif
+
+#ifndef PLUG_EMAIL_STR
+	#define PLUG_EMAIL_STR ""
+#endif
+
+#ifndef PLUG_COPYRIGHT_STR
+	#define PLUG_COPYRIGHT_STR ""
+#endif
+
+#ifndef PLUG_VERSION_HEX
+	#error You need to define PLUG_VERSION_HEX in config.h - The hexadecimal version number in the form 0xVVVVRRMM: V = version, R = revision, M = minor revision.
+#endif
+
+#ifndef PLUG_UNIQUE_ID
+	#error You need to define PLUG_UNIQUE_ID in config.h - The unique four char ID for your plug-in, e.g. 'IPeF'
+#endif
+
+#ifndef PLUG_MFR_ID
+	#error You need to define PLUG_MFR_ID in config.h - The unique four char ID for your manufacturer, e.g. 'Acme'
+#endif
+
+// TODO: Remove arbitrary size limits. Let people with their 8K or 16K screens be able to see without magnifying glass
+//       Should be a normalized float value (0.0-1.0) representing 0-100% of current monitor resolution
+#ifndef PLUG_MAX_WIDTH
+	#define PLUG_MAX_WIDTH (PLUG_WIDTH * 2)
+#endif
+
+#ifndef PLUG_MAX_HEIGHT
+	#define PLUG_MAX_HEIGHT (PLUG_HEIGHT * 2)
+#endif
+
+// TODO: FPS should be read from client hardware and then have a FPS limit option client side
+#ifndef PLUG_FPS
+	#define PLUG_FPS 60
+#endif
+
+#ifdef AAX_API
+	#ifndef AAX_TYPE_IDS
+		#error AAX_TYPE_IDS not defined - list of comma separated four char IDs, that correspond to the different possible channel layouts of your plug-in, e.g. 'EFN1', 'EFN2'
+	#endif
+
+	#ifndef AAX_PLUG_MFR_STR
+		#error AAX_PLUG_MFR_STR not defined - The manufacturer name as it will appear in Pro tools preset manager
+	#endif
+
+	#ifndef AAX_PLUG_NAME_STR
+		#error AAX_PLUG_NAME_STR not defined - The plug-in name string, which may include shorten names separated with newline characters, e.g. "IPlugEffect\nIPEF"
+	#endif
+
+	#ifndef AAX_PLUG_CATEGORY_STR
+		#error AAX_PLUG_CATEGORY_STR not defined - String defining the category for your plug-in, e.g. "Effect"
+	#endif
+
+	#if AAX_DOES_AUDIOSUITE
+		#ifndef AAX_TYPE_IDS_AUDIOSUITE
+			#error AAX_TYPE_IDS_AUDIOSUITE not defined - list of comma separated four char IDs, that correspond to the different possible channel layouts of your plug-in when running off-line in audio suite mode, e.g. 'EFA1', 'EFA2'
+		#endif
+	#endif
+#endif
+
+#define API_EXT2
+#if VST2_API
+	#define API_EXT "vst"
+	#if REAPER_PLUGIN
+		#define LICE_PROVIDED_BY_APP
+		#define PLUGIN_API_BASE IPlugReaperVST2
+		#undef FillRect
+		#undef DrawText
+		#undef Polygon
+	#endif
+#elif AU_API
+	#define API_EXT "audiounit"
+#elif AUv3_API
+	#undef API_EXT2
+	#define API_EXT  "app"
+	#define API_EXT2 ".AUv3"
+#elif AAX_API
+	#define API_EXT "aax"
+	#define PROTOOLS
+#elif APP_API
+	#define API_EXT "app"
+#elif VST3_API || VST3C_API || VST3P_API
+	#define API_EXT "vst3"
+	#if defined VST3C_API
+		#undef PLUG_CLASS_NAME
+		#define PLUG_CLASS_NAME VST3Controller
+	#elif defined VST3P_API
+		#undef NO_IGRAPHICS
+		#define NO_IGRAPHICS
+	#endif
+#endif
+
+#if PLATFORM_WINDOWS || PLATFORM_WEB
+	#define BUNDLE_ID ""
+#elif PLATFORM_MAC
+	#define BUNDLE_ID BUNDLE_DOMAIN "." BUNDLE_MFR "." API_EXT "." BUNDLE_NAME API_EXT2
+#elif PLATFORM_IOS
+	#define BUNDLE_ID BUNDLE_DOMAIN "." BUNDLE_MFR "." BUNDLE_NAME API_EXT2
+#elif PLATFORM_LINUX
+// TODO:
+#endif

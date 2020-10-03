@@ -27,6 +27,8 @@ IPlugAPIBase::IPlugAPIBase(Config c, EAPI plugAPI) : IPluginBase(c.nParams, c.nP
 	mMfrName.Set(c.mfrName, MAX_PLUGIN_NAME_LEN);
 	mHasUI      = c.plugHasUI;
 	mHostResize = c.plugHostResize;
+	// TODO: Don't set constraints without knowing the resolution of the client monitor displaying the plugin.
+	//       Constraints should be defined in %, not pixels.
 	SetEditorSize(c.plugWidth, c.plugHeight);
 	SetSizeConstraints(c.plugMinWidth, c.plugMaxWidth, c.plugMinHeight, c.plugMaxHeight);
 	mStateChunks = c.plugDoesChunks;

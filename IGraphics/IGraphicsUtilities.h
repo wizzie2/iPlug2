@@ -75,6 +75,17 @@ static float GetLineCrossing(IVec2 p0, IVec2 p1, IVec2 p2, IVec2 p3)
   return -(d.x * b.y - d.y * b.x) / m;
 }
 
+//TODO: move this
+#if !PLATFORM_IOS && !PLATFORM_WEB
+/** Helper to find a draw scale factor to scale the plug-in UI to fit in the platform-supplied area
+ * @param height The original height of the UI.
+ * @return A scaling factor that can be supplied when calling MakeGraphics() */
+static float GetScaleForScreen(int height)
+{
+  return 1.f;
+}
+#endif
+
 END_IGRAPHICS_NAMESPACE
 END_IPLUG_NAMESPACE
 

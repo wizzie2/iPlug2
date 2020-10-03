@@ -14,10 +14,6 @@
 //-----------------------------------------------------------------------------
 // Platform configuration
 
-// currently a copy from WindowsPlatform.h
-
-#error "LinuxPlatform.h needs to be configured... Current settings are unconfirmed."
-
 #define PLATFORM_LITTLE_ENDIAN   1
 #define PLATFORM_CACHE_LINE_SIZE 64
 #define DEBUGBREAK()             __emit__(0x90CC)
@@ -41,7 +37,7 @@ namespace iplug::type
 		using int64  = std::int64_t;
 	};
 	using Platform = Linux;
-}  // namespace iplug::types
+}  // namespace iplug::type
 
 
 //-----------------------------------------------------------------------------
@@ -49,3 +45,7 @@ namespace iplug::type
 #include <unistd.h>
 #include <sys/types.h>
 #include <dirent.h>
+
+#ifndef NO_IGRAPHICS
+	#include <OpenGL/gl.h>
+#endif

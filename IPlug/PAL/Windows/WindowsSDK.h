@@ -1,10 +1,10 @@
 /*
  ==============================================================================
- 
- This file is part of the iPlug 2 library. Copyright (C) the iPlug 2 developers. 
- 
+
+ This file is part of the iPlug 2 library. Copyright (C) the iPlug 2 developers.
+
  See LICENSE.txt for more info.
- 
+
  ==============================================================================
 */
 
@@ -140,5 +140,11 @@ using PNTSTATUS = NTSTATUS*;
 #include <winsock.h>
 #include <d3dkmthk.h>
 #include <sys/stat.h>
+
+BEGIN_INCLUDE_DEPENDENCIES
+#ifndef NO_IGRAPHICS
+	#include <glad.h>
+#endif
+END_INCLUDE_DEPENDENCIES
 
 #pragma pack(pop)

@@ -14,10 +14,6 @@
 //-----------------------------------------------------------------------------
 // Platform configuration
 
-// currently a copy from WindowsPlatform.h
-
-#error "IOSPlatform.h needs to be configured... Current settings are unconfirmed."
-
 #define PLATFORM_LITTLE_ENDIAN   1
 #define PLATFORM_CACHE_LINE_SIZE 64
 #define PLATFORM_PTHREADS        0
@@ -63,3 +59,13 @@ namespace iplug::type
 #include <unistd.h>
 #include <sys/types.h>
 #include <dirent.h>
+
+#ifndef NO_IGRAPHICS
+	#if defined IGRAPHICS_GLES2
+		#include <OpenGLES/ES2/gl.h>
+	#elif defined IGRAPHICS_GLES3
+		#include <OpenGLES/ES3/gl.h>
+	#else
+		#include <OpenGL/gl.h>
+	#endif
+#endif

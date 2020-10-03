@@ -14,9 +14,6 @@
 //-----------------------------------------------------------------------------
 // Platform configuration
 
-// currently a copy from WindowsPlatform.h
-
-#error "MacPlatform.h needs to be configured... Current settings are unconfirmed."
 
 #define PLATFORM_LITTLE_ENDIAN   1
 #define PLATFORM_CACHE_LINE_SIZE 64
@@ -63,3 +60,11 @@ namespace iplug::type
 #include <unistd.h>
 #include <sys/types.h>
 #include <dirent.h>
+
+#ifndef NO_IGRAPHICS
+	#if defined IGRAPHICS_GL2
+		#include <OpenGL/gl.h>
+	#elif defined IGRAPHICS_GL3
+		#include <OpenGL/gl3.h>
+	#endif
+#endif
