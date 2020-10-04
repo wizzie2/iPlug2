@@ -61,25 +61,25 @@ void IPluginBase::GetHostVersionStr(WDL_String& str) const
 	GetVersionStr(mHostVersion, str);
 }
 
-const char* IPluginBase::GetAPIStr() const
+constexpr const char* IPluginBase::GetAPIStr() const
 {
 	switch (GetAPI())
 	{
-		case kAPIVST2:
+		case EPlugApi::VST2:
 			return "VST2";
-		case kAPIVST3:
+		case EPlugApi::VST3:
 			return "VST3";
-		case kAPIAU:
+		case EPlugApi::AUv2:
 			return "AU";
-		case kAPIAUv3:
+		case EPlugApi::AUv3:
 			return "AUv3";
-		case kAPIAAX:
+		case EPlugApi::AAX:
 			return "AAX";
-		case kAPIAPP:
+		case EPlugApi::APP:
 			return "APP";
-		case kAPIWAM:
+		case EPlugApi::WAM:
 			return "WAM";
-		case kAPIWEB:
+		case EPlugApi::WEB:
 			return "WEB";
 		default:
 			return "";
@@ -89,13 +89,12 @@ const char* IPluginBase::GetAPIStr() const
 // TODO: move to PAL
 const char* IPluginBase::GetArchStr() const
 {
-#if PLATFORM_WEB
-	return "WASM";
-#elif PLATFORM_64BIT
-	return "x64";
-#else
-	return "x86";
-#endif
+	if constexpr(EPlugApi::Native == EPlugApi::WEB)
+		return "WASM";
+	else if constexpr(EArch::Native == EArch::_64bit)
+		return "x64";
+	else
+		return "x86";
 }
 
 void IPluginBase::GetBuildInfoStr(WDL_String& str) const

@@ -1,10 +1,10 @@
 /*
  ==============================================================================
- 
- This file is part of the iPlug 2 library. Copyright (C) the iPlug 2 developers. 
- 
+
+ This file is part of the iPlug 2 library. Copyright (C) the iPlug 2 developers.
+
  See LICENSE.txt for  more info.
- 
+
  ==============================================================================
 */
 
@@ -88,22 +88,17 @@ void HostPath(WDL_String& path, const char* bundleID)
 	GetModulePath(0, path);
 }
 
-//void PluginPath(WDL_String& path, HMODULE pExtra)
-//{
-//  GetModulePath(pExtra, path);
-//}
-
 void BundleResourcePath(WDL_String& path, HMODULE pExtra)
 {
-	#ifdef VST3_API
-	GetModulePath(pExtra, path);
-		#ifdef PLATFORM_64BIT
-	path.SetLen(path.GetLength() - strlen("x86_64-win/"));
-		#else
-	path.SetLen(path.GetLength() - strlen("x86-win/"));
-		#endif
-	path.Append("Resources\\");
-	#endif
+	if constexpr (EPlugApi::Native == EPlugApi::VST3)
+	{
+		GetModulePath(pExtra, path);
+		if constexpr (EArch::Native == EArch::_64bit)
+			path.SetLen(path.GetLength() - strlen("x86_64-win/"));
+		else
+			path.SetLen(path.GetLength() - strlen("x86-win/"));
+		path.Append("Resources\\");
+	}
 }
 
 void DesktopPath(WDL_String& path)
@@ -152,7 +147,7 @@ static BOOL EnumResNameProc(HANDLE module, LPCTSTR type, LPTSTR name, LONG_PTR p
 		WDL_String* search = (WDL_String*) param;
 		if (search != 0 && name != 0)
 		{
-			//strip off extra quotes
+			// strip off extra quotes
 			WDL_String strippedName(strlwr(name + 1));
 			strippedName.SetLen(strippedName.GetLength() - 1);
 
@@ -267,21 +262,21 @@ EResourceLocation LocateResource(
 
 		bool foundResource = false;
 
-		//TODO: FindResource is not sufficient here
+		// TODO: FindResource is not sufficient here
 
 		if (strcmp(type, "png") == 0)
-		{  //TODO: lowercase/uppercase png
+		{  // TODO: lowercase/uppercase png
 			plusSlash.SetFormatted(strlen("/resources/img/") + strlen(file) + 1, "/resources/img/%s", file);
 			foundResource = emscripten::val::global("Module")["preloadedImages"].call<bool>(
 				"hasOwnProperty", std::string(plusSlash.Get()));
 		}
 		else if (strcmp(type, "ttf") == 0)
-		{  //TODO: lowercase/uppercase ttf
+		{  // TODO: lowercase/uppercase ttf
 			plusSlash.SetFormatted(strlen("/resources/fonts/") + strlen(file) + 1, "/resources/fonts/%s", file);
 			foundResource = true;  // TODO: check ttf
 		}
 		else if (strcmp(type, "svg") == 0)
-		{  //TODO: lowercase/uppercase svg
+		{  // TODO: lowercase/uppercase svg
 			plusSlash.SetFormatted(strlen("/resources/img/") + strlen(file) + 1, "/resources/img/%s", file);
 			foundResource = true;  // TODO: check svg
 		}

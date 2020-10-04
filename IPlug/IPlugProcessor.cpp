@@ -21,7 +21,7 @@
 
 using namespace iplug;
 
-IPlugProcessor::IPlugProcessor(const Config& config, EAPI plugAPI)  // TODO: is EAPI plugAPI actually used?
+IPlugProcessor::IPlugProcessor(const Config& config, EPlugApi plugAPI)
 	: mPlugType(config.plugType)
 	, mDoesMIDIIn(config.plugDoesMidiIn)
 	, mDoesMIDIOut(config.plugDoesMidiOut)
@@ -424,18 +424,18 @@ int IPlugProcessor::ParseChannelIOStr(const char* IOStr,
 
 int IPlugProcessor::GetAUPluginType() const
 {
-	if (mPlugType == EIPlugPluginType::Effect)
+	if (mPlugType == EPluginType::Effect)
 	{
 		if (DoesMIDIIn())
 			return 'aumf';
 		else
 			return 'aufx';
 	}
-	else if (mPlugType == EIPlugPluginType::Instrument)
+	else if (mPlugType == EPluginType::Instrument)
 	{
 		return 'aumu';
 	}
-	else if (mPlugType == EIPlugPluginType::MIDIEffect)
+	else if (mPlugType == EPluginType::MIDIEffect)
 	{
 		return 'aumi';
 	}

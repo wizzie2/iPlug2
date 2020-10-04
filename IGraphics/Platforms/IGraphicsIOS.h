@@ -23,10 +23,10 @@ extern float GetScaleForScreen(int height);
 class IGraphicsIOS final : public IGRAPHICS_DRAW_CLASS
 {
 public:  
-  IGraphicsIOS(IGEditorDelegate& dlg, int w, int h, int fps, float scale);
+  IGraphicsIOS(IGEditorDelegate& dlg, int w, int h, int fps = 0, float scale = 1.);
   virtual ~IGraphicsIOS();
   
-  void SetBundleID(const char* bundleID) { mBundleID.Set(bundleID); }
+  void SetBundleID(const char* bundleID) override { mBundleID.Set(bundleID); }
 
   void* OpenWindow(void* pWindow) override;
   void CloseWindow() override;

@@ -20,8 +20,8 @@ BEGIN_IPLUG_NAMESPACE
 extern HWND gHWND;
 
 IPlugAPP::IPlugAPP(const InstanceInfo& info, const Config& config)
-	: IPlugAPIBase(config, kAPIAPP)
-	, IPlugProcessor(config, kAPIAPP)
+	: IPlugAPIBase(config, EPlugApi::APP)
+	, IPlugProcessor(config, EPlugApi::APP)
 {
 	mAppHost = (IPlugAPPHost*) info.pAppHost;
 

@@ -84,7 +84,7 @@ class IGraphicsNanoVG : public IGraphicsPathBase
 	class Bitmap;
 
  public:
-	IGraphicsNanoVG(IGEditorDelegate& dlg, int w, int h, int fps, float scale);
+	IGraphicsNanoVG(IGEditorDelegate& dlg, int w, int h, int fps = 0, float scale = 1.);
 	~IGraphicsNanoVG();
 
 	const char* GetDrawingAPIStr() override;

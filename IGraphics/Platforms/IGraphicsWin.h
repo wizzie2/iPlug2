@@ -15,22 +15,31 @@ BEGIN_IPLUG_NAMESPACE
 BEGIN_IGRAPHICS_NAMESPACE
 
 /** IGraphics platform class for Windows
-* @ingroup PlatformClasses */
+ * @ingroup PlatformClasses */
 class IGraphicsWin final : public IGRAPHICS_DRAW_CLASS
 {
 	class Font;
 	class InstalledFont;
 	struct HFontHolder;
 
-  public:
-	IGraphicsWin(IGEditorDelegate& dlg, int w, int h, int fps, float scale);
+ public:
+	IGraphicsWin(IGEditorDelegate& dlg, int w, int h, int fps = 0, float scale = 1.);
 	~IGraphicsWin();
 
-	void SetWinModuleHandle(void* pInstance) override { mHInstance = (HINSTANCE) pInstance; }
-	void* GetWinModuleHandle() override { return mHInstance; }
+	void SetWinModuleHandle(void* pInstance) override
+	{
+		mHInstance = (HINSTANCE) pInstance;
+	}
+	void* GetWinModuleHandle() override
+	{
+		return mHInstance;
+	}
 
 	void ForceEndUserEdit() override;
-	int GetPlatformWindowScale() const override { return GetScreenScale(); }
+	int GetPlatformWindowScale() const override
+	{
+		return GetScreenScale();
+	}
 
 	void PlatformResize(bool parentHasResized) override;
 
@@ -47,11 +56,17 @@ class IGraphicsWin final : public IGRAPHICS_DRAW_CLASS
 
 	void GetMouseLocation(float& x, float& y) const override;
 
-	EMsgBoxResult ShowMessageBox(const char* str, const char* caption, EMsgBoxType type, IMsgBoxCompletionHanderFunc completionHandler) override;
+	EMsgBoxResult ShowMessageBox(const char* str,
+								 const char* caption,
+								 EMsgBoxType type,
+								 IMsgBoxCompletionHanderFunc completionHandler) override;
 
 	void* OpenWindow(void* pParent) override;
 	void CloseWindow() override;
-	bool WindowIsOpen() override { return (mPlugWnd != nullptr); }
+	bool WindowIsOpen() override
+	{
+		return (mPlugWnd != nullptr);
+	}
 
 	void UpdateTooltips() override {}
 
@@ -65,15 +80,27 @@ class IGraphicsWin final : public IGRAPHICS_DRAW_CLASS
 
 	bool OpenURL(const char* url, const char* msgWindowTitle, const char* confirmMsg, const char* errMsgOnFailure);
 
-	void* GetWindow() override { return mPlugWnd; }
-	HWND GetParentWindow() const { return mParentWnd; }
+	void* GetWindow() override
+	{
+		return mPlugWnd;
+	}
+	HWND GetParentWindow() const
+	{
+		return mParentWnd;
+	}
 	HWND GetMainWnd();
-	void SetMainWndClassName(const char* name) { mMainWndClassName.Set(name); }
+	void SetMainWndClassName(const char* name)
+	{
+		mMainWndClassName.Set(name);
+	}
 	//  void GetMainWndClassName(char* name) { strcpy(name, mMainWndClassName.Get()); }
 	IRECT GetWindowRECT();
 	void SetWindowTitle(const char* str);
 
-	const char* GetPlatformAPIStr() override { return "win32"; };
+	const char* GetPlatformAPIStr() override
+	{
+		return "win32";
+	};
 
 	bool GetTextFromClipboard(WDL_String& str) override;
 	bool SetTextInClipboard(const char* str) override;
@@ -87,17 +114,18 @@ class IGraphicsWin final : public IGRAPHICS_DRAW_CLASS
 
 	DWORD OnVBlankRun();
 
-  protected:
+ protected:
 	IPopupMenu* CreatePlatformPopupMenu(IPopupMenu& menu, const IRECT& bounds, bool& isAsync) override;
-	void CreatePlatformTextEntry(int paramIdx, const IText& text, const IRECT& bounds, int length, const char* str) override;
+	void CreatePlatformTextEntry(
+		int paramIdx, const IText& text, const IRECT& bounds, int length, const char* str) override;
 
 	void SetTooltip(const char* tooltip);
 	void ShowTooltip();
 	void HideTooltip();
 
-  private:
+ private:
 	/** Called either in response to WM_TIMER tick or user message WM_VBLANK, triggered by VSYNC thread
-    * @param vBlankCount will allow redraws to get paced by the vblank message. Passing 0 is a WM_TIMER fallback. */
+	 * @param vBlankCount will allow redraws to get paced by the vblank message. Passing 0 is a WM_TIMER fallback. */
 	void OnDisplayTimer(uint32 vBlankCount = 0);
 
 	enum class EParamEditMsg : uint8
@@ -115,7 +143,10 @@ class IGraphicsWin final : public IGRAPHICS_DRAW_CLASS
 	void CachePlatformFont(const char* fontID, const PlatformFontPtr& font) override;
 
 	inline IMouseInfo GetMouseInfo(LPARAM lParam, WPARAM wParam);
-	inline IMouseInfo GetMouseInfoDeltas(float& dX, float& dY, LPARAM lParam, WPARAM wParam);  // TODO: missing definition?
+	inline IMouseInfo GetMouseInfoDeltas(float& dX,
+										 float& dY,
+										 LPARAM lParam,
+										 WPARAM wParam);  // TODO: missing definition?
 	bool MouseCursorIsLocked();
 
 #ifdef IGRAPHICS_GL
@@ -144,9 +175,10 @@ class IGraphicsWin final : public IGRAPHICS_DRAW_CLASS
 	HWND mVBlankWindow            = 0;                     // Window to post messages to for every vsync
 	volatile bool mVBlankShutdown = false;                 // Flag to indiciate that the vsync thread should shutdown
 	HANDLE mVBlankThread          = INVALID_HANDLE_VALUE;  // ID of thread.
-	volatile DWORD mVBlankCount   = 0;                     // running count of vblank events since the start of the window.
-	uint32 mVBlankSkipUntil       = 0;                     // support for skipping vblank notification if the last callback took  too long.  This helps keep the message pump clear in the case of overload.
-	bool mVSYNCEnabled            = false;
+	volatile DWORD mVBlankCount   = 0;  // running count of vblank events since the start of the window.
+	uint32 mVBlankSkipUntil = 0;  // support for skipping vblank notification if the last callback took  too long.  This
+								  // helps keep the message pump clear in the case of overload.
+	bool mVSYNCEnabled = false;
 
 	const IParam* mEditParam = nullptr;
 	IText mEditText;
@@ -163,7 +195,8 @@ class IGraphicsWin final : public IGRAPHICS_DRAW_CLASS
 	static StaticStorage<InstalledFont> sPlatformFontCache;
 	static StaticStorage<HFontHolder> sHFontCache;
 
-	std::unordered_map<ITouchID, IMouseInfo> mDeltaCapture;  // associative array of touch id pointers to IMouseInfo structs, so that we can get deltas
+	std::unordered_map<ITouchID, IMouseInfo>
+		mDeltaCapture;  // associative array of touch id pointers to IMouseInfo structs, so that we can get deltas
 };
 
 END_IGRAPHICS_NAMESPACE

@@ -17,7 +17,7 @@ using namespace Steinberg;
 using namespace Vst;
 
 IPlugVST3Processor::IPlugVST3Processor(const InstanceInfo& info, const Config& config)
-  : IPlugAPIBase(config, kAPIVST3),
+  : IPlugAPIBase(config, EPlugApi::VST3),
 	IPlugVST3ProcessorBase(config, *this)
 {
 	setControllerClass(info.mOtherGUID);

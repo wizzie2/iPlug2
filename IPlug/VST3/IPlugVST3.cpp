@@ -19,7 +19,7 @@ using namespace Vst;
 #pragma mark - IPlugVST3 Constructor/Destructor
 
 IPlugVST3::IPlugVST3(const InstanceInfo& info, const Config& config)
-	: IPlugAPIBase(config, kAPIVST3)
+	: IPlugAPIBase(config, EPlugApi::VST3)
 	, IPlugVST3ProcessorBase(config, *this)
 	, IPlugVST3ControllerBase(parameters)
 	, mView(nullptr)

@@ -54,7 +54,7 @@
 
 #ifndef IGRAPHICS_GL
 	#if defined IGRAPHICS_GLES2 || IGRAPHICS_GLES3 || IGRAPHICS_GL2 || IGRAPHICS_GL3
-		#define IGRAPHICS_GL
+		#define IGRAPHICS_GL 1
 	#endif
 #endif
 
@@ -88,40 +88,8 @@
 #endif
 
 // Default floating-point type to use for variables and functions unless explicitly specified
-#ifndef IPLUG2_TFLOAT_TYPE
-	#define IPLUG2_TFLOAT_TYPE float
-#endif
-
-#ifdef __OBJC__
-	#import <Cocoa/Cocoa.h>
-
-	#if defined(VST2_API)
-		#define API_SUFFIX _vst
-	#elif defined(AU_API)
-		#define API_SUFFIX _au
-	#elif defined(AUv3_API)
-		#define API_SUFFIX _auv3
-	#elif defined(AAX_API)
-		#define API_SUFFIX _aax
-	#elif defined(VST3_API)
-		#define API_SUFFIX _vst3
-	#elif defined(APP_API)
-		#define API_SUFFIX _app
-	#endif
-
-	#define IGRAPHICS_VIEW          IGraphicsView_vIPLUG2_##API_SUFFIX
-	#define IGRAPHICS_MENU          IGraphicsMenu_vIPLUG2_##API_SUFFIX
-	#define IGRAPHICS_MENU_RCVR     IGraphicsMenuRcvr_vIPLUG2_##API_SUFFIX
-	#define IGRAPHICS_FORMATTER     IGraphicsFormatter_vIPLUG2_##API_SUFFIX
-	#define IGRAPHICS_TEXTFIELD     IGraphicsTextField_vIPLUG2_##API_SUFFIX
-	#define IGRAPHICS_TEXTFIELDCELL IGraphicsTextFieldCell_vIPLUG2_##API_SUFFIX
-	#define IGRAPHICS_GLLAYER       IGraphicsLayer_vIPLUG2_##API_SUFFIX
-	#define IGRAPHICS_IMGUIVIEW     IGraphicsImGuiView_vIPLUG2_##API_SUFFIX
-	#define MNVGtexture             MNVGtexture_vIPLUG2_##API_SUFFIX
-	#define MNVGbuffers             MNVGbuffers_vIPLUG2_##API_SUFFIX
-	#define MNVGcontext             MNVGcontext_vIPLUG2_##API_SUFFIX
-
-	#undef API_SUFFIX
+#ifndef PLUG_TFLOAT_TYPE
+	#define PLUG_TFLOAT_TYPE float
 #endif
 
 #ifndef PLUG_VERSION_STR
@@ -167,7 +135,7 @@
 	#define PLUG_FPS 60
 #endif
 
-#ifdef AAX_API
+#if AAX_API
 	#ifndef AAX_TYPE_IDS
 		#error AAX_TYPE_IDS not defined - list of comma separated four char IDs, that correspond to the different possible channel layouts of your plug-in, e.g. 'EFN1', 'EFN2'
 	#endif
@@ -191,6 +159,21 @@
 	#endif
 #endif
 
+#if VST3C_API || VST3P_API
+	#undef VST3_API
+	#define VST3_API 1
+#endif
+
+#if VST3C_API
+	#undef PLUG_CLASS_NAME
+	#define PLUG_CLASS_NAME VST3Controller
+#endif
+
+#if VST3P_API || WAM_API
+	#undef NO_IGRAPHICS
+	#define NO_IGRAPHICS
+#endif
+
 #define API_EXT2
 #if VST2_API
 	#define API_EXT "vst"
@@ -212,15 +195,8 @@
 	#define PROTOOLS
 #elif APP_API
 	#define API_EXT "app"
-#elif VST3_API || VST3C_API || VST3P_API
+#elif VST3_API
 	#define API_EXT "vst3"
-	#if defined VST3C_API
-		#undef PLUG_CLASS_NAME
-		#define PLUG_CLASS_NAME VST3Controller
-	#elif defined VST3P_API
-		#undef NO_IGRAPHICS
-		#define NO_IGRAPHICS
-	#endif
 #endif
 
 #if PLATFORM_WINDOWS || PLATFORM_WEB
@@ -231,4 +207,38 @@
 	#define BUNDLE_ID BUNDLE_DOMAIN "." BUNDLE_MFR "." BUNDLE_NAME API_EXT2
 #elif PLATFORM_LINUX
 // TODO:
+#endif
+#undef API_EXT2
+
+
+#ifdef __OBJC__
+	#import <Cocoa/Cocoa.h>
+
+	#if VST2_API
+		#define API_SUFFIX _vst
+	#elif AU_API
+		#define API_SUFFIX _au
+	#elif AUv3_API
+		#define API_SUFFIX _auv3
+	#elif AAX_API
+		#define API_SUFFIX _aax
+	#elif VST3_API
+		#define API_SUFFIX _vst3
+	#elif APP_API
+		#define API_SUFFIX _app
+	#endif
+
+	#define IGRAPHICS_VIEW          IGraphicsView_vIPLUG2_##API_SUFFIX
+	#define IGRAPHICS_MENU          IGraphicsMenu_vIPLUG2_##API_SUFFIX
+	#define IGRAPHICS_MENU_RCVR     IGraphicsMenuRcvr_vIPLUG2_##API_SUFFIX
+	#define IGRAPHICS_FORMATTER     IGraphicsFormatter_vIPLUG2_##API_SUFFIX
+	#define IGRAPHICS_TEXTFIELD     IGraphicsTextField_vIPLUG2_##API_SUFFIX
+	#define IGRAPHICS_TEXTFIELDCELL IGraphicsTextFieldCell_vIPLUG2_##API_SUFFIX
+	#define IGRAPHICS_GLLAYER       IGraphicsLayer_vIPLUG2_##API_SUFFIX
+	#define IGRAPHICS_IMGUIVIEW     IGraphicsImGuiView_vIPLUG2_##API_SUFFIX
+	#define MNVGtexture             MNVGtexture_vIPLUG2_##API_SUFFIX
+	#define MNVGbuffers             MNVGbuffers_vIPLUG2_##API_SUFFIX
+	#define MNVGcontext             MNVGcontext_vIPLUG2_##API_SUFFIX
+
+	#undef API_SUFFIX
 #endif

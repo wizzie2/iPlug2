@@ -22,7 +22,7 @@ BEGIN_IGRAPHICS_NAMESPACE
 /** The lowest level base class of an IGraphics control. A control is anything on the GUI
  *  @ingroup BaseControls */
 class IControl
-#if defined VST3_API || defined VST3C_API
+#if VST3_API && !VST3P_API
 	: public Steinberg::Vst::IContextMenuTarget,
 	  public Steinberg::FObject
 #endif
@@ -686,7 +686,7 @@ class IControl
 		return static_cast<T*>(this);
 	}
 
-#if defined VST3_API || defined VST3C_API
+#if VST3_API && !VST3P_API
 	Steinberg::tresult PLUGIN_API executeMenuItem(Steinberg::int32 tag) override
 	{
 		OnContextSelection(tag);
@@ -748,7 +748,7 @@ class IControl
 		mVals.resize(nVals);
 	}
 
-#if defined VST3_API || defined VST3C_API
+#if VST3_API && !VST3P_API
 	OBJ_METHODS(IControl, FObject)
 	DEFINE_INTERFACES
 	DEF_INTERFACE(IContextMenuTarget)

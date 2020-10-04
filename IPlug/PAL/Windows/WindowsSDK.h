@@ -119,6 +119,8 @@
 
 #include <windows.h>
 
+#pragma pack(pop)
+
 // Make sure NTSTATUS is defined since we're using WIN32_LEAN_AND_MEAN
 using NTSTATUS  = _Return_type_success_(return >= 0) long;
 using PNTSTATUS = NTSTATUS*;
@@ -126,11 +128,10 @@ using PNTSTATUS = NTSTATUS*;
 // Additional windows headers
 #include <VersionHelpers.h>
 
-#include <intrin.h>   // Intrinsic functions
-#include <intsafe.h>  // Helper functions to prevent integer overflow bugs
-#include <strsafe.h>  // Safer C library string routine replacements
+#include <intrin.h>          // Intrinsic functions
+#include <intsafe.h>         // Helper functions to prevent integer overflow bugs
+#include <strsafe.h>         // Safer C library string routine replacements
 
-//#include <commctrl.h>
 #include <commdlg.h>
 #include <shellapi.h>
 #include <shlobj.h>
@@ -138,13 +139,11 @@ using PNTSTATUS = NTSTATUS*;
 #include <WindowsX.h>
 #include <wininet.h>
 #include <winsock.h>
-#include <d3dkmthk.h>
 #include <sys/stat.h>
 
 BEGIN_INCLUDE_DEPENDENCIES
-#ifndef NO_IGRAPHICS
+#if !NO_IGRAPHICS
+	#include <d3dkmthk.h>
 	#include <glad.h>
 #endif
 END_INCLUDE_DEPENDENCIES
-
-#pragma pack(pop)

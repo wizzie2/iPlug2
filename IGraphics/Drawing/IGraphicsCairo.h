@@ -56,7 +56,7 @@ private:
   class PNGStream;
 #endif
 public:
-  IGraphicsCairo(IGEditorDelegate& dlg, int w, int h, int fps, float scale);
+  IGraphicsCairo(IGEditorDelegate& dlg, int w, int h, int fps = 0, float scale = 1.);
   ~IGraphicsCairo();
 
   const char* GetDrawingAPIStr() override { return "CAIRO"; }

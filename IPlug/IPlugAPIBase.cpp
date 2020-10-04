@@ -17,7 +17,7 @@
 
 using namespace iplug;
 
-IPlugAPIBase::IPlugAPIBase(Config c, EAPI plugAPI) : IPluginBase(c.nParams, c.nPresets)
+IPlugAPIBase::IPlugAPIBase(Config c, EPlugApi plugAPI) : IPluginBase(c.nParams, c.nPresets)
 {
 	mUniqueID = c.uniqueID;
 	mMfrID    = c.mfrID;
@@ -25,14 +25,14 @@ IPlugAPIBase::IPlugAPIBase(Config c, EAPI plugAPI) : IPluginBase(c.nParams, c.nP
 	mPluginName.Set(c.pluginName, MAX_PLUGIN_NAME_LEN);
 	mProductName.Set(c.productName, MAX_PLUGIN_NAME_LEN);
 	mMfrName.Set(c.mfrName, MAX_PLUGIN_NAME_LEN);
-	mHasUI      = c.plugHasUI;
+//	mHasUI      = c.plugHasUI;
 	mHostResize = c.plugHostResize;
 	// TODO: Don't set constraints without knowing the resolution of the client monitor displaying the plugin.
 	//       Constraints should be defined in %, not pixels.
 	SetEditorSize(c.plugWidth, c.plugHeight);
 	SetSizeConstraints(c.plugMinWidth, c.plugMaxWidth, c.plugMinHeight, c.plugMaxHeight);
 	mStateChunks = c.plugDoesChunks;
-	mAPI         = plugAPI;
+//	mAPI         = plugAPI;
 	mBundleID.Set(c.bundleID);
 
 	Trace(TRACELOC, "%s:%s", c.pluginName, CurrentTime());
@@ -147,52 +147,51 @@ void IPlugAPIBase::OnTimer(Timer& t)
 {
 	if (HasUI())
 	{
-// VST3 ********************************************************************************
-#if defined VST3P_API || defined VST3_API
-		while (mMidiMsgsFromProcessor.ElementsAvailable())
+		if constexpr(EPlugApi::Native == EPlugApi::VST3) // VST3 ***
 		{
-			IMidiMsg msg;
-			mMidiMsgsFromProcessor.Pop(msg);
-	#ifdef VST3P_API  // distributed
-			TransmitMidiMsgFromProcessor(msg);
-	#else
-			SendMidiMsgFromDelegate(msg);
-	#endif
-		}
+			while (mMidiMsgsFromProcessor.ElementsAvailable())
+			{
+				IMidiMsg msg;
+				mMidiMsgsFromProcessor.Pop(msg);
+				if constexpr (EPlugApiState::Native == EPlugApiState::Processor)
+					TransmitMidiMsgFromProcessor(msg);
+				else
+					SendMidiMsgFromDelegate(msg);
+			}
 
-		while (mSysExDataFromProcessor.ElementsAvailable())
-		{
-			SysExData msg;
-			mSysExDataFromProcessor.Pop(msg);
-	#ifdef VST3P_API  // distributed
-			TransmitSysExDataFromProcessor(msg);
-	#else
-			SendSysexMsgFromDelegate({msg.mOffset, msg.mData, msg.mSize});
-	#endif
+			while (mSysExDataFromProcessor.ElementsAvailable())
+			{
+				SysExData msg;
+				mSysExDataFromProcessor.Pop(msg);
+				if constexpr (EPlugApiState::Native == EPlugApiState::Processor)
+					TransmitSysExDataFromProcessor(msg);
+				else
+					SendSysexMsgFromDelegate({msg.mOffset, msg.mData, msg.mSize});
+			}
 		}
-// !VST3 ******************************************************************************
-#else
-		while (mParamChangeFromProcessor.ElementsAvailable())
+		else // !VST3 ***
 		{
-			ParamTuple p;
-			mParamChangeFromProcessor.Pop(p);
-			SendParameterValueFromDelegate(p.idx, p.value, false);
-		}
+			while (mParamChangeFromProcessor.ElementsAvailable())
+			{
+				ParamTuple p;
+				mParamChangeFromProcessor.Pop(p);
+				SendParameterValueFromDelegate(p.idx, p.value, false);
+			}
 
-		while (mMidiMsgsFromProcessor.ElementsAvailable())
-		{
-			IMidiMsg msg;
-			mMidiMsgsFromProcessor.Pop(msg);
-			SendMidiMsgFromDelegate(msg);
-		}
+			while (mMidiMsgsFromProcessor.ElementsAvailable())
+			{
+				IMidiMsg msg;
+				mMidiMsgsFromProcessor.Pop(msg);
+				SendMidiMsgFromDelegate(msg);
+			}
 
-		while (mSysExDataFromProcessor.ElementsAvailable())
-		{
-			SysExData msg;
-			mSysExDataFromProcessor.Pop(msg);
-			SendSysexMsgFromDelegate({msg.mOffset, msg.mData, msg.mSize});
+			while (mSysExDataFromProcessor.ElementsAvailable())
+			{
+				SysExData msg;
+				mSysExDataFromProcessor.Pop(msg);
+				SendSysexMsgFromDelegate({msg.mOffset, msg.mData, msg.mSize});
+			}
 		}
-#endif
 	}
 
 	OnIdle();

@@ -640,8 +640,10 @@ WDL_DLGRET IPlugAPPHost::MainDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
 				}
 				case ID_PREFERENCES:
 				{
-					INT_PTR ret = DialogBox(
-						gHINSTANCE, MAKEINTRESOURCE(IDD_DIALOG_PREF), hwndDlg, IPlugAPPHost::PreferencesDlgProc);
+					INT_PTR ret = DialogBox((HINSTANCE) gHINSTANCE,
+											MAKEINTRESOURCE(IDD_DIALOG_PREF),
+											hwndDlg,
+											IPlugAPPHost::PreferencesDlgProc);
 
 					if (ret == IDOK)
 						pAppHost->UpdateINI();

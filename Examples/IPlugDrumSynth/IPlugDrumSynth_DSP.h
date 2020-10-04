@@ -3,40 +3,41 @@
 #include "Extras/Oscillator.h"
 #include "Extras/ADSREnvelope.h"
 
-static constexpr int kNumDrums          = 4;
-static constexpr double kStartFreq      = 300.;  // Hz
-static constexpr double kFreqDiff       = 100.;  // Hz
-static constexpr double kPitchEnvRange  = 100.;  // Hz
-static constexpr double kAmpDecayTime   = 300;   // Ms
-static constexpr double kPitchDecayTime = 50.;   // Ms
-
 using namespace iplug;
+
+inline static constexpr int kNumDrums          = 4;
+inline static constexpr tfloat kStartFreq      = 300.;  // Hz
+inline static constexpr tfloat kFreqDiff       = 100.;  // Hz
+inline static constexpr tfloat kPitchEnvRange  = 100.;  // Hz
+inline static constexpr tfloat kAmpDecayTime   = 300;   // Ms
+inline static constexpr tfloat kPitchDecayTime = 50.;   // Ms
+
 
 class DrumSynthDSP
 {
  public:
 	struct DrumVoice
 	{
-		ADSREnvelope<sample> mPitchEnv {"pitch", nullptr, false};
-		ADSREnvelope<sample> mAmpEnv {"amp", nullptr, false};
-		FastSinOscillator<sample> mOsc;
+		ADSREnvelope<tfloat> mPitchEnv {"pitch", nullptr, false};
+		ADSREnvelope<tfloat> mAmpEnv {"amp", nullptr, false};
+		FastSinOscillator<tfloat> mOsc;
 		double mBaseFreq;
 
-		DrumVoice(double baseFreq) : mBaseFreq(baseFreq)
+		DrumVoice(tfloat baseFreq) : mBaseFreq(baseFreq)
 		{
-			mAmpEnv.SetStageTime(ADSREnvelope<sample>::kAttack, 0.);
-			mAmpEnv.SetStageTime(ADSREnvelope<sample>::kDecay, kAmpDecayTime);
+			mAmpEnv.SetStageTime(ADSREnvelope<tfloat>::kAttack, 0.);
+			mAmpEnv.SetStageTime(ADSREnvelope<tfloat>::kDecay, kAmpDecayTime);
 
-			mPitchEnv.SetStageTime(ADSREnvelope<sample>::kAttack, 0.);
-			mPitchEnv.SetStageTime(ADSREnvelope<sample>::kDecay, kPitchDecayTime);
+			mPitchEnv.SetStageTime(ADSREnvelope<tfloat>::kAttack, 0.);
+			mPitchEnv.SetStageTime(ADSREnvelope<tfloat>::kDecay, kPitchDecayTime);
 		}
 
-		inline sample Process()
+		inline tfloat Process()
 		{
 			return mOsc.Process(mBaseFreq + mPitchEnv.Process()) * mAmpEnv.Process();
 		}
 
-		void Trigger(double amp)
+		void Trigger(tfloat amp)
 		{
 			mOsc.Reset();
 			mPitchEnv.Start(amp * kPitchEnvRange);
@@ -58,7 +59,7 @@ class DrumSynthDSP
 		}
 	}
 
-	void Reset(double sampleRate, int blockSize)
+	void Reset(tfloat sampleRate, int blockSize)
 	{
 		mMidiQueue.Resize(blockSize);
 		//    mMidiQueue.Resize(IMidiMsg::QueueSize(blockSize, sampleRate));

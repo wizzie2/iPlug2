@@ -17,8 +17,8 @@ using namespace Steinberg;
 using namespace Vst;
 
 IPlugVST3Controller::IPlugVST3Controller(const InstanceInfo& info, const Config& config)
-	: IPlugAPIBase(config, kAPIVST3)
-	, mPlugIsInstrument(config.plugType == EIPlugPluginType::Instrument)
+	: IPlugAPIBase(config, EPlugApi::VST3)
+	, mPlugIsInstrument(config.plugType == EPluginType::Instrument)
 	, mDoesMidiIn(config.plugDoesMidiIn)
 	, mProcessorGUID(info.mOtherGUID)
 	, IPlugVST3ControllerBase(parameters)

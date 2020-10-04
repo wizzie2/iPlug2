@@ -1011,6 +1011,9 @@ class IGraphics
 		return false;
 	}
 
+	virtual void SetBundleID(const char* bundleID) {}
+
+
 	/** Used on Windows to set the HINSTANCE module handle, which allows graphics APIs to load resources from the
 	 * binary.
 	 * @param pHinstance void pointer to the platform instance */

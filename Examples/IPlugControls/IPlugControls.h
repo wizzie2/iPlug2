@@ -1,7 +1,7 @@
 #pragma once
 
 
-const int kNumPresets = 1;
+inline constexpr int kNumPresets = 1;
 
 enum EParams
 {

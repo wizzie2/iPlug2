@@ -94,8 +94,8 @@ AAX_Result AAX_CEffectGUI_IPLUG::SetControlHighlightInfo(AAX_CParamID paramID, A
 #pragma mark IPlugAAX Construct
 
 IPlugAAX::IPlugAAX(const InstanceInfo& info, const Config& config)
-: IPlugAPIBase(config, kAPIAAX)
-, IPlugProcessor(config, kAPIAAX)
+: IPlugAPIBase(config, EPlugApi::AAX)
+, IPlugProcessor(config, EPlugApi::AAX)
 {
   Trace(TRACELOC, "%s%s", config.pluginName, config.channelIOStr);
 

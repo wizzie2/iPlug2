@@ -14,36 +14,36 @@
  */
 
 #if !defined DOXYGEN_SHOULD_SKIP_THIS
-BEGIN_INCLUDE_DEPENDENCIES
-  #if defined IGRAPHICS_GLES2
-    #define IGRAPHICS_GL
-    #if PLATFORM_IOS
-      #include <OpenGLES/ES2/gl.h>
-    #elif PLATFORM_WEB
-      #include <GLES2/gl2.h>
-    #endif
-  #elif defined IGRAPHICS_GLES3
-    #define IGRAPHICS_GL
-    #if PLATFORM_IOS
-      #include <OpenGLES/ES3/gl.h>
-    #elif PLATFORM_WEB
-      #include <GLES3/gl3.h>
-    #endif
-  #elif defined IGRAPHICS_GL2 || defined IGRAPHICS_GL3
-    #define IGRAPHICS_GL
-    #if PLATFORM_WINDOWS
-      #include <glad.h>
-    #elif PLATFORM_MAC
-      #if defined IGRAPHICS_GL2
-        #include <OpenGL/gl.h>
-      #elif defined IGRAPHICS_GL3
-        #include <OpenGL/gl3.h>
-      #endif
-    #else
-      #include <OpenGL/gl.h>
-    #endif
-  #endif
-END_INCLUDE_DEPENDENCIES
+//BEGIN_INCLUDE_DEPENDENCIES
+//  #if defined IGRAPHICS_GLES2
+//    #define IGRAPHICS_GL
+//    #if PLATFORM_IOS
+//      #include <OpenGLES/ES2/gl.h>
+//    #elif PLATFORM_WEB
+//      #include <GLES2/gl2.h>
+//    #endif
+//  #elif defined IGRAPHICS_GLES3
+//    #define IGRAPHICS_GL
+//    #if PLATFORM_IOS
+//      #include <OpenGLES/ES3/gl.h>
+//    #elif PLATFORM_WEB
+//      #include <GLES3/gl3.h>
+//    #endif
+//  #elif defined IGRAPHICS_GL2 || defined IGRAPHICS_GL3
+//    #define IGRAPHICS_GL
+//    #if PLATFORM_WINDOWS
+//      #include <glad.h>
+//    #elif PLATFORM_MAC
+//      #if defined IGRAPHICS_GL2
+//        #include <OpenGL/gl.h>
+//      #elif defined IGRAPHICS_GL3
+//        #include <OpenGL/gl3.h>
+//      #endif
+//    #else
+//      #include <OpenGL/gl.h>
+//    #endif
+//  #endif
+//END_INCLUDE_DEPENDENCIES
 
   #if defined IGRAPHICS_LICE
     #include "IGraphicsLice.h"

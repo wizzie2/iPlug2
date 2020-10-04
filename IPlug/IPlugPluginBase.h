@@ -15,10 +15,6 @@
  * @copydoc IPluginBase
  */
 
-#include "IPlugDelegate_select.h"
-#include "IPlugParameter.h"
-#include "IPlugStructs.h"
-#include "IPlugLogger.h"
 
 BEGIN_IPLUG_NAMESPACE
 
@@ -72,7 +68,7 @@ class IPluginBase : public EDITOR_DELEGATE_CLASS
 	}
 
 	/** @return The plug-in manufacturer's unique four character ID as an integer */
-	int GetMfrID() const
+	constexpr int GetMfrID() const
 	{
 		return mMfrID;
 	}
@@ -100,13 +96,13 @@ class IPluginBase : public EDITOR_DELEGATE_CLASS
 	void GetHostVersionStr(WDL_String& str) const;
 
 	/** @return The The plug-in API, see EAPI enum for a list of possible APIs */
-	EAPI GetAPI() const
+	constexpr EPlugApi GetAPI() const
 	{
-		return mAPI;
+		return EPlugApi::Native;
 	}
 
 	/** @return  Returns a CString describing the plug-in API, e.g. "VST2" */
-	const char* GetAPIStr() const;
+	constexpr const char* GetAPIStr() const;
 
 	/** @return  Returns a CString either "x86" or "x64" or "WASM" describing the binary architecture */
 	const char* GetArchStr() const;
@@ -118,9 +114,9 @@ class IPluginBase : public EDITOR_DELEGATE_CLASS
 	void GetBuildInfoStr(WDL_String& str) const;
 
 	/** @return \c true if the plug-in is meant to have a UI, as defined in config.h */
-	bool HasUI() const
+	constexpr bool HasUI() const
 	{
-		return mHasUI;
+		return Config::plugHasUI;
 	}
 
 	/** @return \c true if the plug-in allows reszing via the host's window chrome, as defined in config.h */
@@ -581,8 +577,6 @@ class IPluginBase : public EDITOR_DELEGATE_CLASS
 	int mHostVersion = 0;
 	/** Host that has been identified, see EHost enum */
 	EHost mHost = kHostUninit;
-	/** API of this instance */
-	EAPI mAPI;
 	/** macOS/iOS bundle ID */
 	WDL_String mBundleID;
 	/** Saving VST3 format presets requires this see SavePresetAsVSTPreset */
@@ -591,8 +585,6 @@ class IPluginBase : public EDITOR_DELEGATE_CLASS
 	WDL_String mVST3ProcessorUIDStr;
 	/** Saving VST3 format presets requires this see SavePresetAsVSTPreset */
 	WDL_String mVST3ControllerUIDStr;
-	/** \c true if the plug-in has a user interface. If false the host will provide a default interface */
-	bool mHasUI = false;
 	/** \c true if the host window chrome should be able to resize the plug-in UI, only applicable in certain
 	 * formats/hosts */
 	bool mHostResize = false;

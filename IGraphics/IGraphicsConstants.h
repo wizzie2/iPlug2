@@ -254,9 +254,9 @@ namespace iplug::igraphics
 	};
 
 
-	inline constexpr int DEFAULT_FPS = 25;  // TODO: default 60 FPS?
+	inline constexpr int DEFAULT_FPS = 60;  // TODO: default 60 FPS?
 
-	// If not dirty for this many timer ticks, we call OnGUIIDle.
+	// If not dirty for this many timer ticks, we call OnGUIIdle.
 	// Only looked at if USE_IDLE_CALLS is defined.
 	inline constexpr int IDLE_TICKS = 20;
 

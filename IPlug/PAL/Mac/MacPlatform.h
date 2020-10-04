@@ -55,16 +55,18 @@ namespace iplug::type
 
 //-----------------------------------------------------------------------------
 
+BEGIN_INCLUDE_DEPENDENCIES
 #include <CoreGraphics/CoreGraphics.h>
 #include <CoreFoundation/CoreFoundation.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <dirent.h>
 
-#ifndef NO_IGRAPHICS
+#if !NO_IGRAPHICS
 	#if defined IGRAPHICS_GL2
 		#include <OpenGL/gl.h>
 	#elif defined IGRAPHICS_GL3
 		#include <OpenGL/gl3.h>
 	#endif
 #endif
+END_INCLUDE_DEPENDENCIES

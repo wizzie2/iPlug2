@@ -30,7 +30,7 @@ class IPlugAPIBase : public IPluginBase
 {
 
 public:
-  IPlugAPIBase(Config config, EAPI plugAPI);
+  IPlugAPIBase(Config config, EPlugApi plugAPI);
   virtual ~IPlugAPIBase();
   
   IPlugAPIBase(const IPlugAPIBase&) = delete;

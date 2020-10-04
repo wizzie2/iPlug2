@@ -65,7 +65,7 @@ BEGIN_INCLUDE_DEPENDENCIES
 #include <WDL/wdlutf8.h>
 #include <yoga/Yoga.h>
 
-#if VST3_API || VST3C_API || VST3P_API
+#if VST3_API
 	#include <pluginterfaces/base/ibstream.h>
 	#include <pluginterfaces/base/keycodes.h>
 	#include <pluginterfaces/base/ustring.h>
@@ -94,19 +94,20 @@ END_INCLUDE_DEPENDENCIES
 #include "IPlugConstants.h"
 #include "IPlugLogger.h"
 #include "IPlugMath.h"
-#include "Extras/Easing.h"
 #include "IPlugStructs.h"
 #include "IPlugUtilities.h"
 #include "IPlugMidi.h"
-#include "IPlugParameter.h"
 #include "IPlugQueue.h"
 #include "IPlugPaths.h"
 #include "IPlugTimer.h"
+#include "IPlugParameter.h"
+#include "IPlugDelegate_select.h"
+#include "IPlugEditorDelegate.h"
 #include "IPlugPluginBase.h"
 #include "IPlugAPIBase.h"
-#include "IPlugEditorDelegate.h"
 #include "IPlugProcessor.h"
 #include "ISender.h"
+#include "Extras/Easing.h"
 #ifndef NO_IGRAPHICS
 	#include "IGraphicsConstants.h"
 	#include "IGraphicsStructs.h"
@@ -169,15 +170,15 @@ END_INCLUDE_DEPENDENCIES
 #elif WEB_API
 	#include "WEB/IPlugWeb.h"
 	#define IPLUG2_PLUGIN IPlugWeb;
-#elif VST3_API
-	#include "VST3/IPlugVST3.h"
-	#define IPLUG2_PLUGIN IPlugVST3;
 #elif VST3C_API
 	#include "VST3/IPlugVST3_Controller.h"
 	#define IPLUG2_PLUGIN IPlugVST3Controller;
 #elif VST3P_API
 	#include "VST3/IPlugVST3_Processor.h"
 	#define IPLUG2_PLUGIN IPlugVST3Processor;
+#elif VST3_API
+	#include "VST3/IPlugVST3.h"
+	#define IPLUG2_PLUGIN IPlugVST3;
 #else
 	#error "No API defined!"
 #endif

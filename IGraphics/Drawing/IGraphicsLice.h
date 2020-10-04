@@ -48,7 +48,7 @@ private:
   struct FontInfo;
   
 public:
-  IGraphicsLice(IGEditorDelegate& dlg, int w, int h, int fps, float scale);
+  IGraphicsLice(IGEditorDelegate& dlg, int w, int h, int fps = 0, float scale = 1.);
   ~IGraphicsLice();
 
   const char* GetDrawingAPIStr() override { return "LICE"; }

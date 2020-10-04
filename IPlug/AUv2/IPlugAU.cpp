@@ -1788,8 +1788,8 @@ void IPlugAU::ClearConnections()
 #pragma mark - IPlugAU Constructor
 
 IPlugAU::IPlugAU(const InstanceInfo& info, const Config& config)
-: IPlugAPIBase(config, kAPIAU)
-, IPlugProcessor(config, kAPIAU)
+: IPlugAPIBase(config, EPlugApi::AUv2)
+, IPlugProcessor(config, EPlugApi::AUv2)
 {
   Trace(TRACELOC, "%s", config.pluginName);
 

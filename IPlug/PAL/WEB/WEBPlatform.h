@@ -47,9 +47,8 @@ BEGIN_INCLUDE_DEPENDENCIES
 #include <emscripten/val.h>
 #include <emscripten/bind.h>
 #include <emscripten/html5.h>
-END_INCLUDE_DEPENDENCIES
 
-#ifndef NO_IGRAPHICS
+#if !NO_IGRAPHICS
 	#if defined IGRAPHICS_GLES2
 		#include <GLES2/gl2.h>
 	#elif defined IGRAPHICS_GLES3
@@ -58,3 +57,4 @@ END_INCLUDE_DEPENDENCIES
 		#include <OpenGL/gl.h>
 	#endif
 #endif
+END_INCLUDE_DEPENDENCIES

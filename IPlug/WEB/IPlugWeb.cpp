@@ -25,7 +25,7 @@ static const int kNumSSMFUIBytes = 10; // + data size
 static const int kNumSAMFUIBytes = 18; // + data size
 
 IPlugWeb::IPlugWeb(const InstanceInfo& info, const Config& config)
-: IPlugAPIBase(config, kAPIWEB)
+: IPlugAPIBase(config, EPlugApi::WEB)
 {
   mSPVFUIBuf.Resize(kNumSPVFUIBytes); memcpy(mSPVFUIBuf.GetData(), "SPVFUI", kNumMsgHeaderBytes);
   mSMMFUIBuf.Resize(kNumSMMFUIBytes); memcpy(mSMMFUIBuf.GetData(), "SMMFUI", kNumMsgHeaderBytes);

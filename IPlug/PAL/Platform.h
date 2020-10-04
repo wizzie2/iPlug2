@@ -43,7 +43,7 @@ namespace iplug::generic
 		using utf16  = char16_t;
 		using utf32  = char32_t;
 		using size_t = std::size_t;
-		using tfloat = IPLUG2_TFLOAT_TYPE;
+		using tfloat = PLUG_TFLOAT_TYPE;
 	};
 }  // namespace iplug::generic
 
@@ -245,39 +245,40 @@ namespace iplug
 		VST2,
 		VST3,
 		AAX,
-		AUV2,
-		AUV3,
+		AUv2,
+		AUv3,
 		WAM,
 		WEB,
 		Native = 
-			#if defined APP_API
+			#if APP_API
 				APP
-			#elif defined VST2_API
+			#elif VST2_API
 				VST2
-			#elif defined VST3_API || defined VST3C_API || defined VST3P_API
+			#elif VST3_API
 				VST3
-			#elif defined AAX_API
+			#elif AAX_API
 				AAX
-			#elif defined AUV2_API
-				AUV2
-			#elif defined AUV3_API
-				AUV3
-			#elif defined WAM_API
+			#elif AUV2_API
+				AUv2
+			#elif AUV3_API
+				AUv3
+			#elif WAM_API
 				WAM
-			#elif defined WEB_API
+			#elif WEB_API
 				WEB
 			#endif
 		// clang-format on
 	};
+
 	enum class EPlugApiState
 	{   // clang-format off
 		None,
 		Controller,
 		Processor,
 		Native = 
-			#if defined VST3C_API
+			#if VST3C_API || WEB_API
 				Controller
-			#elif defined VST3P_API
+			#elif VST3P_API || WAM_API
 				Processor
 			#else
 				None
@@ -288,6 +289,7 @@ namespace iplug
 }  // namespace iplug
 
 // Cleanup, but keeping PLATFORM_NAME & PLATFORM_<ID>
+#undef PLUG_TFLOAT_TYPE
 #undef PLATFORM_CACHE_LINE_SIZE
 #undef PLATFORM_LITTLE_ENDIAN
 #undef PLATFORM_64BIT

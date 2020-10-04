@@ -30,7 +30,7 @@ class IPlugProcessor
 	/** IPlugProcessor constructor
    * @param config /todo
    * @param plugAPI /todo */
-	IPlugProcessor(const Config& config, EAPI plugAPI);
+	IPlugProcessor(const Config& config, EPlugApi plugAPI);
 	virtual ~IPlugProcessor();
 
 	IPlugProcessor(const IPlugProcessor&) = delete;
@@ -248,13 +248,13 @@ class IPlugProcessor
 	/** @return \c true if the plug-in was configured as an instrument at compile time */
 	bool IsInstrument() const
 	{
-		return mPlugType == EIPlugPluginType::Instrument;
+		return mPlugType == EPluginType::Instrument;
 	}
 
 	/** @return \c true if the plug-in was configured as an MFX at compile time */
 	bool IsMidiEffect() const
 	{
-		return mPlugType == EIPlugPluginType::MIDIEffect;
+		return mPlugType == EPluginType::MIDIEffect;
 	}
 
 	/** @return int The 4Char identifier for the type of audiounit plugin, e.g. 'aufx' for an effect audiounit */
@@ -355,8 +355,8 @@ class IPlugProcessor
 	}
 
  private:
-	/** See EIPlugPluginTypes */
-	EIPlugPluginType mPlugType;
+	/** See EPluginTypes */
+	EPluginType mPlugType;
 	/** \c true if the plug-in accepts MIDI input */
 	bool mDoesMIDIIn;
 	/** \c true if the plug-in produces MIDI output */

@@ -817,6 +817,7 @@ IGraphicsWin::IGraphicsWin(IGEditorDelegate& dlg, int w, int h, int fps, float s
 	fontStorage.Retain();
 	hfontStorage.Retain();
 
+	// TODO: IGRAPHICS_DISABLE_VSYNC should not be a compile-time option
 #ifndef IGRAPHICS_DISABLE_VSYNC
 	mVSYNCEnabled = IsWindows8OrGreater();
 #endif

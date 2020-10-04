@@ -3,7 +3,7 @@
 #include "IconsForkAwesome.h"
 #include "IconsFontaudio.h"
 
-IPlugControls::IPlugControls(const InstanceInfo& info) : Plugin(info, MakeConfig(kNumParams, kNumPresets))
+IPlugControls::IPlugControls(const InstanceInfo& info) : Plugin(info, Config(kNumParams, kNumPresets))
 {
 	GetParam(kParamGain)->InitDouble("Gain", 100., 0., 100.0, 0.01, "%");
 	GetParam(kParamMode)->InitEnum("Mode", 0, 4, "", IParam::kFlagsNone, "", "one", "two", "three", "four");
@@ -14,13 +14,13 @@ IPlugControls::IPlugControls(const InstanceInfo& info) : Plugin(info, MakeConfig
 
 #if IPLUG_EDITOR  // http://bit.ly/2S64BDd
 	mMakeGraphicsFunc = [&]() {
-		return MakeGraphics(*this, PLUG_WIDTH, PLUG_HEIGHT, PLUG_FPS, GetScaleForScreen(PLUG_HEIGHT));
+		return MakeGraphics(*this);
 	};
 
 	mLayoutFunc = [&](IGraphics* pGraphics) {
 		if (pGraphics->NControls())
 		{
-			//Could handle new layout here
+			// Could handle new layout here
 			return;
 		}
 
@@ -33,9 +33,9 @@ IPlugControls::IPlugControls(const InstanceInfo& info) : Plugin(info, MakeConfig
 		pGraphics->AttachPanelBackground(mBGControlPattern);
 		pGraphics->AttachTextEntryControl();
 
-	#if !PLATFORM_IOS
-		pGraphics->AttachPopupMenuControl(DEFAULT_LABEL_TEXT);
-	#endif
+		if constexpr (EPlatform::Native != EPlatform::iOS)
+			pGraphics->AttachPopupMenuControl(DEFAULT_LABEL_TEXT);
+
 		pGraphics->AttachBubbleControl();
 
 		IRECT b = pGraphics->GetBounds().GetPadded(-5);
@@ -157,7 +157,7 @@ IPlugControls::IPlugControls(const InstanceInfo& info) : Plugin(info, MakeConfig
 			kNoTag,
 			"misccontrols");
 
-		//pGraphics->AttachControl(new IVGroupControl("Misc Controls", "misccontrols", 5.f, 35.f, 10.f, 15.f));
+		// pGraphics->AttachControl(new IVGroupControl("Misc Controls", "misccontrols", 5.f, 35.f, 10.f, 15.f));
 
 	#pragma mark IBControls -
 
@@ -198,7 +198,7 @@ IPlugControls::IPlugControls(const InstanceInfo& info) : Plugin(info, MakeConfig
 													 EDirection::Vertical),
 								 kNoTag,
 								 "bcontrols");
-		//pGraphics->AttachControl(new IVGroupControl("Bitmap Controls", "bcontrols", 10.f, 30.f, 30.f, 10.f));
+		// pGraphics->AttachControl(new IVGroupControl("Bitmap Controls", "bcontrols", 10.f, 30.f, 30.f, 10.f));
 		AddLabel("IBTextControl");
 		pGraphics->AttachControl(
 			new IBTextControl(sameCell(), bitmapText, DEFAULT_LABEL_TEXT, "HELLO", 10, 16, 0, false));
@@ -217,7 +217,7 @@ IPlugControls::IPlugControls(const InstanceInfo& info) : Plugin(info, MakeConfig
 								 kNoTag,
 								 "svgcontrols");
 
-		//pGraphics->AttachControl(new IVGroupControl("SVG Controls", "svgcontrols", 10.f, 30.f, 10.f, 10.f));
+		// pGraphics->AttachControl(new IVGroupControl("SVG Controls", "svgcontrols", 10.f, 30.f, 10.f, 10.f));
 
 	#pragma mark IVControls -
 
@@ -423,7 +423,8 @@ IPlugControls::IPlugControls(const InstanceInfo& info) : Plugin(info, MakeConfig
 		//    AddLabel("IWebViewControl");
 		//
 		//    auto readyFunc = [](IWebViewControl* pCaller){
-		//      pCaller->LoadHTML(R"(<input type="range" id="vol" name="vol" min="0" max="100" onchange='IPlugSendMsg({"msg":"SAMFUI"})'>)");
+		//      pCaller->LoadHTML(R"(<input type="range" id="vol" name="vol" min="0" max="100"
+		//      onchange='IPlugSendMsg({"msg":"SAMFUI"})'>)");
 		//    };
 		//
 		//    auto msgFunc = [](IWebViewControl* pCaller, const char* json){
@@ -431,13 +432,16 @@ IPlugControls::IPlugControls(const InstanceInfo& info) : Plugin(info, MakeConfig
 		//      pCaller->GetUI()->GetBackgroundControl()->As<IPanelControl>()->SetPattern(IColor::GetRandomColor());
 		//    };
 		//
-		//    pGraphics->AttachControl(new IWebViewControl(b.GetCentredInside(200), false, readyFunc, msgFunc, "C:\\Users\\oli\\Dev\\iPlug2\\Examples\\IPlugControls\\WebView2Loader.dll", "C:\\Users\\oli\\Dev\\iPlug2\\Examples\\IPlugControls\\"));
+		//    pGraphics->AttachControl(new IWebViewControl(b.GetCentredInside(200), false, readyFunc, msgFunc,
+		//    "C:\\Users\\oli\\Dev\\iPlug2\\Examples\\IPlugControls\\WebView2Loader.dll",
+		//    "C:\\Users\\oli\\Dev\\iPlug2\\Examples\\IPlugControls\\"));
 
-		//    pGraphics->AttachControl(new IVButtonControl(b.GetFromTRHC(50, 50)))->SetAnimationEndActionFunction([b](IControl* pCaller){
+		//    pGraphics->AttachControl(new IVButtonControl(b.GetFromTRHC(50,
+		//    50)))->SetAnimationEndActionFunction([b](IControl* pCaller){
 		//      /* TODO: get webview control */->EvaluateJavaScript(R"(document.body.style.background = "#000";)");
 		//    });
 
-		//pGraphics->AttachControl(new IVGroupControl("Vector Controls", "vcontrols", 10.f, 30.f, 10.f, 10.f));
+		// pGraphics->AttachControl(new IVGroupControl("Vector Controls", "vcontrols", 10.f, 30.f, 10.f, 10.f));
 
 		AddLabel("ILambdaControl");
 		pGraphics->AttachControl(new ILambdaControl(
@@ -492,12 +496,23 @@ IPlugControls::IPlugControls(const InstanceInfo& info) : Plugin(info, MakeConfig
 
 							switch (slider)
 							{
-								case 0: vcontrol.SetWidgetFrac(val); break;
-								case 1: vcontrol.SetRoundness(val); break;
-								case 2: vcontrol.SetShadowOffset(val * 5.f); break;
-								case 3: vcontrol.SetFrameThickness(val * 5.f); break;
-								case 4: vcontrol.SetAngle(val * 360.f); break;
-								default: break;
+								case 0:
+									vcontrol.SetWidgetFrac(val);
+									break;
+								case 1:
+									vcontrol.SetRoundness(val);
+									break;
+								case 2:
+									vcontrol.SetShadowOffset(val * 5.f);
+									break;
+								case 3:
+									vcontrol.SetFrameThickness(val * 5.f);
+									break;
+								case 4:
+									vcontrol.SetAngle(val * 360.f);
+									break;
+								default:
+									break;
 							}
 						});
 					},
@@ -527,12 +542,23 @@ IPlugControls::IPlugControls(const InstanceInfo& info) : Plugin(info, MakeConfig
 
 						switch (toggle)
 						{
-							case 0: vcontrol.SetDrawFrame(val); break;
-							case 1: vcontrol.SetDrawShadows(val); break;
-							case 2: vcontrol.SetEmboss(val); break;
-							case 3: vcontrol.SetShowLabel(val); break;
-							case 4: vcontrol.SetShowValue(val); break;
-							default: break;
+							case 0:
+								vcontrol.SetDrawFrame(val);
+								break;
+							case 1:
+								vcontrol.SetDrawShadows(val);
+								break;
+							case 2:
+								vcontrol.SetEmboss(val);
+								break;
+							case 3:
+								vcontrol.SetShowLabel(val);
+								break;
+							case 4:
+								vcontrol.SetShowValue(val);
+								break;
+							default:
+								break;
 						}
 					});
 				},
@@ -583,7 +609,8 @@ IPlugControls::IPlugControls(const InstanceInfo& info) : Plugin(info, MakeConfig
 							else
 								pGraphics->AttachPopupMenuControl();
 							break;
-						default: break;
+						default:
+							break;
 					}
 				},
 				label,
@@ -777,15 +804,19 @@ void IPlugControls::OnMidiMsgUI(const IMidiMsg& msg)
 	{
 		switch (msg.StatusMsg())
 		{
-			case iplug::IMidiMsg::EStatusMsg::kNoteOn: FlashBlueLED(); break;
-			default: break;
+			case iplug::IMidiMsg::EStatusMsg::kNoteOn:
+				FlashBlueLED();
+				break;
+			default:
+				break;
 		}
 	}
 }
 
 void IPlugControls::OnUIClose()
 {
-	// store the background pattern. No modifications to other controls are stored, and this would also need to be serialized in plugin state, for recall!
+	// store the background pattern. No modifications to other controls are stored, and this would also need to be
+	// serialized in plugin state, for recall!
 	mBGControlPattern = GetUI()->GetBackgroundControl()->As<IPanelControl>()->GetPattern();
 }
 

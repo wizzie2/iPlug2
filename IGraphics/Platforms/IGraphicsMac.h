@@ -20,10 +20,10 @@ BEGIN_IGRAPHICS_NAMESPACE
 class IGraphicsMac final : public IGRAPHICS_DRAW_CLASS
 {
 public:
-  IGraphicsMac(IGEditorDelegate& dlg, int w, int h, int fps, float scale);
+  IGraphicsMac(IGEditorDelegate& dlg, int w, int h, int fps = 0, float scale = 1.);
   virtual ~IGraphicsMac();
 
-  void SetBundleID(const char* bundleID) { mBundleID.Set(bundleID); }
+  void SetBundleID(const char* bundleID) override { mBundleID.Set(bundleID); }
 
   void* OpenWindow(void* pWindow) override;
   void CloseWindow() override;

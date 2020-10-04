@@ -114,7 +114,7 @@ public:
     mStage = kAttack;
     mEnvValue = 0.;
     mLevel = level;
-    mScalar = 1./timeScalar;
+    mScalar = 1/timeScalar;
     mReleased = false;
   }
 
@@ -218,7 +218,7 @@ public:
         break;
       case kDecay:
         mEnvValue -= ((mDecayIncr*mEnvValue) * mScalar);
-        result = (mEnvValue * (1.-sustainLevel)) + sustainLevel;
+        result = (mEnvValue * (1-sustainLevel)) + sustainLevel;
         if (mEnvValue < ENV_VALUE_LOW)
         {
           if(mSustainEnabled)
@@ -289,7 +289,7 @@ private:
   inline T CalcIncrFromTimeLinear(T timeMS, T sr) const
   {
     if (timeMS <= 0.) return 0.;
-    else return (1./sr) / (timeMS/1000.);
+    else return (1/sr) / (timeMS/1000);
   }
   
   inline T CalcIncrFromTimeExp(T timeMS, T sr) const
@@ -299,7 +299,7 @@ private:
     if (timeMS <= 0.0) return 0.;
     else
     {
-      r = -std::expm1(1000.0 * std::log(0.001) / (sr * timeMS));
+      r = -std::expm1(1000 * std::log(0.001f) / (sr * timeMS));
       if (!(r < 1.0)) r = 1.0;
       
       return r;

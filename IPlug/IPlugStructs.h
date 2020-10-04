@@ -1,10 +1,10 @@
 /*
  ==============================================================================
- 
- This file is part of the iPlug 2 library. Copyright (C) the iPlug 2 developers. 
- 
+
+ This file is part of the iPlug 2 library. Copyright (C) the iPlug 2 developers.
+
  See LICENSE.txt for  more info.
- 
+
  ==============================================================================
 */
 
@@ -29,7 +29,8 @@ namespace iplug
 		ParamTuple(int idx = kNoParameter, double value = 0.) : idx(idx), value(value) {}
 	};
 
-	/** This structure is used when queueing Sysex messages. You may need to set MAX_SYSEX_SIZE to reflect the max sysex payload in bytes */
+	/** This structure is used when queueing Sysex messages. You may need to set MAX_SYSEX_SIZE to reflect the max sysex
+	 * payload in bytes */
 	struct SysExData
 	{
 		SysExData(int offset = 0, int size = 0, const void* pData = 0) : mOffset(offset), mSize(size)
@@ -56,7 +57,8 @@ namespace iplug
 		 * @param pDst The destination buffer
 		 * @param nBytesToCopy The number of bytes to copy from pSrc
 		 * @param startPos The starting position in bytes in pSrc
-		 * @return int The end position in bytes after the copy, or -1 if the copy would have copied more data than in the src buffer  */
+		 * @return int The end position in bytes after the copy, or -1 if the copy would have copied more data than in
+		 * the src buffer  */
 		static inline int GetBytes(const uint8_t* pSrc, int srcSize, void* pDst, int nBytesToCopy, int startPos)
 		{
 			int endPos = startPos + nBytesToCopy;
@@ -73,7 +75,8 @@ namespace iplug
 		 * @param dstSize The size of the source data in bytes
 		 * @param str WDL_String to fill with the extracted string
 		 * @param startPos The starting position in bytes in pSrc
-		 * @return int The end position in bytes after the copy, or -1 if the copy would have copied more data than in the src buffer  */
+		 * @return int The end position in bytes after the copy, or -1 if the copy would have copied more data than in
+		 * the src buffer  */
 		static inline int GetStr(const uint8_t* pSrc, int srcSize, WDL_String& str, int startPos)
 		{
 			int len;
@@ -98,17 +101,18 @@ namespace iplug
 	/** Manages a block of memory, for plug-in settings store/recall */
 	class IByteChunk : private IByteGetter
 	{
-	  private:
+	 private:
 		// Version for IByteChunk serialization
 		// Even if IPLUG_VERSION changes, this can still get the correct data
 		static constexpr uint32 mVersion      = 0x010000;
 		static constexpr uint32 mVersionMagic = 'pfft';
 
-	  public:
+	 public:
 		IByteChunk() {}
 		~IByteChunk() {}
 
-		/** This method is used in order to place the IPlug version number in the chunk when serialising data. In theory this is for backwards compatibility.
+		/** This method is used in order to place the IPlug version number in the chunk when serialising data. In theory
+		 * this is for backwards compatibility.
 		 * @param chunk reference to the chunk where the version number will be placed */
 		static void InitChunkWithIPlugVer(IByteChunk& chunk)
 		{
@@ -148,7 +152,8 @@ namespace iplug
 		 * @param pDst The destination buffer
 		 * @param nBytesToCopy The number of bytes to copy from the chunk
 		 * @param startPos The starting position in bytes in the chunk
-		 * @return int The end position in the chunk (in bytes) after the copy, or -1 if the copy would have copied more data than in the chunk  */
+		 * @return int The end position in the chunk (in bytes) after the copy, or -1 if the copy would have copied more
+		 * data than in the chunk  */
 		inline int GetBytes(void* pDst, int nBytesToCopy, int startPos) const
 		{
 			return IByteGetter::GetBytes(mBytes.Get(), Size(), pDst, nBytesToCopy, startPos);
@@ -168,7 +173,8 @@ namespace iplug
 		 * @tparam T The type of data to be extracted
 		 * @param pDst Ptr to the destination where the data will be extracted
 		 * @param startPos The starting position in bytes in the chunk
-		 * @return int The end position in the chunk (in bytes) after the copy, or -1 if the copy would have copied  more data than in the chunk  */
+		 * @return int The end position in the chunk (in bytes) after the copy, or -1 if the copy would have copied
+		 * more data than in the chunk  */
 		template <class T>
 		inline int Get(T* pDst, int startPos) const
 		{
@@ -188,7 +194,8 @@ namespace iplug
 		/** Get a string from the IByteChunk
 		 * @param str WDL_String to fill
 		 * @param startPos The starting position in bytes in the chunk
-		 * @return int The end position in the chunk (in bytes) after the copy, or -1 if the copy would have copied  more data than in the chunk  */
+		 * @return int The end position in the chunk (in bytes) after the copy, or -1 if the copy would have copied
+		 * more data than in the chunk  */
 		inline int GetStr(WDL_String& str, int startPos) const
 		{
 			return IByteGetter::GetStr(mBytes.Get(), Size(), str, startPos);
@@ -251,14 +258,14 @@ namespace iplug
 			return (otherChunk.Size() == Size() && !memcmp(otherChunk.mBytes.Get(), mBytes.Get(), Size()));
 		}
 
-	  private:
+	 private:
 		WDL_TypedBuf<uint8_t> mBytes;
 	};
 
 	/** Manages a non-owned block of memory, for receiving arbitrary message byte streams */
 	class IByteStream : private IByteGetter
 	{
-	  public:
+	 public:
 		IByteStream(const void* pData, int dataSize) : mBytes(reinterpret_cast<const uint8_t*>(pData)), mSize(dataSize)
 		{
 		}
@@ -268,7 +275,8 @@ namespace iplug
 		 * @param pDst The destination buffer
 		 * @param nBytesToCopy The number of bytes to copy from the stream
 		 * @param startPos The starting position in bytes in the stream
-		 * @return int The end position in the stream (in bytes) after the copy, or -1 if the copy would have copied more data than in the stream  */
+		 * @return int The end position in the stream (in bytes) after the copy, or -1 if the copy would have copied
+		 * more data than in the stream  */
 		inline int GetBytes(void* pDst, int nBytesToCopy, int startPos) const
 		{
 			return IByteGetter::GetBytes(mBytes, Size(), pDst, nBytesToCopy, startPos);
@@ -278,7 +286,8 @@ namespace iplug
 		 * @tparam T The type of data to be extracted
 		 * @param pDst Ptr to the destination where the data will be extracted
 		 * @param startPos The starting position in bytes in the stream
-		 * @return int The end position in the stream (in bytes) after the copy, or -1 if the copy would have copied  more data than in the stream  */
+		 * @return int The end position in the stream (in bytes) after the copy, or -1 if the copy would have copied
+		 * more data than in the stream  */
 		template <class T>
 		inline int Get(T* pDst, int startPos) const
 		{
@@ -288,7 +297,8 @@ namespace iplug
 		/** Get a string from the stream
 		 * @param str WDL_String to fill
 		 * @param startPos The starting position in bytes in the stream
-		 * @return int The end position in the stream (in bytes) after the copy, or -1 if the copy would have copied  more data than in the stream  */
+		 * @return int The end position in the stream (in bytes) after the copy, or -1 if the copy would have copied
+		 * more data than in the stream  */
 		inline int GetStr(WDL_String& str, int startPos) const
 		{
 			return IByteGetter::GetStr(mBytes, Size(), str, startPos);
@@ -316,7 +326,7 @@ namespace iplug
 			return mBytes;
 		}
 
-	  private:
+	 private:
 		const uint8_t* mBytes;
 		int mSize;
 	};
@@ -324,7 +334,7 @@ namespace iplug
 	/** Helper class to maintain a read position whilst extracting data from an IByteChunk  */
 	class IByteChunkReader
 	{
-	  public:
+	 public:
 		IByteChunkReader(const IByteChunk& chunk, int startPos = 0) : mChunk(chunk), mPos(startPos) {}
 
 		/** Copy \c nBytesToCopy bytes from the managed IByteChunk into \c pBuf .
@@ -371,7 +381,7 @@ namespace iplug
 			mPos = pos;
 		}
 
-	  private:
+	 private:
 		const IByteChunk& mChunk;
 		int mPos;
 	};
@@ -379,82 +389,39 @@ namespace iplug
 	/** Helper struct to set compile time options to an API class constructor  */
 	struct Config
 	{
-		int nParams;
-		int nPresets;
-		const char* channelIOStr;
-		const char* pluginName;
-		const char* productName;
-		const char* mfrName;
-		int vendorVersion;
-		int uniqueID;
-		int mfrID;
-		int latency;
-		bool plugDoesMidiIn;
-		bool plugDoesMidiOut;
-		bool plugDoesMPE;
-		bool plugDoesChunks;
-		EIPlugPluginType plugType;
-		bool plugHasUI;
-		int plugWidth;
-		int plugHeight;
-		int plugMinWidth;
-		int plugMaxWidth;
-		int plugMinHeight;
-		int plugMaxHeight;
-		bool plugHostResize;
-		const char* bundleID;
+		const int nParams;
+		const int nPresets;
 
-		Config(int nParams,
-			   int nPresets,
-			   const char* channelIOStr,
-			   const char* pluginName,
-			   const char* productName,
-			   const char* mfrName,
-			   int vendorVersion,
-			   int uniqueID,
-			   int mfrID,
-			   int latency,
-			   bool plugDoesMidiIn,
-			   bool plugDoesMidiOut,
-			   bool plugDoesMPE,
-			   bool plugDoesChunks,
-			   EIPlugPluginType plugType,
-			   bool plugHasUI,
-			   int plugWidth,
-			   int plugHeight,
-			   bool plugHostResize,
-			   int plugMinWidth,
-			   int plugMaxWidth,
-			   int plugMinHeight,
-			   int plugMaxHeight,
-			   const char* bundleID)
-		  : nParams(nParams),
-			nPresets(nPresets),
-			channelIOStr(channelIOStr),
-			pluginName(pluginName),
-			productName(productName),
-			mfrName(mfrName),
-			vendorVersion(vendorVersion),
-			uniqueID(uniqueID),
-			mfrID(mfrID),
-			latency(latency),
-			plugDoesMidiIn(plugDoesMidiIn),
-			plugDoesMidiOut(plugDoesMidiOut),
-			plugDoesMPE(plugDoesMPE),
-			plugDoesChunks(plugDoesChunks),
-			plugType(plugType),
-			plugHasUI(plugHasUI),
-			plugWidth(plugWidth),
-			plugHeight(plugHeight),
-			plugMinWidth(plugMinWidth),
-			plugMaxWidth(plugMaxWidth),
-			plugMinHeight(plugMinHeight),
-			plugMaxHeight(plugMaxHeight),
-			plugHostResize(plugHostResize),
-			bundleID(bundleID) {};
+		static constexpr EPluginType plugType               = EPluginType::PLUG_TYPE;
+		static constexpr const char* channelIOStr           = PLUG_CHANNEL_IO;
+		static constexpr const char* pluginName             = PLUG_NAME;
+		static constexpr const char* productName            = "";
+		static constexpr const char* mfrName                = PLUG_MFR;
+		static constexpr int vendorVersion                  = PLUG_VERSION_HEX;
+		static constexpr int uniqueID                       = PLUG_UNIQUE_ID;
+		static constexpr int mfrID                          = PLUG_MFR_ID;
+		static constexpr int latency                        = PLUG_LATENCY;
+		static constexpr bool plugDoesMidiIn                = PLUG_DOES_MIDI_IN;
+		static constexpr bool plugDoesMidiOut               = PLUG_DOES_MIDI_OUT;
+		static constexpr bool plugDoesMPE                   = PLUG_DOES_MPE;
+		static constexpr bool plugDoesChunks                = PLUG_DOES_STATE_CHUNKS;
+		static constexpr bool plugHasUI                     = PLUG_HAS_UI;
+		static constexpr int plugFPS                        = PLUG_FPS;
+		static constexpr int plugWidth                      = PLUG_WIDTH;
+		static constexpr int plugHeight                     = PLUG_HEIGHT;
+		static constexpr int plugMinWidth                   = PLUG_MIN_WIDTH;
+		static constexpr int plugMaxWidth                   = PLUG_MAX_WIDTH;
+		static constexpr int plugMinHeight                  = PLUG_MIN_HEIGHT;
+		static constexpr int plugMaxHeight                  = PLUG_MAX_HEIGHT;
+		static constexpr bool plugHostResize                = PLUG_HOST_RESIZE;
+		static constexpr const char* bundleID               = BUNDLE_ID;
+		static constexpr const char* sharedResourcesSubpath = SHARED_RESOURCES_SUBPATH;
+
+		explicit Config(int nParams, int nPresets) : nParams(nParams), nPresets(nPresets) {};
 	};
 
-	/** Used to manage scratch buffers for each channel of I/O, which may involve converting from single to double precision */
+	/** Used to manage scratch buffers for each channel of I/O, which may involve converting from single to double
+	 * precision */
 	template <class TIN = PLUG_SAMPLE_SRC, class TOUT = PLUG_SAMPLE_DST>
 	struct IChannelData
 	{
@@ -472,7 +439,7 @@ namespace iplug
 	/** Used to manage information about a bus such as whether it's an input or output, channel count */
 	class IBusInfo
 	{
-	  public:
+	 public:
 		IBusInfo(ERoute direction, int nchans = 0) : mDirection(direction), mNChans(nchans) {}
 
 		int NChans() const
@@ -485,7 +452,7 @@ namespace iplug
 			return mDirection;
 		}
 
-	  private:
+	 private:
 		ERoute mDirection;
 		int mNChans;
 	};
@@ -502,7 +469,7 @@ namespace iplug
 			mBusInfo[1].Empty(true);
 		}
 
-		/** /todo 
+		/** /todo
 		 * @param direction /todo
 		 * @param NChans /todo
 		 * @param label /todo */
@@ -521,7 +488,7 @@ namespace iplug
 			return mBusInfo[direction].Get(index);
 		}
 
-		/** /todo 
+		/** /todo
 		 * @param direction /todo
 		 * @param index /todo
 		 * @return int /todo */
@@ -535,7 +502,7 @@ namespace iplug
 			return NChans;
 		}
 
-		/** /todo  
+		/** /todo
 		 * @param direction /todo
 		 * @return int /todo */
 		int NBuses(ERoute direction) const
@@ -556,7 +523,7 @@ namespace iplug
 			return total;
 		}
 
-		/** /todo  
+		/** /todo
 		 * @param direction /todo
 		 * @return true /todo
 		 * @return false /todo */

@@ -120,8 +120,8 @@ static int VSTKeyCodeToVK(int code, int ascii)
 }
 
 IPlugVST2::IPlugVST2(const InstanceInfo& info, const Config& config)
-  : IPlugAPIBase(config, kAPIVST2)
-  , IPlugProcessor(config, kAPIVST2)
+  : IPlugAPIBase(config, EPlugApi::VST2)
+  , IPlugProcessor(config, EPlugApi::VST2)
   , mHostCallback(info.mVSTHostCallback)
 {
   Trace(TRACELOC, "%s", config.pluginName);
@@ -151,7 +151,7 @@ IPlugVST2::IPlugVST2(const InstanceInfo& info, const Config& config)
 
   if (config.plugDoesChunks) { mAEffect.flags |= effFlagsProgramChunks; }
   if (LegalIO(1, -1)) { mAEffect.flags |= __effFlagsCanMonoDeprecated; }
-  if (config.plugType == EIPlugPluginType::Instrument) { mAEffect.flags |= effFlagsIsSynth; }
+  if (config.plugType == EPluginType::Instrument) { mAEffect.flags |= effFlagsIsSynth; }
 
   memset(&mEditRect, 0, sizeof(ERect));
   memset(&mInputSpkrArr, 0, sizeof(VstSpeakerArrangement));

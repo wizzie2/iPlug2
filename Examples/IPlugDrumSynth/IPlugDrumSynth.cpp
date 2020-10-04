@@ -50,13 +50,13 @@ class DrumPadControl : public IControl, public IVectorBase
 };
 #endif
 
-IPlugDrumSynth::IPlugDrumSynth(const InstanceInfo& info) : Plugin(info, MakeConfig(kNumParams, kNumPresets))
+IPlugDrumSynth::IPlugDrumSynth(const InstanceInfo& info) : Plugin(info, Config(kNumParams, kNumPresets))
 {
 	GetParam(kParamGain)->InitDouble("Gain", 100., 0., 100.0, 0.01, "%");
 	GetParam(kParamMultiOuts)->InitBool("Multi-outs", false);
 #if IPLUG_EDITOR  // http://bit.ly/2S64BDd
 	mMakeGraphicsFunc = [&]() {
-		return MakeGraphics(*this, PLUG_WIDTH, PLUG_HEIGHT, PLUG_FPS, 1.);
+		return MakeGraphics(*this);
 	};
 
 	mLayoutFunc = [&](IGraphics* pGraphics) {
@@ -125,7 +125,7 @@ void IPlugDrumSynth::GetBusName(ERoute direction, int busIdx, int nBuses, WDL_St
 
 void IPlugDrumSynth::ProcessBlock(sample** inputs, sample** outputs, int nFrames)
 {
-	const double gain = GetParam(kParamGain)->Value() / 100.;
+	const tfloat gain = static_cast<tfloat>(GetParam(kParamGain)->Value() / 100.);
 	const int nChans  = NOutChansConnected();
 
 	mDSP.ProcessBlock(outputs, nFrames);
@@ -147,7 +147,7 @@ void IPlugDrumSynth::OnIdle()
 
 void IPlugDrumSynth::OnReset()
 {
-	mDSP.Reset(GetSampleRate(), GetBlockSize());
+	mDSP.Reset(static_cast<tfloat>(GetSampleRate()), GetBlockSize());
 }
 
 void IPlugDrumSynth::ProcessMidiMsg(const IMidiMsg& msg)

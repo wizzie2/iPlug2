@@ -28,7 +28,7 @@ BEGIN_IGRAPHICS_NAMESPACE
 class IGraphicsPathBase : public IGraphics
 {
 public:
-  IGraphicsPathBase(IGEditorDelegate& dlg, int w, int h, int fps, float scale)
+  IGraphicsPathBase(IGEditorDelegate& dlg, int w, int h, int fps = 0, float scale = 1.)
   : IGraphics(dlg, w, h, fps, scale) 
   {}
 

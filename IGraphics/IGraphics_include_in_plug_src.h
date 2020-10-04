@@ -10,73 +10,55 @@
 
 #pragma once
 
-#ifndef __IGRAPHICS_SRC_INC__
-#define __IGRAPHICS_SRC_INC__
 
 /**
- * @file IGraphics_include_in_plug_hdr.h
+ * @file IGraphics_include_in_plug_src.h
  * @brief IGraphics source include
  * Include this file in the main cpp file if using IGraphics outside a plugin context
  */
 
-#ifndef NO_IGRAPHICS
+#if PLATFORM_WINDOWS
+	#define IGRAPHICS IGraphicsWin
+#elif PLATFORM_MAC
+	#define IGRAPHICS IGraphicsMac
+#elif PLATFORM_IOS
+	#define IGRAPHICS IGraphicsIOS
+#elif PLATFORM_WEB
+	#define IGRAPHICS IGraphicsWeb
+#endif
 
-  #if PLATFORM_WEB
+IGRAPHICS* gGraphics = nullptr;
+extern void* gHINSTANCE;
 
-  #include <emscripten.h>
+#if PLATFORM_WEB
+void StartMainLoopTimer()
+{
+	IGraphicsWeb* pGraphics = gGraphics;
+	emscripten_set_main_loop(pGraphics->OnMainLoopTimer, 0 /*pGraphics->FPS()*/, 1);
+}
+#endif
 
-  iplug::igraphics::IGraphicsWeb* gGraphics = nullptr;
+namespace iplug::igraphics
+{
+	IGRAPHICS* MakeGraphics(IGEditorDelegate& dlg,
+							int w   = Config::plugWidth,
+							int h   = Config::plugHeight,
+							int fps = Config::plugFPS)
+	{
+		IGRAPHICS* pGraphics = new IGRAPHICS(dlg, w, h, fps);
+		pGraphics->SetWinModuleHandle(gHINSTANCE);
+		pGraphics->SetBundleID(Config::bundleID);
+		pGraphics->SetSharedResourcesSubPath(Config::sharedResourcesSubpath);
+		if constexpr (EPlatform::Native == EPlatform::Web)
+		{
+			gGraphics = pGraphics;
+			return gGraphics;
+		}
+		else
+			return pGraphics;
+	}
 
-  void StartMainLoopTimer()
-  {
-    iplug::igraphics::IGraphicsWeb* pGraphics = gGraphics;
-    emscripten_set_main_loop(pGraphics->OnMainLoopTimer, 0 /*pGraphics->FPS()*/, 1);
-  }
 
-  #elif PLATFORM_WINDOWS
-  extern HINSTANCE gHINSTANCE;
-  #endif
+}  // namespace iplug::igraphics
 
-  BEGIN_IPLUG_NAMESPACE
-  BEGIN_IGRAPHICS_NAMESPACE
-
-  #if PLATFORM_WINDOWS
-  IGraphics* MakeGraphics(IGEditorDelegate& dlg, int w, int h, int fps = 0, float scale = 1.)
-  {
-    IGraphicsWin* pGraphics = new IGraphicsWin(dlg, w, h, fps, scale);
-    pGraphics->SetWinModuleHandle(gHINSTANCE);
-    return pGraphics;
-  }
-  #elif PLATFORM_MAC
-  IGraphics* MakeGraphics(IGEditorDelegate& dlg, int w, int h, int fps = 0, float scale = 1.)
-  {
-    IGraphicsMac* pGraphics = new IGraphicsMac(dlg, w, h, fps, scale);
-    pGraphics->SetBundleID(BUNDLE_ID);
-    pGraphics->SetSharedResourcesSubPath(SHARED_RESOURCES_SUBPATH);
-    
-    return pGraphics;
-  }
-  #elif PLATFORM_IOS
-  IGraphics* MakeGraphics(IGEditorDelegate& dlg, int w, int h, int fps = 0, float scale = 1.)
-  {
-    IGraphicsIOS* pGraphics = new IGraphicsIOS(dlg, w, h, fps, scale);
-    pGraphics->SetBundleID(BUNDLE_ID);
-
-    return pGraphics;
-  }
-  #elif PLATFORM_WEB
-  IGraphics* MakeGraphics(IGEditorDelegate& dlg, int w, int h, int fps = 0, float scale = 1.)
-  {
-    gGraphics = new IGraphicsWeb(dlg, w, h, fps, scale);
-    return gGraphics;
-  }
-  #else
-    #error "No OS defined!"
-  #endif
-
-  END_IGRAPHICS_NAMESPACE
-  END_IPLUG_NAMESPACE
-
-#endif //NO_IGRAPHICS
-
-#endif //__IGRAPHICS_SRC_INC__
+#undef IGraphicsPlatform

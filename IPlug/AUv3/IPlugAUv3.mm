@@ -21,8 +21,8 @@
 using namespace iplug;
 
 IPlugAUv3::IPlugAUv3(const InstanceInfo& instanceInfo, const Config& config)
-: IPlugAPIBase(config, kAPIAUv3)
-, IPlugProcessor(config, kAPIAUv3)
+: IPlugAPIBase(config, EPlugApi::AUv3)
+, IPlugProcessor(config, EPlugApi::AUv3)
 {
   Trace(TRACELOC, "%s", config.pluginName);
 }

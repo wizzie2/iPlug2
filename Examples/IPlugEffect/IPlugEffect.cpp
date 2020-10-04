@@ -2,13 +2,13 @@
 #include "IPlug_include_in_plug_src.h"
 
 IPlugEffect::IPlugEffect(const InstanceInfo& info)
-: Plugin(info, MakeConfig(kNumParams, kNumPresets))
+: Plugin(info, Config(kNumParams, kNumPresets))
 {
   GetParam(kGain)->InitDouble("Gain", 0., 0., 100.0, 0.01, "%");
 
 #if IPLUG_EDITOR // http://bit.ly/2S64BDd
   mMakeGraphicsFunc = [&]() {
-    return MakeGraphics(*this, PLUG_WIDTH, PLUG_HEIGHT, PLUG_FPS, GetScaleForScreen(PLUG_HEIGHT));
+    return MakeGraphics(*this);
   };
   
   mLayoutFunc = [&](IGraphics* pGraphics) {
@@ -25,7 +25,7 @@ IPlugEffect::IPlugEffect(const InstanceInfo& info)
 #if IPLUG_DSP
 void IPlugEffect::ProcessBlock(sample** inputs, sample** outputs, int nFrames)
 {
-  const double gain = GetParam(kGain)->Value() / 100.;
+  const tfloat gain = static_cast<tfloat>(GetParam(kGain)->Value() / 100);
   const int nChans = NOutChansConnected();
   
   for (int s = 0; s < nFrames; s++) {

@@ -22,23 +22,23 @@
 
 BEGIN_IPLUG_NAMESPACE
 
+// clang-format off
 #ifdef NDEBUG
 	#define DBGMSG(...) ((void) 0)
 #else
 	#if PLATFORM_MAC || PLATFORM_LINUX || PLATFORM_WEB || PLATFORM_IOS
 		#define DBGMSG(...) printf(__VA_ARGS__)
 	#elif PLATFORM_WINDOWS
-		#ifdef OutputDebugString
-			#undef OutputDebugString
-			#define OutputDebugString OutputDebugStringA
-		#endif
+		#undef OutputDebugString
+		#define OutputDebugString OutputDebugStringA
 
 		static void DBGMSG(const char* format, ...)
 		{
-			char buf[4096], *p = buf;
-			va_list args;
+			static char buf[4096];
+			char *p = buf;
 			int n;
 
+			va_list args;
 			va_start(args, format);
 			n = _vsnprintf(p, sizeof buf - 3, format, args);  // buf-3 is room for CR/LF/NUL
 			va_end(args);
@@ -56,6 +56,7 @@ BEGIN_IPLUG_NAMESPACE
 		}
 	#endif
 #endif
+// clang-format on
 
 #if defined TRACER_BUILD
 	#define TRACE Trace(TRACELOC, "");
@@ -71,9 +72,6 @@ BEGIN_IPLUG_NAMESPACE
 #endif
 
 #define TRACELOC __FUNCTION__, __LINE__
-static void Trace(const char* funcName, int line, const char* fmtStr, ...);
-
-//#define APPEND_TIMESTAMP(str) AppendTimestamp(__DATE__, __TIME__, str)
 
 struct LogFile
 {
@@ -82,11 +80,11 @@ struct LogFile
 	LogFile()
 	{
 		char logFilePath[100];
-#if PLATFORM_WINDOWS
-		sprintf(logFilePath, "%s/%s", "C:\\", LOGFILE);  // TODO: check windows logFilePath
-#else
-		sprintf(logFilePath, "%s/%s", getenv("HOME"), LOGFILE);
-#endif
+		if constexpr (EPlatform::Native == EPlatform::Windows)
+			sprintf(logFilePath, "%s/%s", "C:\\", LOGFILE);  // TODO: check windows logFilePath
+		else
+			sprintf(logFilePath, "%s/%s", getenv("HOME"), LOGFILE);
+
 		mFP = fopen(logFilePath, "w");
 		assert(mFP);
 
@@ -143,23 +141,23 @@ static const char* CurrentTime()
 	return sTimeStr;
 }
 
-// static const char* AppendTimestamp(const char* Mmm_dd_yyyy, const char* hh_mm_ss, const char* cStr)
-//{
-//	static WDL_String str;
-//	str.Set(cStr);
-//	str.Append(" ");
-//	WDL_String tStr;
-//	tStr.Set("[");
-//	tStr.Append(Mmm_dd_yyyy);
-//	tStr.SetLen(7);
-//	tStr.DeleteSub(4, 1);
-//	tStr.Append(" ");
-//	tStr.Append(hh_mm_ss);
-//	tStr.SetLen(12);
-//	tStr.Append("]");
-//	str.Append(tStr.Get());
-//	return str.Get();
-//}
+inline static const char* AppendTimestamp(const char* Mmm_dd_yyyy, const char* hh_mm_ss, const char* cStr)
+{
+	static WDL_String str;
+	str.Set(cStr);
+	str.Append(" ");
+	WDL_String tStr;
+	tStr.Set("[");
+	tStr.Append(Mmm_dd_yyyy);
+	tStr.SetLen(7);
+	tStr.DeleteSub(4, 1);
+	tStr.Append(" ");
+	tStr.Append(hh_mm_ss);
+	tStr.SetLen(12);
+	tStr.Append("]");
+	str.Append(tStr.Get());
+	return str.Get();
+}
 
 #if defined TRACER_BUILD
 
@@ -643,23 +641,9 @@ static const char* AUScopeStr(int scope)
 	#endif  // AU_API
 
 #else   // TRACER_BUILD
-static void Trace(const char* funcName, int line, const char* format, ...) {}
-static const char* VSTOpcodeStr(int opCode)
-{
-	return "";
-}
-static const char* AUSelectStr(int select)
-{
-	return "";
-}
-static const char* AUPropertyStr(int propID)
-{
-	return "";
-}
-static const char* AUScopeStr(int scope)
-{
-	return "";
-}
+
+inline static constexpr void Trace(const char* funcName, int line, const char* format, ...) {}
+
 #endif  // !TRACER_BUILD
 
 END_IPLUG_NAMESPACE

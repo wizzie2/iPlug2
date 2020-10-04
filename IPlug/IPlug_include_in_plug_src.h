@@ -18,16 +18,13 @@
  * Depending on the API macro defined, a different entry point and helper methods are activated
  */
 
+void* gHINSTANCE = nullptr;
+
 // clang-format off
 
-#define PUBLIC_NAME PLUG_NAME
+#if PLATFORM_WINDOWS && !VST3C_API
 
-#pragma mark - PLATFORM_WINDOWS
-
-#if PLATFORM_WINDOWS && !defined VST3C_API
-HINSTANCE gHINSTANCE = 0;
-
-	#if defined(VST2_API) || defined(AAX_API)
+	#if VST2_API || AAX_API
 	BOOL WINAPI DllMain(HINSTANCE hDllInst, DWORD fdwReason, LPVOID res)
 	{
 		gHINSTANCE = hDllInst;
@@ -46,10 +43,8 @@ HINSTANCE gHINSTANCE = 0;
 	}
 #endif
 
-#pragma mark - ** Global Functions and Defines **
 
-#pragma mark - VST2
-#if defined VST2_API
+#if VST2_API
 	extern "C"
 	{
 		IPLUG_EXPORT void* VSTPluginMain(audioMasterCallback hostCallback)
@@ -78,14 +73,13 @@ HINSTANCE gHINSTANCE = 0;
 		}
 	};
 
-#pragma mark - VST3 (All)
-#elif defined VST3_API || VST3C_API || defined VST3P_API
+#elif VST3_API
 	#if !defined VST3_PROCESSOR_UID && !defined VST3_CONTROLLER_UID
 		#define VST3_PROCESSOR_UID  0xF2AEE70D, 0x00DE4F4E, PLUG_MFR_ID, PLUG_UNIQUE_ID
 		#define VST3_CONTROLLER_UID 0xF2AEE70E, 0x00DE4F4F, PLUG_MFR_ID, PLUG_UNIQUE_ID
 	#endif
 
-	#if defined VST3P_API || defined VST3_API
+	#if !VST3C_API
 		bool InitModule()
 		{
 		#if PLATFORM_WINDOWS
@@ -102,28 +96,24 @@ HINSTANCE gHINSTANCE = 0;
 		}
 	#endif
 
-	#pragma mark - VST3
-	#if defined VST3_API
+	#if !VST3P_API
 		static Steinberg::FUnknown* createInstance(void*)
 		{
 			return (Steinberg::Vst::IAudioProcessor*) MakePlug(InstanceInfo());
 		}
 
 		BEGIN_FACTORY_DEF(PLUG_MFR, PLUG_URL_STR, PLUG_EMAIL_STR)
-
-		DEF_CLASS2(INLINE_UID_FROM_FUID(FUID(VST3_PROCESSOR_UID)),
-				   Steinberg::PClassInfo::kManyInstances,  // cardinality
-				   kVstAudioEffectClass,                   // the component category (don't change this)
-				   PLUG_NAME,                              // plug-in name
-				   Steinberg::Vst::kSimpleModeSupported,   // means gui and plugin aren't split
-				   VST3_SUBCATEGORY,                       // Subcategory for this plug-in
-				   PLUG_VERSION_STR,                       // plug-in version
-				   kVstVersionString,                      // the VST 3 SDK version (don't change - use define)
-				   createInstance)                         // function pointer called to be instantiate
-
+			DEF_CLASS2(INLINE_UID_FROM_FUID(FUID(VST3_PROCESSOR_UID)),
+					   Steinberg::PClassInfo::kManyInstances,  // cardinality
+					   kVstAudioEffectClass,                   // the component category (don't change this)
+					   PLUG_NAME,                              // plug-in name
+					   Steinberg::Vst::kSimpleModeSupported,   // means gui and plugin aren't split
+					   VST3_SUBCATEGORY,                       // Subcategory for this plug-in
+					   PLUG_VERSION_STR,                       // plug-in version
+					   kVstVersionString,                      // the VST 3 SDK version (don't change - use define)
+					   createInstance)                         // function pointer called to be instantiate
 		END_FACTORY
-	#pragma mark - VST3 Processor
-	#elif defined VST3P_API
+	#else
 		static Steinberg::FUnknown* createProcessorInstance(void*)
 		{
 			return MakeProcessor();
@@ -159,7 +149,6 @@ HINSTANCE gHINSTANCE = 0;
 		END_FACTORY
 	#endif
 
-#pragma mark - AUv2
 #elif defined AU_API
 	extern "C"
 	{
@@ -178,7 +167,6 @@ HINSTANCE gHINSTANCE = 0;
 		}
 	};
 
-#pragma mark - WAM
 #elif defined WAM_API
 	extern "C"
 	{
@@ -189,7 +177,6 @@ HINSTANCE gHINSTANCE = 0;
 		}
 	}
 
-#pragma mark - WEB
 #elif defined WEB_API
 	std::unique_ptr<iplug::IPlugWeb> gPlug;
 	extern void StartMainLoopTimer();
@@ -251,26 +238,10 @@ HINSTANCE gHINSTANCE = 0;
 	#error "No API defined!"
 #endif
 
-#pragma mark - ** Instantiation **
 
 BEGIN_IPLUG_NAMESPACE
 
-#pragma mark -
-#pragma mark VST2, VST3, AAX, AUv3, APP, WAM, WEB
-
-#if defined VST2_API || defined VST3_API || defined AAX_API || defined AUv3_API || defined APP_API || defined WAM_API || defined WEB_API
-
-	Plugin* MakePlug(const InstanceInfo& info)
-	{
-		// From VST3 - is this necessary?
-		static WDL_Mutex sMutex;
-		WDL_MutexLock lock(&sMutex);
-
-		return new PLUG_CLASS_NAME(info);
-	}
-
-#pragma mark - AUv2
-#elif defined AU_API
+#if AU_API
 	Plugin* MakePlug(void* pMemory)
 	{
 		InstanceInfo info;
@@ -281,10 +252,7 @@ BEGIN_IPLUG_NAMESPACE
 		else
 			return new PLUG_CLASS_NAME(info);
 	}
-
-#pragma mark - VST3 Controller
-#elif defined VST3C_API
-
+#elif VST3C_API
 	Steinberg::FUnknown* MakeController()
 	{
 		static WDL_Mutex sMutex;
@@ -295,10 +263,7 @@ BEGIN_IPLUG_NAMESPACE
 		//you need to replace all instances of PLUG_CLASS_NAME in your plug-in class, with the macro PLUG_CLASS_NAME
 		return static_cast<Steinberg::Vst::IEditController*>(new PLUG_CLASS_NAME(info));
 	}
-
-#pragma mark - VST3 Processor
-#elif defined VST3P_API
-
+#elif VST3P_API
 	Steinberg::FUnknown* MakeProcessor()
 	{
 		static WDL_Mutex sMutex;
@@ -307,6 +272,15 @@ BEGIN_IPLUG_NAMESPACE
 		info.mOtherGUID = Steinberg::FUID(VST3_CONTROLLER_UID);
 		return static_cast<Steinberg::Vst::IAudioProcessor*>(new PLUG_CLASS_NAME(info));
 	}
+#elif VST2_API || VST3_API || AAX_API || AUv3_API || APP_API || WAM_API || WEB_API
+	Plugin* MakePlug(const InstanceInfo& info)
+	{
+		// From VST3 - is this necessary?
+		//static WDL_Mutex sMutex;
+		//WDL_MutexLock lock(&sMutex);
+
+		return new PLUG_CLASS_NAME(info);
+	}
 
 #else
 	#error "No API defined!"
@@ -314,51 +288,12 @@ BEGIN_IPLUG_NAMESPACE
 
 // clang-format on
 
-#pragma mark - ** Config Utility **
 
-static Config MakeConfig(int nParams, int nPresets)
-{
-	return Config(nParams,
-				  nPresets,
-				  PLUG_CHANNEL_IO,
-				  PUBLIC_NAME,
-				  "",
-				  PLUG_MFR,
-				  PLUG_VERSION_HEX,
-				  PLUG_UNIQUE_ID,
-				  PLUG_MFR_ID,
-				  PLUG_LATENCY,
-				  PLUG_DOES_MIDI_IN,
-				  PLUG_DOES_MIDI_OUT,
-				  PLUG_DOES_MPE,
-				  PLUG_DOES_STATE_CHUNKS,
-				  EIPlugPluginType::PLUG_TYPE,
-				  PLUG_HAS_UI,
-				  PLUG_WIDTH,
-				  PLUG_HEIGHT,
-				  PLUG_HOST_RESIZE,
-				  PLUG_MIN_WIDTH,
-				  PLUG_MAX_WIDTH,
-				  PLUG_MIN_HEIGHT,
-				  PLUG_MAX_HEIGHT,
-				  BUNDLE_ID);
-}
+#pragma mark - ** Config Utility **
 
 END_IPLUG_NAMESPACE
 
-/*
- #if defined _DEBUG
- #define PUBLIC_NAME APPEND_TIMESTAMP(PLUG_NAME " DEBUG")
- #elif defined TRACER_BUILD
- #define PUBLIC_NAME APPEND_TIMESTAMP(PLUG_NAME " TRACER")
- #elif defined TIMESTAMP_PLUG_NAME
- #pragma REMINDER("plug name is timestamped")
- #define PUBLIC_NAME APPEND_TIMESTAMP(PLUG_NAME)
- #else
- #define PUBLIC_NAME PLUG_NAME
- #endif
- */
 
-#if !defined NO_IGRAPHICS && !defined VST3P_API
+#if !NO_IGRAPHICS
 	#include "IGraphics_include_in_plug_src.h"
 #endif

@@ -42,7 +42,7 @@ class IGraphicsSkia : public IGraphicsPathBase
 	struct Font;
 
  public:
-	IGraphicsSkia(IGEditorDelegate& dlg, int w, int h, int fps, float scale);
+	IGraphicsSkia(IGEditorDelegate& dlg, int w, int h, int fps = 0, float scale = 1.);
 	~IGraphicsSkia();
 
 	const char* GetDrawingAPIStr() override;

@@ -39,7 +39,7 @@ class IGraphicsWeb final : public IGRAPHICS_DRAW_CLASS
   class FileFont;
   class MemoryFont;
 public:
-  IGraphicsWeb(IGEditorDelegate& dlg, int w, int h, int fps, float scale);
+  IGraphicsWeb(IGEditorDelegate& dlg, int w, int h, int fps = 0, float scale = 1.);
   ~IGraphicsWeb();
 
   void DrawResize() override;

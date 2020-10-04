@@ -33,7 +33,7 @@ private:
   struct Font;
   
 public:
-  IGraphicsCanvas(IGEditorDelegate& dlg, int w, int h, int fps, float scale);
+  IGraphicsCanvas(IGEditorDelegate& dlg, int w, int h, int fps = 0, float scale = 1.);
   ~IGraphicsCanvas();
 
   const char* GetDrawingAPIStr() override { return "Canvas2D"; }

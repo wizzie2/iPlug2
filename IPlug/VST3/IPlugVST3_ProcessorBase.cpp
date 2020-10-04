@@ -46,7 +46,7 @@ uint64_t iplug::GetAPIBusTypeForChannelIOConfig(
 }
 #endif
 
-IPlugVST3ProcessorBase::IPlugVST3ProcessorBase(Config c, IPlugAPIBase& plug) : IPlugProcessor(c, kAPIVST3), mPlug(plug)
+IPlugVST3ProcessorBase::IPlugVST3ProcessorBase(Config c, IPlugAPIBase& plug) : IPlugProcessor(c, EPlugApi::VST3), mPlug(plug)
 {
 	SetChannelConnections(ERoute::kInput, 0, MaxNChannels(ERoute::kInput), true);
 	SetChannelConnections(ERoute::kOutput, 0, MaxNChannels(ERoute::kOutput), true);

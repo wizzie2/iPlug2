@@ -8,20 +8,18 @@
  ==============================================================================
 */
 
-//#include "IGraphics.h"
-
 #define NANOSVG_IMPLEMENTATION
 BEGIN_INCLUDE_DEPENDENCIES
 #include <nanosvg.h>
 END_INCLUDE_DEPENDENCIES
 
-#if defined VST3_API
-	#include "VST3/IPlugVST3.h"
-using VST3_API_BASE = iplug::IPlugVST3;
-#elif defined VST3C_API
+#if VST3C_API
 	#include "VST3/IPlugVST3_Controller.h"
 	#include "VST3/IPlugVST3_View.h"
-using VST3_API_BASE = iplug::IPlugVST3Controller;
+	using VST3_API_BASE = iplug::IPlugVST3Controller;
+#elif VST3_API
+	#include "VST3/IPlugVST3.h"
+	using VST3_API_BASE = iplug::IPlugVST3;
 #endif
 
 using namespace iplug;
@@ -1491,7 +1489,8 @@ void IGraphics::PopupHostContextMenuForParam(IControl* pControl, int paramIdx, f
 	{
 		pControl->CreateContextMenu(contextMenu);
 
-#if defined VST3_API || defined VST3C_API
+#if VST3_API
+	#if !VST3P_API
 		VST3_API_BASE* pVST3 = dynamic_cast<VST3_API_BASE*>(GetDelegate());
 
 		if (!pVST3->GetComponentHandler() || !pVST3->GetView())
@@ -1528,7 +1527,7 @@ void IGraphics::PopupHostContextMenuForParam(IControl* pControl, int paramIdx, f
 			pVST3ContextMenu->popup((Steinberg::UCoord) x, (Steinberg::UCoord) y);
 			pVST3ContextMenu->release();
 		}
-
+	#endif
 #else
 		if (!contextMenu.NItems())
 			return;

@@ -1,10 +1,10 @@
 /*
  ==============================================================================
- 
- This file is part of the iPlug 2 library. Copyright (C) the iPlug 2 developers. 
- 
+
+ This file is part of the iPlug 2 library. Copyright (C) the iPlug 2 developers.
+
  See LICENSE.txt for  more info.
- 
+
  ==============================================================================
 */
 
@@ -38,7 +38,7 @@ using sample = PLUG_SAMPLE_DST;
 #define MAX_PROCESS_TRACE_COUNT 100
 #define MAX_IDLE_TRACE_COUNT    15
 
-enum class EIPlugPluginType : uint8
+enum class EPluginType : uint8
 {
 	Effect,
 	Instrument,
@@ -66,7 +66,7 @@ inline constexpr int MAX_PRESET_NAME_LEN    = 256;
 
 #define AU_MAX_IO_CHANNELS 128
 
-//TODO: check this shit really?
+// TODO: check this shit really?
 #define MAX_MACOS_PATH_LEN      1024
 #define MAX_WIN32_PATH_LEN      256
 #define MAX_WIN32_PARAM_LEN     256
@@ -121,15 +121,15 @@ inline constexpr int kNoTag             = -1;
 //#undef stricmp
 //#undef strnicmp
 //#include "pluginterfaces/vst/vsttypes.h"
-//static const uint64_t kInvalidBusType = Steinberg::Vst::SpeakerArr::kEmpty;
+// static const uint64_t kInvalidBusType = Steinberg::Vst::SpeakerArr::kEmpty;
 //#elif defined AU_API || AUv3_API
 //#include <CoreAudio/CoreAudio.h>
-//static const uint64_t kInvalidBusType = kAudioChannelLayoutTag_Unknown;
+// static const uint64_t kInvalidBusType = kAudioChannelLayoutTag_Unknown;
 //#elif defined AAX_API
 //#include "AAX_Enums.h"
-//static const uint64_t kInvalidBusType = AAX_eStemFormat_None;
+// static const uint64_t kInvalidBusType = AAX_eStemFormat_None;
 //#else
-//static const uint64_t kInvalidBusType = 0;
+// static const uint64_t kInvalidBusType = 0;
 //#endif
 
 /** @enum EParamSource
@@ -161,17 +161,6 @@ enum ERoute
 
 inline constexpr const char* RoutingDirStrs[2] = {"Input", "Output"};
 
-enum EAPI
-{
-	kAPIVST2 = 0,
-	kAPIVST3 = 1,
-	kAPIAU   = 2,
-	kAPIAUv3 = 3,
-	kAPIAAX  = 4,
-	kAPIAPP  = 5,
-	kAPIWAM  = 6,
-	kAPIWEB  = 7
-};
 
 /** @enum EHost
  * Host identifier
@@ -240,7 +229,7 @@ enum EResourceLocation
 };
 
 // These constants come from vstpreset.cpp, allowing saving of VST3 format presets without including the VST3 SDK
-//typedef char ChunkID[4];
+// typedef char ChunkID[4];
 using ChunkID = char[4];
 
 enum ChunkType
@@ -267,7 +256,7 @@ static const ChunkID commonChunks[kNumPresetChunks] = {
 inline constexpr int32 kFormatVersion = 1;
 inline constexpr int32 kClassIDSize   = 32;  // ASCII-encoded FUID
 inline constexpr int32 kHeaderSize    = sizeof(ChunkID) + sizeof(int32) + kClassIDSize + sizeof(int64);
-//static const int32_t kListOffsetPos = kHeaderSize - sizeof (int64_t);
+// static const int32_t kListOffsetPos = kHeaderSize - sizeof (int64_t);
 
 // Preset Version Constants
 inline constexpr int kFXPVersionNum = 1;

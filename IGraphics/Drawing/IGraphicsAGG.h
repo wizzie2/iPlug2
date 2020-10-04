@@ -234,7 +234,7 @@ private:
     agg::rasterizer_scanline_aa<> mRasterizer;
   };
 public:
-  IGraphicsAGG(IGEditorDelegate& dlg, int w, int h, int fps, float scale);
+  IGraphicsAGG(IGEditorDelegate& dlg, int w, int h, int fps = 0, float scale = 1.);
   ~IGraphicsAGG();
 
   const char* GetDrawingAPIStr() override { return "AGG"; }

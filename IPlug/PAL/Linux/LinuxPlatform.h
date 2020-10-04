@@ -41,11 +41,12 @@ namespace iplug::type
 
 
 //-----------------------------------------------------------------------------
-
+BEGIN_INCLUDE_DEPENDENCIES
 #include <unistd.h>
 #include <sys/types.h>
 #include <dirent.h>
 
-#ifndef NO_IGRAPHICS
+#if !NO_IGRAPHICS
 	#include <OpenGL/gl.h>
 #endif
+END_INCLUDE_DEPENDENCIES

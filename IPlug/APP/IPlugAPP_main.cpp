@@ -1,10 +1,10 @@
 /*
  ==============================================================================
- 
- This file is part of the iPlug 2 library. Copyright (C) the iPlug 2 developers. 
- 
+
+ This file is part of the iPlug 2 library. Copyright (C) the iPlug 2 developers.
+
  See LICENSE.txt for  more info.
- 
+
  ==============================================================================
 */
 
@@ -18,7 +18,7 @@
 #if PLATFORM_WINDOWS
 
 extern int WINAPI MainDlgProc(HWND, UINT, WPARAM, LPARAM);
-extern HINSTANCE  gHINSTANCE;
+extern void* gHINSTANCE;
 
 HWND gHWND;
 UINT gScrollMessage;
@@ -49,28 +49,15 @@ namespace iplug
 		pAppHost->Init();
 		pAppHost->TryToChangeAudio();
 
-		HACCEL hAccel = LoadAccelerators(gHINSTANCE, MAKEINTRESOURCE(IDR_ACCELERATOR1));
+		HACCEL hAccel = LoadAccelerators((HINSTANCE) gHINSTANCE, MAKEINTRESOURCE(IDR_ACCELERATOR1));
 
 		double scale = 1.;
 
-		/*
-		TODO: DPI awareness is recommended to set through manifest instead of API calls.
-		https://docs.microsoft.com/en-us/windows/win32/hidpi/setting-the-default-dpi-awareness-for-a-process
-		
-		<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-		<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0" xmlns:asmv3="urn:schemas-microsoft-com:asm.v3">
-		  <asmv3:application>
-		    <asmv3:windowsSettings>
-		      <dpiAware xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">true</dpiAware>
-		      <dpiAwareness xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings">PerMonitorV2</dpiAwareness>
-		    </asmv3:windowsSettings>
-		  </asmv3:application>
-		</assembly>
-		*/
-		SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+		//SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 
 		// TODO: Create window should be used since dialog boxes don't support maximize window
-		CreateDialog(gHINSTANCE, MAKEINTRESOURCE(IDD_DIALOG_MAIN), GetDesktopWindow(), IPlugAPPHost::MainDlgProc);
+		CreateDialog(
+			(HINSTANCE) gHINSTANCE, MAKEINTRESOURCE(IDD_DIALOG_MAIN), GetDesktopWindow(), IPlugAPPHost::MainDlgProc);
 
 	#ifndef _DEBUG
 		HMENU menu = GetMenu(gHWND);
@@ -83,7 +70,7 @@ namespace iplug
 
 		while ((result = GetMessage(&msg, NULL, 0, 0)) != 0)
 		{
-			if ( result == -1)
+			if (result == -1)
 				break;
 
 			if (!msg.hwnd)
@@ -132,13 +119,14 @@ namespace iplug
 	#include "IPlugSWELL.h"
 	#include "IPlugPaths.h"
 
-HWND         gHWND;
+HWND gHWND;
 extern HMENU SWELL_app_stocksysmenu;
 
 int main(int argc, char* argv[])
 {
 	#if APP_COPY_AUV3
-	//if invoked with an argument registerauv3 use plug-in kit to explicitly register auv3 app extension (doesn't happen from debugger)
+	// if invoked with an argument registerauv3 use plug-in kit to explicitly register auv3 app extension (doesn't
+	// happen from debugger)
 	if (strcmp(argv[2], "registerauv3"))
 	{
 		WDL_String appexPath(argv[0]);
@@ -185,7 +173,7 @@ INT_PTR SWELLAppMain(int msg, INT_PTR parm1, INT_PTR parm2)
 
 					if (sm)
 					{
-						char         str[1024];
+						char str[1024];
 						MENUITEMINFO mii = {sizeof(mii), MIIM_TYPE};
 						mii.dwTypeData   = str;
 						mii.cch          = sizeof(str);
@@ -252,9 +240,9 @@ INT_PTR SWELLAppMain(int msg, INT_PTR parm1, INT_PTR parm2)
 
 			if (menu)
 			{
-				SetMenu(
-					hwnd,
-					menu);  // set the menu for the dialog to our menu (on Windows that menu is set from the .rc, but on SWELL
+				SetMenu(hwnd,
+						menu);  // set the menu for the dialog to our menu (on Windows that menu is set from the .rc,
+								// but on SWELL
 				SWELL_SetDefaultModalWindowMenu(menu);  // other windows will get the stock (bundle) menus
 			}
 
@@ -270,10 +258,10 @@ INT_PTR SWELLAppMain(int msg, INT_PTR parm1, INT_PTR parm2)
 				DestroyWindow(gHWND);
 			break;
 		case SWELLAPP_PROCESSMESSAGE:
-			MSG*     pMSG         = (MSG*) parm1;
-			NSView*  pContentView = (NSView*) pMSG->hwnd;
-			NSEvent* pEvent       = (NSEvent*) parm2;
-			int      etype        = (int) [pEvent type];
+			MSG* pMSG            = (MSG*) parm1;
+			NSView* pContentView = (NSView*) pMSG->hwnd;
+			NSEvent* pEvent      = (NSEvent*) parm2;
+			int etype            = (int) [pEvent type];
 
 			bool textField = [pContentView isKindOfClass:[NSText class]];
 
@@ -308,11 +296,11 @@ INT_PTR SWELLAppMain(int msg, INT_PTR parm1, INT_PTR parm2)
 //#include <IPlugSWELL.h>
 //#include "swell-internal.h" // fixes problem with HWND forward decl
 //
-//HWND gHWND;
-//UINT gScrollMessage;
-//extern HMENU SWELL_app_stocksysmenu;
+// HWND gHWND;
+// UINT gScrollMessage;
+// extern HMENU SWELL_app_stocksysmenu;
 //
-//int main(int argc, char **argv)
+// int main(int argc, char **argv)
 //{
 //  SWELL_initargs(&argc, &argv);
 //  SWELL_Internal_PostMessage_Init();
@@ -334,7 +322,7 @@ INT_PTR SWELLAppMain(int msg, INT_PTR parm1, INT_PTR parm2)
 //  return 0;
 //}
 //
-//INT_PTR SWELLAppMain(int msg, INT_PTR parm1, INT_PTR parm2)
+// INT_PTR SWELLAppMain(int msg, INT_PTR parm1, INT_PTR parm2)
 //{
 //  switch (msg)
 //  {
@@ -361,8 +349,8 @@ INT_PTR SWELLAppMain(int msg, INT_PTR parm1, INT_PTR parm2)
 //            mii.cch = sizeof(str);
 //            str[0] = 0;
 //            GetMenuItemInfo(src, x, TRUE, &mii);
-//            MENUITEMINFO mi= {sizeof(mi), MIIM_STATE|MIIM_SUBMENU|MIIM_TYPE,MFT_STRING, 0, 0, SWELL_DuplicateMenu(sm), NULL, NULL, 0, str};
-//            InsertMenuItem(menu, x+1, TRUE, &mi);
+//            MENUITEMINFO mi= {sizeof(mi), MIIM_STATE|MIIM_SUBMENU|MIIM_TYPE,MFT_STRING, 0, 0, SWELL_DuplicateMenu(sm),
+//            NULL, NULL, 0, str}; InsertMenuItem(menu, x+1, TRUE, &mi);
 //          }
 //        }
 //      }
@@ -370,8 +358,9 @@ INT_PTR SWELLAppMain(int msg, INT_PTR parm1, INT_PTR parm2)
 //      if (menu)
 //      {
 //        HMENU sm = GetSubMenu(menu, 1);
-//        DeleteMenu(sm, ID_QUIT, MF_BYCOMMAND); // remove QUIT from our file menu, since it is in the system menu on OSX
-//        DeleteMenu(sm, ID_PREFERENCES, MF_BYCOMMAND); // remove PREFERENCES from the file menu, since it is in the system menu on OSX
+//        DeleteMenu(sm, ID_QUIT, MF_BYCOMMAND); // remove QUIT from our file menu, since it is in the system menu on
+//        OSX DeleteMenu(sm, ID_PREFERENCES, MF_BYCOMMAND); // remove PREFERENCES from the file menu, since it is in the
+//        system menu on OSX
 //
 //        // remove any trailing separators
 //        int a = GetMenuItemCount(sm);
@@ -389,8 +378,8 @@ INT_PTR SWELLAppMain(int msg, INT_PTR parm1, INT_PTR parm2)
 //
 //      if (menu)
 //      {
-//        SetMenu(hwnd, menu); // set the menu for the dialog to our menu (on Windows that menu is set from the .rc, but on SWELL
-//        SWELL_SetDefaultModalWindowMenu(menu); // other windows will get the stock (bundle) menus
+//        SetMenu(hwnd, menu); // set the menu for the dialog to our menu (on Windows that menu is set from the .rc, but
+//        on SWELL SWELL_SetDefaultModalWindowMenu(menu); // other windows will get the stock (bundle) menus
 //      }
 //
 //      break;
@@ -424,7 +413,10 @@ INT_PTR SWELLAppMain(int msg, INT_PTR parm1, INT_PTR parm2)
 // Main entry routing to corresponding namespace entry.
 // To be moved to platform section
 #if PLATFORM_WINDOWS
-int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPSTR lpszCmdParam, _In_ int nShowCmd)
+int WINAPI WinMain(_In_ HINSTANCE hInstance,
+				   _In_opt_ HINSTANCE hPrevInstance,
+				   _In_ LPSTR lpszCmdParam,
+				   _In_ int nShowCmd)
 {
 	return iplug::WinMain(hInstance, hPrevInstance, lpszCmdParam, nShowCmd);
 }
@@ -434,7 +426,7 @@ int main(int argc, char* argv[])
 	return iplug::main(argc, argv[])
 }
 #elif PLATFORM_LINUX
-//int main(int argc, char** argv)
+// int main(int argc, char** argv)
 //{
 //	return iplug::main(argc, argv)
 //}
