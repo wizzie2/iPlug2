@@ -95,3 +95,5 @@
 #define PLUG_NAME
 #define kVstAudioEffectClass
 #define END_FACTORY } else gPluginFactory->addRef (); return gPluginFactory; }
+#define END_DEFINE_INTERFACES(BaseClass) return BaseClass::queryInterface (iid, obj); }
+#define REFCOUNT_METHODS(BaseClass) virtual Steinberg::uint32 PLUGIN_API addRef ()SMTG_OVERRIDE{ return BaseClass::addRef (); } virtual Steinberg::uint32 PLUGIN_API release ()SMTG_OVERRIDE{ return BaseClass::release (); }
