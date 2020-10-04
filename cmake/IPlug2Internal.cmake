@@ -32,6 +32,7 @@ set(_projectConfigArgs
     "PLUG_SHARED_RESOURCES"
     "PLUG_TYPE"
     "PLUG_HOST_RESIZE"
+    "PLUG_TFLOAT_TYPE"
     "SHARED_RESOURCES_SUBPATH"
     "PCH_FOLDER_NAME"
 )
@@ -177,9 +178,9 @@ macro(_iplug_post_project_setup)
         endif()
     endforeach()
 
-    if(HAVESDK_VST3)
+    if(HAVESDK_VST3 OR HAVESDK_VST2)
         # Find a suitable application to use as default when launching debugger for VST3 plugins
-        if(${CMAKE_GENERATOR} MATCHES "^Visual Studio")
+        if(CMAKE_GENERATOR MATCHES "^Visual Studio")
             set(_reg_tests
                 "[HKEY_LOCAL_MACHINE\\SOFTWARE\\REAPER]"
                 "[HKEY_LOCAL_MACHINE\\SOFTWARE\\PreSonus\\Studio One 5]"
@@ -190,40 +191,42 @@ macro(_iplug_post_project_setup)
                 # "[HKEY_LOCAL_MACHINE\\Software\\Propellerhead Software\\Reason]"                     # unconfirmed
             )
 
-            set(VST3_DEFAULT_DEBUG_APPLICATION_DESC "Default application to use when debugging a VST3 plugin. This setting does not override any previous settings in Visual Studio.")
-            set(VST3_DEFAULT_DEBUG_APPLICATION "" CACHE FILEPATH "${VST3_DEFAULT_DEBUG_APPLICATION_DESC}")
-            if(NOT VST3_DEFAULT_DEBUG_APPLICATION)
+            set(IPLUG2_DEFAULT_VST_DEBUG_APPLICATION_DESC "Default application to use when debugging a VST plugins. This setting does not override any previous settings in Visual Studio.")
+            set(IPLUG2_DEFAULT_VST_DEBUG_APPLICATION "" CACHE FILEPATH "${IPLUG2_DEFAULT_VST_DEBUG_APPLICATION_DESC}")
+            if(NOT DEFINED IPLUG2_DEFAULT_VST_DEBUG_APPLICATION OR IPLUG2_DEFAULT_VST_DEBUG_APPLICATION STREQUAL "")
                 foreach(_key IN LISTS _reg_tests)
                     get_filename_component(_key "${_key}" ABSOLUTE)
-                    if(_key AND NOT ${_key} MATCHES "registry")
+                    if(_key AND NOT _key MATCHES "registry")
                         if(_key MATCHES "^.*Reaper$")
                             string(APPEND _key "/reaper.exe" )
                         endif()
                         if(EXISTS ${_key})
-                            set(VST3_DEFAULT_DEBUG_APPLICATION ${_key} CACHE FILEPATH "${VST3_DEFAULT_DEBUG_APPLICATION_DESC}" FORCE)
+                            set(IPLUG2_DEFAULT_VST_DEBUG_APPLICATION ${_key} CACHE FILEPATH "${IPLUG2_DEFAULT_VST_DEBUG_APPLICATION_DESC}" FORCE)
                             break()
                         endif()
                     endif()
                 endforeach()
             endif()
         endif()
+    endif()
 
+    if(HAVESDK_VST3)
         list(APPEND CMAKE_MODULE_PATH "${VST3_SDK_PATH}/cmake/modules")
 
         include(SMTG_DetectPlatform)
         smtg_detect_platform()
 
         include(SetupVST3LibraryDefaultPath)
-        include(AddVST3Library) # Includes AddSMTGLibrary, UniversalBinary and provides SMTG_DESKTOP_INI_PATH
+        include(AddVST3Library)
         include(CoreAudioSupport)
 
         smtg_get_default_vst3_path()  # Provides DEFAULT_VST3_FOLDER
 
-        set(SMTG_PLUGIN_TARGET_PATH "${DEFAULT_VST3_FOLDER}" CACHE PATH "Here you can redefine the VST3 Plug-ins folder")
+        set(VST3_PLUGIN_TARGET_PATH "${DEFAULT_VST3_FOLDER}" CACHE PATH "Here you can redefine the VST3 Plug-ins folder")
 
         # Unlike the default setting in Steinberg VST3 SDK, we do *not* create a directory if it's missing, just warn about it.
-        if(SMTG_PLUGIN_TARGET_PATH AND NOT EXISTS ${SMTG_PLUGIN_TARGET_PATH})
-            iplug_warning("SMTG_PLUGIN_TARGET_PATH = \"${SMTG_PLUGIN_TARGET_PATH}\" is invalid.")
+        if(VST3_PLUGIN_TARGET_PATH AND NOT EXISTS ${VST3_PLUGIN_TARGET_PATH})
+            iplug_warning("VST3_PLUGIN_TARGET_PATH = \"${VST3_PLUGIN_TARGET_PATH}\" is invalid.")
         endif()
 
         if(PLATFORM_WINDOWS)
@@ -233,7 +236,6 @@ macro(_iplug_post_project_setup)
         endif()
         option(SMTG_CREATE_PLUGIN_LINK "Create symbolic link for each Plug-in (you need to have the Administrator right on Windows! or change the Local Group Policy to allow create symbolic links)" ${DEF_OPT_LINK})
 
-
         if(PLATFORM_APPLE)
             set(SMTG_CODE_SIGN_IDENTITY_MAC "Mac Developer" CACHE STRING "macOS Code Sign Identity")
             set(SMTG_CODE_SIGN_IDENTITY_IOS "iPhone Developer" CACHE STRING "iOS Code Sign Identity")
@@ -242,8 +244,6 @@ macro(_iplug_post_project_setup)
 
         # Run the Validator after each new compilation of VST3 Plug-ins
         option(SMTG_RUN_VST_VALIDATOR "Run VST validator on VST3 Plug-ins" ON)
-
-
     endif()
 
     #------------------------------------------------------------------------------
@@ -253,16 +253,6 @@ macro(_iplug_post_project_setup)
     #     get_filename_component(DEFAULT_VST2_FOLDER "[HKEY_LOCAL_MACHINE\\SOFTWARE\\VST;VSTPluginsPath]" ABSOLUTE)
     #     cmake_print_variables(DEFAULT_VST2_FOLDER)
     # endif()
-
-
-    #------------------------------------------------------------------------------
-    # TFLOAT type definition
-
-    set(IPLUG2_TFLOAT_TYPE "float" CACHE STRING "tfloat type [float|double]. Base type used for floating-point operations")
-    set_property(CACHE IPLUG2_TFLOAT_TYPE PROPERTY STRINGS
-        "float"
-        "double"
-    )
 
 
     #------------------------------------------------------------------------------
@@ -561,6 +551,7 @@ macro(_iplug_validate_config_variables _prefix)
     cmake_parse_arguments(_arg  "" "" "" ${ARGN})
     set(_extraFlags ${_arg_UNPARSED_ARGUMENTS})
 
+    set(VALIDATION_PLUG_TFLOAT_TYPE         DEFAULT "float" NOTEMPTY STREQUAL float double)
     set(VALIDATION_PLUG_NAME                DEFAULT "${PROJECT_NAME}" NOTEMPTY ALPHA NUMERIC SPACE)
     set(VALIDATION_PLUG_NAME_SHORT          NOTEMPTY ALPHA NUMERIC MINLENGTH 4 MAXLENGTH 4)
     set(VALIDATION_PLUG_CLASS_NAME          DEFAULT "${PROJECT_NAME}" NOTEMPTY ALPHAFIRST ALPHA NUMERIC UNDERSCORE)
@@ -709,16 +700,16 @@ function(_iplug_generate_source_groups)
     endif()
 
     # Option to compile with Faust if available
-    option(IPLUG2_EXTRAS_FAUST "Compile with Faust." OFF)
-    if(NOT IPLUG2_EXTRAS_FAUST)
+    # option(IPLUG2_EXTRAS_FAUST "Compile with Faust." OFF)
+    # if(NOT IPLUG2_EXTRAS_FAUST)
         _iplug_disable_source_compile(${_src_list} REGEX "^.*Faust.*\\.cpp$")
-    endif()
+    # endif()
 
     # Option to compile with reaper extension API
-    option(IPLUG2_EXTRAS_REAPEREXT "Compile with Reaper Extension API." OFF)
-    if(NOT IPLUG2_EXTRAS_REAPEREXT)
+    # option(IPLUG2_EXTRAS_REAPEREXT "Compile with Reaper Extension API." OFF)
+    # if(NOT IPLUG2_EXTRAS_REAPEREXT)
         _iplug_disable_source_compile("${IPLUG2_ROOT_PATH}/IPlug/ReaperExt/ReaperExtBase.cpp")
-    endif()
+    # endif()
 
 endfunction()
 

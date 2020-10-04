@@ -47,6 +47,8 @@ mark_as_advanced(_VCPKG_CL)
 mark_as_advanced(_VCPKG_INSTALLED_DIR)
 mark_as_advanced(VCPKG_APPLOCAL_DEPS)
 mark_as_advanced(VCPKG_TARGET_TRIPLET)
+mark_as_advanced(IPLUG2_DEVELOPER_CMAKE_DEBUG)
+mark_as_advanced(IPLUG2_DEVELOPER_ENABLE_GLOB_DEPENDENCY)
 
 
 #------------------------------------------------------------------------------
@@ -66,14 +68,16 @@ add_library(IPlug_VST2                 INTERFACE)
 add_library(IPlug_VST3                 INTERFACE)
 add_library(IPlug_VST3C                INTERFACE)
 add_library(IPlug_VST3P                INTERFACE)
+add_library(IPlug_WAM                  INTERFACE)
 add_library(IPlug_WEB                  INTERFACE)
 
-# Create source list for IPlug & IGraphics with a one time glob dependency check
-option(IPLUG2_DEVELOPER_ENABLE_GLOB_DEPENDENCY "Enable glob dependency check on IPlug and IGraphics when compiling." OFF)
-if(IPLUG2_DEVELOPER_ENABLE_GLOB_DEPENDENCY)
-    set(_CONFIGURE_DEPENDS CONFIGURE_DEPENDS)
-else()
-    set(_CONFIGURE_DEPENDS "")
+set(_CONFIGURE_DEPENDS "")
+if(NOT IPLUG2_EXTERNAL_PROJECT)
+    # Create source list for IPlug & IGraphics with a one time glob dependency check
+    option(IPLUG2_DEVELOPER_ENABLE_GLOB_DEPENDENCY "Enable glob dependency check on IPlug and IGraphics when compiling." OFF)
+    if(IPLUG2_DEVELOPER_ENABLE_GLOB_DEPENDENCY)
+        set(_CONFIGURE_DEPENDS CONFIGURE_DEPENDS)
+    endif()
 endif()
 
 file(GLOB_RECURSE IPLUG_SOURCE_LIST ${_CONFIGURE_DEPENDS} "${IPLUG2_ROOT_PATH}/IPlug/*")
@@ -114,7 +118,6 @@ target_compile_definitions(IPlug_SharedDefinitions
                                     # If using _UNICODE, it's recommended to set both _UNICODE and UNICODE.
 
         # ${_NANOVG_DEF}
-        IPLUG2_TFLOAT_TYPE=${IPLUG2_TFLOAT_TYPE}
 
         # TODO: Add support for the other graphics libraries
         $<$<BOOL:${GFXLIB_NANOVG}>:IGRAPHICS_NANOVG>
@@ -136,16 +139,16 @@ target_compile_definitions(IPlug_SharedDefinitions
 )
 
 # Target specific definitions
-target_compile_definitions(IPlug_APP   INTERFACE APP_API   IPLUG_EDITOR=1 IPLUG_DSP=1 $<$<BOOL:${PLATFORM_MAC}>:__MACOSX_CORE__ SWELL_COMPILED> )
-target_compile_definitions(IPlug_VST3  INTERFACE VST3_API  IPLUG_EDITOR=1 IPLUG_DSP=1                                                           )
-target_compile_definitions(IPlug_AAX   INTERFACE AAX_API   IPLUG_EDITOR=1 IPLUG_DSP=1                                                           )
-target_compile_definitions(IPlug_AU    INTERFACE AU_API    IPLUG_EDITOR=1 IPLUG_DSP=1                                                           )
-target_compile_definitions(IPlug_AUv3  INTERFACE AUv3_API  IPLUG_EDITOR=1 IPLUG_DSP=1                                                           )
-target_compile_definitions(IPlug_VST2  INTERFACE VST2_API  IPLUG_EDITOR=1 IPLUG_DSP=1                                                           )
-target_compile_definitions(IPlug_VST3C INTERFACE VST3C_API IPLUG_EDITOR=1 IPLUG_DSP=0                                                           )
-target_compile_definitions(IPlug_VST3P INTERFACE VST3P_API IPLUG_EDITOR=0 IPLUG_DSP=1 #[[NO_IGRAPHICS]]                                         )
-# target_compile_definitions(IPlug_WAM   INTERFACE WAM_API   IPLUG_EDITOR=0 IPLUG_DSP=1 NO_IGRAPHICS                                              )
-# target_compile_definitions(IPlug_WEB   INTERFACE WEB_API   IPLUG_EDITOR=1 IPLUG_DSP=0 USE_WEBGL2=0 FULL_ES3=1                                   )
+target_compile_definitions(IPlug_APP   INTERFACE APP_API=1   IPLUG_EDITOR=1 IPLUG_DSP=1 $<$<BOOL:${PLATFORM_MAC}>:__MACOSX_CORE__ SWELL_COMPILED> )
+target_compile_definitions(IPlug_VST3  INTERFACE VST3_API=1  IPLUG_EDITOR=1 IPLUG_DSP=1                                                           )
+target_compile_definitions(IPlug_AAX   INTERFACE AAX_API=1   IPLUG_EDITOR=1 IPLUG_DSP=1                                                           )
+target_compile_definitions(IPlug_AU    INTERFACE AU_API=1    IPLUG_EDITOR=1 IPLUG_DSP=1                                                           )
+target_compile_definitions(IPlug_AUv3  INTERFACE AUv3_API=1  IPLUG_EDITOR=1 IPLUG_DSP=1                                                           )
+target_compile_definitions(IPlug_VST2  INTERFACE VST2_API=1  IPLUG_EDITOR=1 IPLUG_DSP=1                                                           )
+target_compile_definitions(IPlug_VST3C INTERFACE VST3C_API=1 IPLUG_EDITOR=1 IPLUG_DSP=0                                                           )
+target_compile_definitions(IPlug_VST3P INTERFACE VST3P_API=1 IPLUG_EDITOR=0 IPLUG_DSP=1                                                           )
+target_compile_definitions(IPlug_WAM   INTERFACE WAM_API=1   IPLUG_EDITOR=0 IPLUG_DSP=1                                                           )
+target_compile_definitions(IPlug_WEB   INTERFACE WEB_API=1   IPLUG_EDITOR=1 IPLUG_DSP=0 USE_WEBGL2=0 FULL_ES3=1                                   )
 
 #------------------------------------------------------------------------------
 # Shared includes for all IPlug2 related libraries and consumers

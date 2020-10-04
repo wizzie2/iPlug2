@@ -420,7 +420,7 @@ macro(iplug_add_vst3 _target)
             SUFFIX                                         ".${PLUGIN_EXT}"
             LIBRARY_OUTPUT_DIRECTORY                       "${PLUGIN_PACKAGE_PATH}"
             PDB_OUTPUT_DIRECTORY                           "${PROJECT_BINARY_DIR}/PDB/${VST3_CONFIG_PATH}"
-            VS_DEBUGGER_COMMAND                            "${VST3_DEFAULT_DEBUG_APPLICATION}"
+            VS_DEBUGGER_COMMAND                            "${IPLUG2_DEFAULT_VST_DEBUG_APPLICATION}"
             BUNDLE                                         TRUE
             BUNDLE_EXTENSION                               "${PLUGIN_EXT}"
             XCODE_ATTRIBUTE_WRAPPER_EXTENSION              "${PLUGIN_EXT}"
@@ -459,7 +459,7 @@ macro(iplug_add_vst3 _target)
         endif()
 
         if(PLATFORM_WINDOWS)
-            if(NOT "${VST3_ICON}" STREQUAL "")
+            if(NOT VST3_ICON STREQUAL "")
                 add_custom_command(TARGET ${_target}
                     COMMENT "Copy PlugIn.ico and desktop.ini and change their attributes."
                     POST_BUILD
@@ -488,19 +488,19 @@ macro(iplug_add_vst3 _target)
         endif()
 
         if(SMTG_CREATE_PLUGIN_LINK)
-            if(${SMTG_PLUGIN_TARGET_PATH} STREQUAL "")
-                message(FATAL_ERROR "Define a proper value for SMTG_PLUGIN_TARGET_PATH")
+            if(NOT DEFINED VST3_PLUGIN_TARGET_PATH OR VST3_PLUGIN_TARGET_PATH STREQUAL "")
+                iplug_syntax_error("Define a proper value for VST3_PLUGIN_TARGET_PATH")
             endif()
 
             set(TARGET_SOURCE ${PLUGIN_PACKAGE_PATH})
-            set(TARGET_DESTINATION ${SMTG_PLUGIN_TARGET_PATH}/${CONFIG_BUNDLE_NAME})
+            set(TARGET_DESTINATION ${VST3_PLUGIN_TARGET_PATH}/${CONFIG_BUNDLE_NAME})
 
-            if(SMTG_WIN)
+            if(PLATFORM_WINDOWS)
                 file(TO_NATIVE_PATH "${TARGET_SOURCE}" SOURCE_NATIVE_PATH)
                 file(TO_NATIVE_PATH "${TARGET_DESTINATION}" DESTINATION_NATIVE_PATH)
                 add_custom_command(
                     TARGET ${_target} POST_BUILD
-                    COMMAND rmdir "${DESTINATION_NATIVE_PATH}"
+                    COMMAND if exist "${DESTINATION_NATIVE_PATH}" ( rmdir "${DESTINATION_NATIVE_PATH}" )
                     COMMAND mklink /D
                         "${DESTINATION_NATIVE_PATH}"
                         "${SOURCE_NATIVE_PATH}"
