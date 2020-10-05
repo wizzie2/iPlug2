@@ -18,18 +18,18 @@ class DrumSynthDSP
  public:
 	struct DrumVoice
 	{
-		ADSREnvelope<tfloat> mPitchEnv {"pitch", nullptr, false};
-		ADSREnvelope<tfloat> mAmpEnv {"amp", nullptr, false};
-		FastSinOscillator<tfloat> mOsc;
-		double mBaseFreq;
+		ADSREnvelope<> mPitchEnv {"pitch", nullptr, false};
+		ADSREnvelope<> mAmpEnv {"amp", nullptr, false};
+		FastSinOscillator<> mOsc;
+		tfloat mBaseFreq;
 
 		DrumVoice(tfloat baseFreq) : mBaseFreq(baseFreq)
 		{
-			mAmpEnv.SetStageTime(ADSREnvelope<tfloat>::kAttack, 0.);
-			mAmpEnv.SetStageTime(ADSREnvelope<tfloat>::kDecay, kAmpDecayTime);
+			mAmpEnv.SetStageTime(ADSREnvelope<>::EStage::kAttack, 0.);
+			mAmpEnv.SetStageTime(ADSREnvelope<>::EStage::kDecay, kAmpDecayTime);
 
-			mPitchEnv.SetStageTime(ADSREnvelope<tfloat>::kAttack, 0.);
-			mPitchEnv.SetStageTime(ADSREnvelope<tfloat>::kDecay, kPitchDecayTime);
+			mPitchEnv.SetStageTime(ADSREnvelope<>::EStage::kAttack, 0.);
+			mPitchEnv.SetStageTime(ADSREnvelope<>::EStage::kDecay, kPitchDecayTime);
 		}
 
 		inline tfloat Process()

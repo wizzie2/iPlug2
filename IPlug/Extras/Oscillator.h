@@ -1,10 +1,10 @@
 /*
  ==============================================================================
- 
- This file is part of the iPlug 2 library. Copyright (C) the iPlug 2 developers. 
- 
+
+ This file is part of the iPlug 2 library. Copyright (C) the iPlug 2 developers.
+
  See LICENSE.txt for  more info.
- 
+
  ==============================================================================
 */
 
@@ -13,70 +13,66 @@
 
 BEGIN_IPLUG_NAMESPACE
 
-template <typename T>
-class IOscillator
+template <typename T = tfloat>
+struct IOscillator
 {
-public:
-  IOscillator(double startPhase = 0., double startFreq = 1.)
-  : mStartPhase(startPhase)
-  {
-    SetFreqCPS(startFreq);
-  }
+	IOscillator(T startPhase = 0., T startFreq = 1.) : mStartPhase(startPhase)
+	{
+		SetFreqCPS(startFreq);
+	}
 
-  virtual inline T Process(double freqHz) = 0;
+//	inline T Process(T freqHz) = 0;
 
-  inline void SetFreqCPS(double freqHz)
-  {
-    mPhaseIncr = mSampleRateReciprocal * freqHz;
-  }
+	constexpr void SetFreqCPS(T freqHz)
+	{
+		mPhaseIncr = mSampleRateReciprocal * freqHz;
+	}
 
-  void SetSampleRate(double sampleRate)
-  {
-    mSampleRateReciprocal = (1./sampleRate);
-  }
+	constexpr void SetSampleRate(T sampleRate)
+	{
+		mSampleRateReciprocal = (1. / sampleRate);
+	}
 
-  void Reset()
-  {
-    mPhase = mStartPhase;
-  }
-  
-  void SetPhase(double phase)
-  {
-    mPhase = phase;
-  }
+	constexpr void Reset()
+	{
+		mPhase = mStartPhase;
+	}
 
-protected:
-  double mPhase = 0.;  // float phase (goes between 0. and 1.)
-  double mPhaseIncr = 0.; // how much to add to the phase on each T
-  double mSampleRateReciprocal = 1./44100.;
-  double mStartPhase;
+	constexpr void SetPhase(T phase)
+	{
+		mPhase = phase;
+	}
+
+ protected:
+	T mSampleRateReciprocal = 1. / 44100.;
+	T mStartPhase           = 0.;
+	T mPhase                = 0.;  // float phase (goes between 0. and 1.)
+	T mPhaseIncr            = mSampleRateReciprocal;  // how much to add to the phase on each T
 };
 
-template <typename T>
-class SinOscillator : public IOscillator<T>
-{
-public:
-  SinOscillator(double startPhase = 0., double startFreq = 1.)
-  : IOscillator<T>(startPhase, startFreq)
-  {
-  }
-  
-  inline T Process()
-  {
-    IOscillator<T>::mPhase = IOscillator<T>::mPhase + IOscillator<T>::mPhaseIncr;
-    return std::sin(IOscillator<T>::mPhase * math::constants::pi_v<double> * 2.);
-  }
 
-  inline T Process(double freqHz) override
-  {
-    IOscillator<T>::SetFreqCPS(freqHz);
-    IOscillator<T>::mPhase = IOscillator<T>::mPhase + IOscillator<T>::mPhaseIncr;
-    return std::sin(IOscillator<T>::mPhase * math::constants::pi_v<double> * 2.);
-  }
+template <typename T = tfloat>
+struct SinOscillator : public IOscillator<T>
+{
+	SinOscillator(T startPhase = 0., T startFreq = 1.) : IOscillator<T>(startPhase, startFreq) {}
+
+	constexpr T Process() const
+	{
+		IOscillator<T>::mPhase = IOscillator<T>::mPhase + IOscillator<T>::mPhaseIncr;
+		return std::sin(IOscillator<T>::mPhase * math::constants::pi_v<T> * 2);
+	}
+
+	constexpr T Process(T freqHz)
+	{
+		IOscillator<T>::SetFreqCPS(freqHz);
+		IOscillator<T>::mPhase = IOscillator<T>::mPhase + IOscillator<T>::mPhaseIncr;
+		return std::sin(IOscillator<T>::mPhase * math::constants::pi_v<T> * 2);
+	}
 };
 
 /*
- FastSinOscillator - fast sinusoidal oscillator / table look up, based on an approach and code used by Miller Puckette in Pure Data, originally by Robert Höldrich
+ FastSinOscillator - fast sinusoidal oscillator / table look up, based on an approach and code used by Miller Puckette
+ in Pure Data, originally by Robert Höldrich
 
  From some correspondence with M.S.P...
 
@@ -109,106 +105,77 @@ public:
  point representation of the fractional part.
  */
 
-#define UNITBIT32 1572864.  /* 3*2^19; bit 32 has place value 1 */
-#define HIOFFSET 1
-#define LOWOFFSET 0
-
-#ifdef _MSC_VER
-#define ALIGN16 __declspec(align(16))
-#define ALIGNED(x)
-#else
-#define ALIGN16 alignas(16)
-#define ALIGNED(x) __attribute__ ((aligned (x)))
-#endif
-
-template <typename T>
+template <class T = tfloat>
 class FastSinOscillator : public IOscillator<T>
 {
-  union tabfudge
-  {
-    double d;
-    int i[2];
-  } ALIGNED(8);
+	static constexpr double UNITBIT32 = 1572864.; /* 3*2^19; bit 32 has place value 1 */
+	static constexpr auto HIOFFSET  = 1;
+	static constexpr auto LOWOFFSET = 0;
 
-public:
-  FastSinOscillator(double startPhase = 0., double startFreq = 1.)
-  : IOscillator<T>(startPhase * tableSizeM1, startFreq)
-  {
-  }
+	union tabfudge
+	{
+		double d;
+		int i[2];
+	};
 
-  //todo rewrite this
-  inline T Process()
-  {
-    T output = 0.;
-    ProcessBlock(&output, 1);
+ public:
+	FastSinOscillator(T startPhase = 0., T startFreq = 1.) : IOscillator<T>(startPhase * tableSizeM1, startFreq) {}
 
-    return output;
-  }
+	// todo rewrite this
+	constexpr T Process() const
+	{
+		T output = 0.;
+		ProcessBlock(&output, 1);
 
-  inline T Process(double freqCPS) override
-  {
-    IOscillator<T>::SetFreqCPS(freqCPS);
+		return output;
+	}
 
-    T output = 0.;
-    ProcessBlock(&output, 1);
+	constexpr T Process(T freqCPS)
+	{
+		IOscillator<T>::SetFreqCPS(freqCPS);
 
-    return output;
-  }
+		T output = 0.;
+		ProcessBlock(&output, 1);
 
-  static inline T Lookup(double phaseRadians)
-  {
-    double tPhase = phaseRadians / (math::constants::pi_v<double> * 2.) * tableSizeM1;
+		return output;
+	}
 
-    tPhase += (double) UNITBIT32;
+	constexpr void ProcessBlock(T* pOutput, int nFrames)
+	{
+		T phase           = IOscillator<T>::mPhase + static_cast<T>(UNITBIT32);
+		const T phaseIncr = IOscillator<T>::mPhaseIncr * tableSize;
 
-    union tabfudge tf;
-    tf.d = UNITBIT32;
-    const int normhipart = tf.i[HIOFFSET];
+		union tabfudge tf{UNITBIT32};
+		const int normhipart = tf.i[HIOFFSET];
 
-    tf.d = tPhase;
-    const T* addr = mLUT + (tf.i[HIOFFSET] & tableSizeM1);
-    tf.i[HIOFFSET] = normhipart;
-    const double frac = tf.d - UNITBIT32;
-    const T f1 = addr[0];
-    const T f2 = addr[1];
-    return f1 + frac * (f2 - f1);
-  }
+		for (auto s = 0; s < nFrames; s++)
+		{
+			tf.d = phase;
+			phase += phaseIncr;
+			const double* addr = mLUT + (tf.i[HIOFFSET] & tableSizeM1);  // Obtain the integer portion
+			tf.i[HIOFFSET]     = normhipart;                             // Force the double to wrap.
+			const T frac       = static_cast<T>(tf.d - UNITBIT32);
+			const T f1         = static_cast<T>(addr[0]);
+			const T f2         = static_cast<T>(addr[1]);
+			mLastOutput = pOutput[s] = T(f1 + frac * (f2 - f1));
+		}
 
-  void ProcessBlock(T* pOutput, int nFrames)
-  {
-    double phase = IOscillator<T>::mPhase + (double) UNITBIT32;
-    const double phaseIncr = IOscillator<T>::mPhaseIncr * tableSize;
+		// Restore mPhase
+		tf.d                  = UNITBIT32 * tableSize;
+		const int normhipart2 = tf.i[HIOFFSET];
+		tf.d =
+			phase + (UNITBIT32 * tableSize - UNITBIT32);  // Remove the offset we introduced at the start of UNITBIT32.
+		tf.i[HIOFFSET]         = normhipart2;
+		IOscillator<T>::mPhase = static_cast<T>(tf.d - UNITBIT32 * tableSize);
+	}
 
-    union tabfudge tf;
-    tf.d = UNITBIT32;
-    const int normhipart = tf.i[HIOFFSET];
+	T mLastOutput = 0.;
 
-    for (auto s = 0; s < nFrames; s++)
-    {
-      tf.d = phase;
-      phase += phaseIncr;
-      const T* addr = mLUT + (tf.i[HIOFFSET] & tableSizeM1); // Obtain the integer portion
-      tf.i[HIOFFSET] = normhipart; // Force the double to wrap.
-      const double frac = tf.d - UNITBIT32;
-      const T f1 = addr[0];
-      const T f2 = addr[1];
-      mLastOutput = pOutput[s] = T(f1 + frac * (f2 - f1));
-    }
-
-    // Restore mPhase
-    tf.d = UNITBIT32 * tableSize;
-    const int normhipart2 = tf.i[HIOFFSET];
-    tf.d = phase + (UNITBIT32 * tableSize - UNITBIT32); // Remove the offset we introduced at the start of UNITBIT32.
-    tf.i[HIOFFSET] = normhipart2;
-    IOscillator<T>::mPhase = tf.d - UNITBIT32 * tableSize;
-  }
-
-  T mLastOutput = 0.;
-private:
-  static const int tableSize = 512; // 2^9
-  static const int tableSizeM1 = 511; // 2^9 -1
-  static const T mLUT[513];
-} ALIGNED(8);
+ private:
+	static constexpr int tableSize   = 512;  // 2^9
+	static constexpr int tableSizeM1 = 511;  // 2^9 -1
+	alignas(8) static const double mLUT[513];
+};
 
 #include "Oscillator_table.h"
 
