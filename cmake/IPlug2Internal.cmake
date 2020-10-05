@@ -36,6 +36,40 @@ set(_projectConfigArgs
     "PCH_FOLDER_NAME"
 )
 
+set(_projectConfigArgs_overridable
+    "BUNDLE_NAME"
+    "BUNDLE_DOMAIN"
+    "BUNDLE_ICON"
+    "PLUG_NAME"
+    "PLUG_NAME_SHORT"
+    "PLUG_CLASS_NAME"
+    "PLUG_UNIQUE_ID"
+    "PLUG_MFR_ID"
+    "PLUG_URL_STR"
+    "PLUG_EMAIL_STR"
+    "PLUG_COPYRIGHT_STR"
+    "PLUG_CHANNEL_IO"
+    "PLUG_LATENCY"
+    "PLUG_DOES_MIDI_IN"
+    "PLUG_DOES_MIDI_OUT"
+    "PLUG_DOES_MPE"
+    "PLUG_DOES_STATE_CHUNKS"
+    "PLUG_HAS_UI"
+    "PLUG_WIDTH"
+    "PLUG_HEIGHT"
+    "PLUG_MIN_WIDTH"
+    "PLUG_MIN_HEIGHT"
+    "PLUG_MAX_WIDTH"
+    "PLUG_MAX_HEIGHT"
+    "PLUG_FPS"
+    "PLUG_SHARED_RESOURCES"
+    "PLUG_TYPE"
+    "PLUG_HOST_RESIZE"
+    "PLUG_TFLOAT_TYPE"
+    "SHARED_RESOURCES_SUBPATH"
+)
+
+
 # configuration variables that are considered string values and gets quotation marks applied in the definition
 set(_iplug_config_string_variables
     PLUG_NAME
@@ -505,7 +539,10 @@ endfunction()
 #------------------------------------------------------------------------------
 # _iplug_warn_unparsed_arguments
 
-function(_iplug_warn_unparsed_arguments _list)
+function(_iplug_warn_unparsed_arguments _pre_str _list)
+    if(DEFINED _pre_str)
+        string(APPEND _pre_str " ")
+    endif()
     set(_list ${${_list}})
     if(_list)
         while(TRUE)
@@ -515,7 +552,7 @@ function(_iplug_warn_unparsed_arguments _list)
             endif()
             list(POP_FRONT _list _item_name)
             list(POP_FRONT _list _item_val)
-            iplug_warning("Unknown configuration ${_item_name} = \"${_item_val}\".")
+            iplug_warning("Unknown configuration ${_pre_str}${_item_name} = \"${_item_val}\".")
         endwhile()
     endif()
 endfunction()
