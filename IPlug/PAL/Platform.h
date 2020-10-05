@@ -43,7 +43,6 @@ namespace iplug::generic
 		using utf16  = char16_t;
 		using utf32  = char32_t;
 		using size_t = std::size_t;
-		using tfloat = PLUG_TFLOAT_TYPE;
 	};
 }  // namespace iplug::generic
 
@@ -115,7 +114,7 @@ namespace iplug
 	using utf16  = type::Platform::utf16;   // 16-bit unsigned
 	using utf32  = type::Platform::utf32;   // 32-bit unsigned
 	using size_t = type::Platform::size_t;  // 32-bit or 64-bit unsigned
-	using tfloat = type::Platform::tfloat;  // defined floating-point type float/double
+	using tfloat = PLUG_TFLOAT_TYPE;		// defined floating-point type float/double
 
 
 	//-----------------------------------------------------------------------------
