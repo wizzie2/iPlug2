@@ -76,7 +76,7 @@ class IPlugVST3PresetParameter : public Steinberg::Vst::Parameter
 {
 public:
   IPlugVST3PresetParameter(int nPresets)
-  : Steinberg::Vst::Parameter(STR16("Preset"), kPresetParam, STR16(""), 0, nPresets - 1, Steinberg::Vst::ParameterInfo::kIsProgramChange)
+  : Steinberg::Vst::Parameter(STR16("Preset"), static_cast<uint32>(EVST3ParamIDs::kPresetParam), STR16(""), 0, nPresets - 1, Steinberg::Vst::ParameterInfo::kIsProgramChange)
   {}
   
   Steinberg::Vst::ParamValue toPlain(Steinberg::Vst::ParamValue vNormalized) const override
@@ -97,7 +97,7 @@ class IPlugVST3BypassParameter : public Steinberg::Vst::StringListParameter
 {
 public:
   IPlugVST3BypassParameter()
-  : Steinberg::Vst::StringListParameter(STR16("Bypass"), kBypassParam, 0, Steinberg::Vst::ParameterInfo::kCanAutomate | Steinberg::Vst::ParameterInfo::kIsBypass | Steinberg::Vst::ParameterInfo::kIsList)
+  : Steinberg::Vst::StringListParameter(STR16("Bypass"), static_cast<uint32>(EVST3ParamIDs::kBypassParam), 0, Steinberg::Vst::ParameterInfo::kCanAutomate | Steinberg::Vst::ParameterInfo::kIsBypass | Steinberg::Vst::ParameterInfo::kIsList)
   {
     appendString(STR16("off"));
     appendString(STR16("on"));

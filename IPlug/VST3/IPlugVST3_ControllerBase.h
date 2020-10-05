@@ -123,7 +123,7 @@ class IPlugVST3ControllerBase
 			unitNameSetter.fromAscii(VST3_CC_UNITNAME);
 			pEditController->addUnit(new Steinberg::Vst::Unit(unitInfo));
 
-			Steinberg::Vst::ParamID paramIdx = kMIDICCParamStartIdx;
+			Steinberg::Vst::ParamID paramIdx = static_cast<uint32>(EVST3ParamIDs::kMIDICCParamStartIdx);
 
 			WDL_String chanGroupStr;
 			Steinberg::Vst::UnitID midiCCsUnitID = unitID;
@@ -164,11 +164,11 @@ class IPlugVST3ControllerBase
 		if (!SetVST3ParamNormalized(tag, value))
 			return false;
 
-		if (tag >= kBypassParam)
+		if (tag >= static_cast<uint32>(EVST3ParamIDs::kBypassParam))
 		{
 			switch (tag)
 			{
-				case kPresetParam:
+				case static_cast<uint32>(EVST3ParamIDs::kPresetParam):
 				{
 					pPlug->RestorePreset(std::round((pPlug->NPresets() - 1.0) * value));
 					break;
@@ -184,7 +184,7 @@ class IPlugVST3ControllerBase
 			if (pParam)
 			{
 				pParam->SetNormalized(value);
-				pPlug->OnParamChangeUI(tag, kHost);
+				pPlug->OnParamChangeUI(tag, EParamSource::kHost);
 				pPlug->SendParameterValueFromDelegate(tag, value, true);
 			}
 		}

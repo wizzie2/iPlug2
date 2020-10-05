@@ -475,7 +475,7 @@ namespace iplug
 		 * @param label /todo */
 		void AddBusInfo(ERoute direction, int NChans)
 		{
-			mBusInfo[direction].Add(new IBusInfo(direction, NChans));
+			mBusInfo[static_cast<int>(direction)].Add(new IBusInfo(direction, NChans));
 		}
 
 		/** /todo
@@ -484,8 +484,8 @@ namespace iplug
 		 * @return IBusInfo* /todo */
 		const IBusInfo* GetBusInfo(ERoute direction, int index) const
 		{
-			assert(index >= 0 && index < mBusInfo[direction].GetSize());
-			return mBusInfo[direction].Get(index);
+			assert(index >= 0 && index < mBusInfo[static_cast<int>(direction)].GetSize());
+			return mBusInfo[static_cast<int>(direction)].Get(index);
 		}
 
 		/** /todo
@@ -496,8 +496,8 @@ namespace iplug
 		{
 			int NChans = 0;
 
-			if (index >= 0 && index < mBusInfo[direction].GetSize())
-				NChans = mBusInfo[direction].Get(index)->NChans();
+			if (index >= 0 && index < mBusInfo[static_cast<int>(direction)].GetSize())
+				NChans = mBusInfo[static_cast<int>(direction)].Get(index)->NChans();
 
 			return NChans;
 		}
@@ -507,7 +507,7 @@ namespace iplug
 		 * @return int /todo */
 		int NBuses(ERoute direction) const
 		{
-			return mBusInfo[direction].GetSize();
+			return mBusInfo[static_cast<int>(direction)].GetSize();
 		}
 
 		/** Get the total number of channels across all direction buses for this IOConfig
@@ -517,8 +517,8 @@ namespace iplug
 		{
 			int total = 0;
 
-			for (int i = 0; i < mBusInfo[direction].GetSize(); i++)
-				total += mBusInfo[direction].Get(i)->NChans();
+			for (int i = 0; i < mBusInfo[static_cast<int>(direction)].GetSize(); i++)
+				total += mBusInfo[static_cast<int>(direction)].Get(i)->NChans();
 
 			return total;
 		}
@@ -529,9 +529,9 @@ namespace iplug
 		 * @return false /todo */
 		bool ContainsWildcard(ERoute direction) const
 		{
-			for (auto i = 0; i < mBusInfo[direction].GetSize(); i++)
+			for (auto i = 0; i < mBusInfo[static_cast<int>(direction)].GetSize(); i++)
 			{
-				if (mBusInfo[direction].Get(i)->NChans() < 0)
+				if (mBusInfo[static_cast<int>(direction)].Get(i)->NChans() < 0)
 					return true;
 			}
 

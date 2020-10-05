@@ -37,7 +37,7 @@ tresult PLUGIN_API IPlugVST3Processor::initialize(FUnknown* context)
     Initialize(this);
     IPlugVST3GetHost(this, context);
     OnHostIdentified();
-    OnParamReset(kReset);
+    OnParamReset(EParamSource::kReset);
     
     return kResultOk;
   }

@@ -37,7 +37,7 @@ tresult PLUGIN_API IPlugVST3Controller::initialize(FUnknown* context)
 		Initialize(this, mPlugIsInstrument, mDoesMidiIn);
 		IPlugVST3GetHost(this, context);
 		OnHostIdentified();
-		OnParamReset(kReset);
+		OnParamReset(EParamSource::kReset);
 
 		// Load iplug parameters into the GUI thread visible values
 
@@ -98,7 +98,7 @@ tresult PLUGIN_API IPlugVST3Controller::getMidiControllerAssignment(Steinberg::i
 {
 	if (busIndex == 0 && midiChannel < VST3_NUM_CC_CHANS)
 	{
-		tag = kMIDICCParamStartIdx + (midiChannel * kCountCtrlNumber) + midiCCNumber;
+		tag = static_cast<uint32>(EVST3ParamIDs::kMIDICCParamStartIdx) + (midiChannel * kCountCtrlNumber) + midiCCNumber;
 		return kResultTrue;
 	}
 
@@ -111,7 +111,7 @@ tresult PLUGIN_API IPlugVST3Controller::getProgramName(ProgramListID listId,
 													   Steinberg::int32 programIndex,
 													   String128 name /*out*/)
 {
-	if (NPresets() && listId == kPresetParam)
+	if (NPresets() && listId == static_cast<int32>(EVST3ParamIDs::kPresetParam))
 	{
 		Steinberg::UString(name, 128).fromAscii(GetPresetName(programIndex));
 		return kResultTrue;

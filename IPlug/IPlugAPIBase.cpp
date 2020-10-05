@@ -105,14 +105,14 @@ void IPlugAPIBase::PrintDebugInfo() const
 
 void IPlugAPIBase::SetHost(const char* host, int version)
 {
-	assert(mHost == kHostUninit);
+	assert(mHost == EHost::kHostUninit);
 
 	mHost        = LookUpHost(host);
 	mHostVersion = version;
 
 	WDL_String vStr;
 	GetVersionStr(version, vStr);
-	Trace(TRACELOC, "host_%sknown:%s:%s", (mHost == kHostUnknown ? "un" : ""), host, vStr.Get());
+	Trace(TRACELOC, "host_%sknown:%s:%s", (mHost == EHost::kHostUnknown ? "un" : ""), host, vStr.Get());
 
 	HostSpecificInit();
 	OnHostIdentified();
@@ -123,7 +123,7 @@ void IPlugAPIBase::SetParameterValue(int idx, double normalizedValue)
 	Trace(TRACELOC, "%d:%f", idx, normalizedValue);
 	GetParam(idx)->SetNormalized(normalizedValue);
 	InformHostOfParamChange(idx, normalizedValue);
-	OnParamChange(idx, kUI);
+	OnParamChange(idx, EParamSource::kUI);
 }
 
 void IPlugAPIBase::DirtyParametersFromUI()

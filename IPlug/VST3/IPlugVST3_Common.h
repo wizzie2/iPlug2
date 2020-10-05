@@ -61,7 +61,7 @@ struct IPlugVST3State
 			Steinberg::int32 bytesRead = 0;
 			auto status = pState->read(buffer, (Steinberg::int32) bytesPerBlock, &bytesRead);
 
-			if (bytesRead <= 0 || (status != Steinberg::kResultTrue && pPlug->GetHost() != kHostWaveLab))
+			if (bytesRead <= 0 || (status != Steinberg::kResultTrue && pPlug->GetHost() != EHost::kHostWaveLab))
 				break;
 
 			chunk.PutBytes(buffer, bytesRead);
@@ -94,7 +94,7 @@ static void IPlugVST3GetHost(IPlugAPIBase* pPlug, Steinberg::FUnknown* context)
 	char hostNameCString[128];
 	Steinberg::FUnknownPtr<Steinberg::Vst::IHostApplication> pApp(context);
 
-	if ((pPlug->GetHost() == kHostUninit) && pApp)
+	if ((pPlug->GetHost() == EHost::kHostUninit) && pApp)
 	{
 		pApp->getName(tmpStringBuf);
 		Steinberg::UString(tmpStringBuf, 128).toAscii(hostNameCString, 128);

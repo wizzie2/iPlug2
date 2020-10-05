@@ -311,11 +311,11 @@ void IPlugVST3ProcessorBase::ProcessParameterChanges(ProcessData& data, IPlugQue
 
 		if (paramQueue->getPoint(numPoints - 1, offsetSamples, value) == kResultTrue)
 		{
-			int idx = paramQueue->getParameterId();
+			uint32 idx = paramQueue->getParameterId();
 
 			switch (idx)
 			{
-				case kBypassParam:
+				case static_cast<uint32>(EVST3ParamIDs::kBypassParam):
 				{
 					const bool bypassed = (value > 0.5);
 
@@ -326,7 +326,7 @@ void IPlugVST3ProcessorBase::ProcessParameterChanges(ProcessData& data, IPlugQue
 				}
 				default:
 				{
-					if (idx >= 0 && idx < mPlug.NParams())
+					if (idx >= 0 && idx < static_cast<uint32>(mPlug.NParams()))
 					{
 #ifdef PARAMS_MUTEX
 						mPlug.mParams_mutex.Enter();
@@ -334,14 +334,14 @@ void IPlugVST3ProcessorBase::ProcessParameterChanges(ProcessData& data, IPlugQue
 						mPlug.GetParam(idx)->SetNormalized(value);
 
 						// In VST3 non distributed the same parameter value is also set via IPlugVST3Controller::setParamNormalized(ParamID tag, ParamValue value)
-						mPlug.OnParamChange(idx, kHost, offsetSamples);
+						mPlug.OnParamChange(idx, EParamSource::kHost, offsetSamples);
 #ifdef PARAMS_MUTEX
 						mPlug.mParams_mutex.Leave();
 #endif
 					}
-					else if (idx >= kMIDICCParamStartIdx)
+					else if (idx >= static_cast<uint32>(EVST3ParamIDs::kMIDICCParamStartIdx))
 					{
-						int index   = idx - kMIDICCParamStartIdx;
+						int index   = idx - static_cast<uint32>(EVST3ParamIDs::kMIDICCParamStartIdx);
 						int channel = index / kCountCtrlNumber;
 						int ctrlr   = index % kCountCtrlNumber;
 

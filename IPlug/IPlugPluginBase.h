@@ -576,7 +576,7 @@ class IPluginBase : public EDITOR_DELEGATE_CLASS
 	/** Host version number stored as 0xVVVVRRMM: V = version, R = revision, M = minor revision */
 	int mHostVersion = 0;
 	/** Host that has been identified, see EHost enum */
-	EHost mHost = kHostUninit;
+	EHost mHost = EHost::kHostUninit;
 	/** macOS/iOS bundle ID */
 	WDL_String mBundleID;
 	/** Saving VST3 format presets requires this see SavePresetAsVSTPreset */

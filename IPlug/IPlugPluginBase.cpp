@@ -142,7 +142,7 @@ int IPluginBase::UnserializeParams(const IByteChunk& chunk, int startPos)
 		Trace(TRACELOC, "%d %s %f", i, pParam->GetName(), pParam->Value());
 	}
 
-	OnParamReset(kPresetRecall);
+	OnParamReset(EParamSource::kPresetRecall);
 	LEAVE_PARAMS_MUTEX
 
 	return pos;

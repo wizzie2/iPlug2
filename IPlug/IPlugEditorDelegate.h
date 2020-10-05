@@ -135,7 +135,7 @@ class IEditorDelegate
 	 * @param sampleOffset For sample accurate parameter changes - index into current block */
 	virtual void OnParamChange(int paramIdx, EParamSource source, int sampleOffset = -1)
 	{
-		Trace(TRACELOC, "idx:%i src:%s\n", paramIdx, ParamSourceStrs[source]);
+		Trace(TRACELOC, "idx:%i src:%s\n", paramIdx, ParamSourceStrs[static_cast<size_t>(source)]);
 		OnParamChange(paramIdx);
 	}
 
@@ -149,7 +149,7 @@ class IEditorDelegate
 	 * low-priority thread, should be used to update UI (e.g. for hiding or showing controls). You should not update
 	 * parameter objects using this method.
 	 * @param paramIdx The index of the parameter that changed */
-	virtual void OnParamChangeUI(int paramIdx, EParamSource source = kUnknown) {};
+	virtual void OnParamChangeUI(int paramIdx, EParamSource source = EParamSource::kUnknown) {};
 
 	/** Called when parameteres have changed to inform the plugin of the changes
 	 * Override only if you need to handle notifications and updates in a specialist manner (e.g. if the ordering of

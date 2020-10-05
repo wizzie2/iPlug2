@@ -66,7 +66,7 @@ namespace iplug
 		SelectMIDIDevice(ERoute::kInput, mState.mMidiInDev.Get());
 		SelectMIDIDevice(ERoute::kOutput, mState.mMidiOutDev.Get());
 
-		mIPlug->OnParamReset(kReset);
+		mIPlug->OnParamReset(EParamSource::kReset);
 		mIPlug->OnActivate(true);
 
 		return true;

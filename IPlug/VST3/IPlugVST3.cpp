@@ -42,7 +42,7 @@ tresult PLUGIN_API IPlugVST3::initialize(FUnknown* context)
 
 			IPlugVST3GetHost(this, context);
 			OnHostIdentified();
-			OnParamReset(kReset);
+			OnParamReset(EParamSource::kReset);
 
 			return kResultOk;
 		}
@@ -166,7 +166,7 @@ tresult PLUGIN_API IPlugVST3::getMidiControllerAssignment(Steinberg::int32 busIn
 {
 	if (busIndex == 0 && midiChannel < VST3_NUM_CC_CHANS)
 	{
-		tag = kMIDICCParamStartIdx + (midiChannel * kCountCtrlNumber) + midiCCNumber;
+		tag = static_cast<uint32>(EVST3ParamIDs::kMIDICCParamStartIdx) + (midiChannel * kCountCtrlNumber) + midiCCNumber;
 		return kResultTrue;
 	}
 
