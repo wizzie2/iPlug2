@@ -18,7 +18,7 @@ namespace iplug::math::constants
 	#define FDECLARE_CONST(name, number)                                                                          \
 		template <class T>                                                                                        \
 		inline constexpr std::conditional_t<type::IsFloatingPoint<T>, T, type::InvalidType<T>> name##_v = number; \
-		inline constexpr float name = name##_v<float>;
+		inline constexpr tfloat name = name##_v<tfloat>;
 
 	// Declare integral types
 	#define IDECLARE_CONST(name, number)                                                                          \
