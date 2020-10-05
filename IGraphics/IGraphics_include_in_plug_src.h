@@ -61,4 +61,4 @@ namespace iplug::igraphics
 
 }  // namespace iplug::igraphics
 
-#undef IGraphicsPlatform
+#undef IGRAPHICS

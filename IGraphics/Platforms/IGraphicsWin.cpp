@@ -129,7 +129,6 @@ StaticStorage<IGraphicsWin::HFontHolder> IGraphicsWin::sHFontCache;
 
 #pragma mark - Mouse and tablet helpers
 
-// extern int GetScaleForHWND(HWND hWnd);
 extern const int GetScaleForHWND(const HWND hWnd, const bool useCachedResult = true);
 
 inline IMouseInfo IGraphicsWin::GetMouseInfo(LPARAM lParam, WPARAM wParam)
@@ -142,13 +141,7 @@ inline IMouseInfo IGraphicsWin::GetMouseInfo(LPARAM lParam, WPARAM wParam)
                         (wParam & MK_RBUTTON),
                         (wParam & MK_SHIFT),
                         (wParam & MK_CONTROL),
-#ifdef AAX_API
-						GetAsyncKeyState(VK_MENU) < 0
-#else
-						GetKeyState(VK_MENU) < 0
-#endif
-	);
-
+                        (EPlugApi::Native == EPlugApi::AAX) ? GetAsyncKeyState(VK_MENU) < 0 : GetKeyState(VK_MENU) < 0);
 	return info;
 }
 
