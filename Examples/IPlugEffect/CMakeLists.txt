@@ -7,7 +7,6 @@ project(IPlugEffect)
 # Minimalistic configuration using mostly default values
 iplug_configure_project(
     PLUG_NAME_SHORT             IPCT
-    PLUG_VERSION_HEX            0x00010000
     PLUG_UNIQUE_ID              'Ipef'
     PLUG_CHANNEL_IO             "1-1 2-2"
 

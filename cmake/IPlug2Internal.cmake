@@ -8,7 +8,6 @@ set(_projectConfigArgs
     "PLUG_NAME_SHORT"
     "PLUG_CLASS_NAME"
     "PLUG_MFR"
-    "PLUG_VERSION_HEX"
     "PLUG_VERSION_STR"
     "PLUG_UNIQUE_ID"
     "PLUG_MFR_ID"

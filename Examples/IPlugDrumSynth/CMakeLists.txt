@@ -11,7 +11,6 @@ iplug_configure_project(
     PLUG_NAME                   "IPlugDrumSynth"
     PLUG_NAME_SHORT             "IPDS"
     PLUG_MFR                    "AcmeInc"
-    PLUG_VERSION_HEX            0x00010000
     PLUG_VERSION_STR            "1.0.0"
     PLUG_UNIQUE_ID              'GZDU'
     PLUG_MFR_ID                 'Acme'

@@ -12,7 +12,6 @@ iplug_configure_project(
     PLUG_NAME                   "My Plugin"
     PLUG_NAME_SHORT             IPCT
     PLUG_MFR                    AcmeInc
-    PLUG_VERSION_HEX            0x00010000
     PLUG_VERSION_STR            1.0.0
     PLUG_UNIQUE_ID              'Ipct'
     PLUG_MFR_ID                 'Acme'

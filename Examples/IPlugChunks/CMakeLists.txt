@@ -15,7 +15,6 @@ iplug_configure_project(
     PLUG_NAME                   "IPlugChunks"
     PLUG_NAME_SHORT             "IPCH"
     PLUG_MFR                    "AcmeInc"
-    PLUG_VERSION_HEX            0x00010000
     PLUG_VERSION_STR            "1.0.0"
     PLUG_UNIQUE_ID              'W1Q1'
     PLUG_MFR_ID                 'Acme'

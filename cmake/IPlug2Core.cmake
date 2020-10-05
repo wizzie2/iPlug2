@@ -169,8 +169,22 @@ macro(iplug_configure_project)
     _iplug_validate_config_variables(CONFIG)
 
     # additional variables that are based on existing variables
-    # _iplug_add_config_variable(PLUG_VERSION_HEX    "")  # TODO: generate information from PLUG_VERSION_STR
     _iplug_add_config_variable(CONFIG "" BUNDLE_MFR "${CONFIG_PLUG_MFR}")
+
+    # Generate and add PLUG_VERSION_HEX from PLUG_VERSION_STR
+    # Yes, we could have done an ordinary replace dots with semi-colons, but thats no fun.
+    string(REGEX REPLACE "^([0-9]+)\\.([0-9]+)\\.([0-9]+)$" "\\1;\\2;\\3" _str ${CONFIG_PLUG_VERSION_STR})
+    list(POP_FRONT _str PLUG_VERSION_STR_MAJOR_NUMBER)
+    list(POP_FRONT _str PLUG_VERSION_STR_MINOR_NUMBER)
+    list(POP_FRONT _str PLUG_VERSION_STR_PATCH_NUMBER)
+    iplug_validate_string(PLUG_VERSION_STR_MAJOR_NUMBER MINVALUE 0 MAXVALUE 65535)
+    iplug_validate_string(PLUG_VERSION_STR_MINOR_NUMBER MINVALUE 0 MAXVALUE 255)
+    iplug_validate_string(PLUG_VERSION_STR_PATCH_NUMBER MINVALUE 0 MAXVALUE 255)
+    math(EXPR _VERSION_HEX "(${PLUG_VERSION_STR_MAJOR_NUMBER} << 16) +
+                            (${PLUG_VERSION_STR_MINOR_NUMBER} << 8) +
+                            (${PLUG_VERSION_STR_PATCH_NUMBER})"
+                            OUTPUT_FORMAT HEXADECIMAL)
+    _iplug_add_config_variable(CONFIG "" PLUG_VERSION_HEX "${_VERSION_HEX}")
 
     set(_caller_override "")
 
