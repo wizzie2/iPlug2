@@ -34,6 +34,7 @@ set(_projectConfigArgs
     "PLUG_TFLOAT_TYPE"
     "SHARED_RESOURCES_SUBPATH"
     "PCH_FOLDER_NAME"
+    "OBJC_PREFIX"
 )
 
 set(_projectConfigArgs_overridable
@@ -67,6 +68,7 @@ set(_projectConfigArgs_overridable
     "PLUG_HOST_RESIZE"
     "PLUG_TFLOAT_TYPE"
     "SHARED_RESOURCES_SUBPATH"
+    "OBJC_PREFIX"
 )
 
 
@@ -617,6 +619,7 @@ macro(_iplug_validate_config_variables _prefix)
     set(VALIDATION_BUNDLE_DOMAIN            DEFAULT "com" NOTEMPTY ALPHAFIRST ALPHA NUMERIC HYPHEN)
     set(VALIDATION_BUNDLE_NAME              DEFAULT "${PROJECT_NAME}" NOTEMPTY ALPHAFIRST ALPHA NUMERIC HYPHEN)
     set(VALIDATION_SHARED_RESOURCES_SUBPATH DEFAULT "${PROJECT_NAME}")
+    set(VALIDATION_OBJC_PREFIX              ALPHA NUMERIC UNDERSCORE MINLENGTH 3 MAXLENGTH 31)
 
     foreach(_cfg IN LISTS _projectConfigArgs)
         iplug_validate_string(${_cfg} PREFIX ${_prefix} ${_extraFlags} ${VALIDATION_${_cfg}})
