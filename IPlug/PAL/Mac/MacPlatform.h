@@ -62,6 +62,11 @@ BEGIN_INCLUDE_DEPENDENCIES
 #include <sys/types.h>
 #include <dirent.h>
 
+#ifdef __OBJC__
+	#import <Cocoa/Cocoa.h>
+	#import <Foundation/Foundation.h>
+#endif
+
 #if !NO_IGRAPHICS
 	#if defined IGRAPHICS_GL2
 		#include <OpenGL/gl.h>

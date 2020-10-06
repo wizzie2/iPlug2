@@ -16,12 +16,16 @@
 //-----------------------------------------------------------------------------
 // Global preprocessor definitions
 
-#define PREPROCESSOR_TOKEN_STRING(expr)         #expr
-#define PREPROCESSOR_TOKEN_CONCAT(A, B)         A##B
-#define PREPROCESSOR_TOKEN_VARIADIC(...)        __VA_ARGS__
-#define PREPROCESSOR_STRING(expr)               PREPROCESSOR_TOKEN_STRING(expr)
-#define PREPROCESSOR_CONCAT(A, B)               PREPROCESSOR_TOKEN_CONCAT(A, B)
-#define PREPROCESSOR_UNPARENTHESIZE(...)        PREPROCESSOR_TOKEN_VARIADIC __VA_ARGS__
+#define _INTERNAL_TOKEN_VARIADIC(...)           __VA_ARGS__
+#define _INTERNAL_TOKEN_STRING(expr)            #expr
+#define _INTERNAL_TOKEN_CONCAT(A, B)            A##B
+#define _INTERNAL_TOKEN_CONCAT3(A,B,C)		    A##B##C
+#define _INTERNAL_TOKEN_CONCAT4(A,B,C,D)		A##B##C##D
+#define PREPROCESSOR_UNPARENTHESIZE(...)        _INTERNAL_TOKEN_VARIADIC __VA_ARGS__
+#define PREPROCESSOR_STRING(expr)               _INTERNAL_TOKEN_STRING(expr)
+#define PREPROCESSOR_CONCAT(A,B)                _INTERNAL_TOKEN_CONCAT(A,B)
+#define PREPROCESSOR_CONCAT3(A,B,C)             _INTERNAL_TOKEN_CONCAT3(A,B,C)
+#define PREPROCESSOR_CONCAT4(A,B,C,D)           _INTERNAL_TOKEN_CONCAT3(A,B,C,D)
 
 // No quotes in filename
 #define PLATFORM_HEADER(filename)               PREPROCESSOR_STRING(PLATFORM_NAME/filename)
@@ -171,7 +175,7 @@
 
 #if VST3P_API || WAM_API
 	#undef NO_IGRAPHICS
-	#define NO_IGRAPHICS
+	#define NO_IGRAPHICS 1
 #endif
 
 #define API_EXT2
@@ -210,9 +214,10 @@
 #endif
 #undef API_EXT2
 
-
 #ifdef __OBJC__
-	#import <Cocoa/Cocoa.h>
+	#ifndef OBJC_PREFIX
+		#define OBJC_PREFIX vIPLUG2
+	#endif
 
 	#if VST2_API
 		#define API_SUFFIX _vst
@@ -228,17 +233,17 @@
 		#define API_SUFFIX _app
 	#endif
 
-	#define IGRAPHICS_VIEW          IGraphicsView_vIPLUG2_##API_SUFFIX
-	#define IGRAPHICS_MENU          IGraphicsMenu_vIPLUG2_##API_SUFFIX
-	#define IGRAPHICS_MENU_RCVR     IGraphicsMenuRcvr_vIPLUG2_##API_SUFFIX
-	#define IGRAPHICS_FORMATTER     IGraphicsFormatter_vIPLUG2_##API_SUFFIX
-	#define IGRAPHICS_TEXTFIELD     IGraphicsTextField_vIPLUG2_##API_SUFFIX
-	#define IGRAPHICS_TEXTFIELDCELL IGraphicsTextFieldCell_vIPLUG2_##API_SUFFIX
-	#define IGRAPHICS_GLLAYER       IGraphicsLayer_vIPLUG2_##API_SUFFIX
-	#define IGRAPHICS_IMGUIVIEW     IGraphicsImGuiView_vIPLUG2_##API_SUFFIX
-	#define MNVGtexture             MNVGtexture_vIPLUG2_##API_SUFFIX
-	#define MNVGbuffers             MNVGbuffers_vIPLUG2_##API_SUFFIX
-	#define MNVGcontext             MNVGcontext_vIPLUG2_##API_SUFFIX
+	#define IGRAPHICS_VIEW          PREPROCESSOR_CONCAT3(IGraphicsView_, OBJC_PREFIX, API_SUFFIX)
+	#define IGRAPHICS_MENU          PREPROCESSOR_CONCAT3(IGraphicsMenu_, OBJC_PREFIX, API_SUFFIX)
+	#define IGRAPHICS_MENU_RCVR     PREPROCESSOR_CONCAT3(IGraphicsMenuRcvr_, OBJC_PREFIX, API_SUFFIX)
+	#define IGRAPHICS_FORMATTER     PREPROCESSOR_CONCAT3(IGraphicsFormatter_, OBJC_PREFIX, API_SUFFIX)
+	#define IGRAPHICS_TEXTFIELD     PREPROCESSOR_CONCAT3(IGraphicsTextField_, OBJC_PREFIX, API_SUFFIX)
+	#define IGRAPHICS_TEXTFIELDCELL PREPROCESSOR_CONCAT3(IGraphicsTextFieldCell_, OBJC_PREFIX, API_SUFFIX)
+	#define IGRAPHICS_GLLAYER       PREPROCESSOR_CONCAT3(IGraphicsLayer_, OBJC_PREFIX, API_SUFFIX)
+	#define IGRAPHICS_IMGUIVIEW     PREPROCESSOR_CONCAT3(IGraphicsImGuiView_, OBJC_PREFIX, API_SUFFIX)
+	#define MNVGtexture             PREPROCESSOR_CONCAT3(MNVGtexture_, OBJC_PREFIX, API_SUFFIX)
+	#define MNVGbuffers             PREPROCESSOR_CONCAT3(MNVGbuffers_, OBJC_PREFIX, API_SUFFIX)
+	#define MNVGcontext             PREPROCESSOR_CONCAT3(MNVGcontext_, OBJC_PREFIX, API_SUFFIX)
 
 	#undef API_SUFFIX
 #endif
