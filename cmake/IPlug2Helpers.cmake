@@ -162,6 +162,8 @@ function(iplug_validate_string _variable)
 
     if(OPTION_NOTEMPTY AND _len EQUAL 0)
         iplug_syntax_error("${_defined}. Can not be an empty string.")
+    elseif(_len EQUAL 0)
+        return()
     endif()
 
     if(DEFINED OPTION_MINLENGTH AND _len LESS OPTION_MINLENGTH)
@@ -170,10 +172,6 @@ function(iplug_validate_string _variable)
 
     if(DEFINED OPTION_MAXLENGTH AND _len GREATER OPTION_MAXLENGTH)
         iplug_syntax_error("${_defined}. Length exceedes ${OPTION_MAXLENGTH} characters.")
-    endif()
-
-    if(_len EQUAL 0)
-        return()
     endif()
 
     if(DEFINED OPTION_MINVALUE OR DEFINED OPTION_MAXVALUE)
