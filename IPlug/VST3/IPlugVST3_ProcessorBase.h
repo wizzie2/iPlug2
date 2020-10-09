@@ -1,17 +1,15 @@
 
 /*
  ==============================================================================
- 
+
  This file is part of the iPlug 2 library. Copyright (C) the iPlug 2 developers.
- 
+
  See LICENSE.txt for  more info.
- 
+
  ==============================================================================
  */
 
 #pragma once
-
-#include "IPlugVST3_Defs.h"
 
 // Custom bus type function (in global namespace)
 #ifdef CUSTOM_BUSTYPE_FUNC
@@ -26,7 +24,7 @@ BEGIN_IPLUG_NAMESPACE
 
 // Default bus type function (in iplug namespace)
 #ifndef CUSTOM_BUSTYPE_FUNC
-uint64_t GetAPIBusTypeForChannelIOConfig(
+uint64 GetAPIBusTypeForChannelIOConfig(
 	int configIdx, ERoute dir, int busIdx, const IOConfig* pConfig, WDL_TypedBuf<uint64_t>* APIBusTypes = nullptr);
 #endif
 
@@ -39,8 +37,6 @@ class IPlugVST3ProcessorBase : public IPlugProcessor
 	template <class T>
 	void Initialize(T* pPlug)
 	{
-		//		using namespace Steinberg::Vst;
-
 		Steinberg::Vst::String128 tmpStringBuf;
 
 		// TODO: move this to IPlugProcessor::MaxNBuses(x,&x) method;
@@ -49,7 +45,8 @@ class IPlugVST3ProcessorBase : public IPlugProcessor
 		/*int maxNInBuses =*/MaxNBuses(ERoute::kInput, &configWithMostInputBuses);
 		int maxNOutBuses = MaxNBuses(ERoute::kOutput, &configWithMostOutputBuses);
 
-		// Add the maximum number of input buses in any ioconfig. channel count/API Bus type will be changed later if nessecary
+		// Add the maximum number of input buses in any ioconfig. channel count/API Bus type will be changed later if
+		// nessecary
 		{
 			const IOConfig* pConfig = GetIOConfig(configWithMostInputBuses);
 
@@ -71,7 +68,8 @@ class IPlugVST3ProcessorBase : public IPlugProcessor
 			}
 		}
 
-		// Add the maximum number of output buses in any ioconfig. channel count/API Bus type will be changed later if nessecary
+		// Add the maximum number of output buses in any ioconfig. channel count/API Bus type will be changed later if
+		// nessecary
 		{
 			const IOConfig* pConfig = GetIOConfig(configWithMostOutputBuses);
 			int nOut                = pConfig->NBuses(ERoute::kOutput);
@@ -160,7 +158,7 @@ class IPlugVST3ProcessorBase : public IPlugProcessor
 			const int nIn           = pConfig->NBuses(ERoute::kInput);
 			for (auto inBusIdx = 0; inBusIdx < nIn; inBusIdx++)
 			{
-				Steinberg::Vst::AudioBus* pBus      = pPlug->getAudioInput(inBusIdx);
+				Steinberg::Vst::AudioBus* pBus = pPlug->getAudioInput(inBusIdx);
 				int nInputsRequired = Steinberg::Vst::SpeakerArr::getChannelCount(pInputBusArrangements[inBusIdx]);
 
 				// if existing input bus has a different number of channels to the input bus being connected
@@ -182,7 +180,7 @@ class IPlugVST3ProcessorBase : public IPlugProcessor
 			const int nOut = pConfig->NBuses(ERoute::kOutput);
 			for (auto outBusIdx = 0; outBusIdx < nOut; outBusIdx++)
 			{
-				Steinberg::Vst::AudioBus* pBus       = pPlug->getAudioOutput(outBusIdx);
+				Steinberg::Vst::AudioBus* pBus = pPlug->getAudioOutput(outBusIdx);
 				int nOutputsRequired = Steinberg::Vst::SpeakerArr::getChannelCount(pOutputBusArrangements[outBusIdx]);
 
 				// if existing output bus has a different number of channels to the output bus being connected

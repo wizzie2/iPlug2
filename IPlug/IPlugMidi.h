@@ -1,10 +1,10 @@
 /*
  ==============================================================================
- 
- This file is part of the iPlug 2 library. Copyright (C) the iPlug 2 developers. 
- 
+
+ This file is part of the iPlug 2 library. Copyright (C) the iPlug 2 developers.
+
  See LICENSE.txt for  more info.
- 
+
  ==============================================================================
 */
 
@@ -20,6 +20,113 @@
 
 BEGIN_IPLUG_NAMESPACE
 
+/** /todo */
+enum class EMidiStatusMsg : uint8
+{
+	kNone              = 0,
+	kNoteOff           = 8,
+	kNoteOn            = 9,
+	kPolyAftertouch    = 10,
+	kControlChange     = 11,
+	kProgramChange     = 12,
+	kChannelAftertouch = 13,
+	kPitchWheel        = 14
+};
+
+
+/** /todo */
+enum class EMidiControlChangeMsg : uint8
+{
+	// Custom
+	kNoCC = 0xFF,
+
+	// Control Changes and Mode Changes
+	kModWheel                  = 1,
+	kBreathController          = 2,
+	kUndefined003              = 3,
+	kFootController            = 4,
+	kPortamentoTime            = 5,
+	kChannelVolume             = 7,
+	kBalance                   = 8,
+	kUndefined009              = 9,
+	kPan                       = 10,
+	kExpressionController      = 11,
+	kEffectControl1            = 12,
+	kEffectControl2            = 13,
+	kUndefined014              = 14,
+	kUndefined015              = 15,
+	kGeneralPurposeController1 = 16,
+	kGeneralPurposeController2 = 17,
+	kGeneralPurposeController3 = 18,
+	kGeneralPurposeController4 = 19,
+	kUndefined020              = 20,
+	kUndefined021              = 21,
+	kUndefined022              = 22,
+	kUndefined023              = 23,
+	kUndefined024              = 24,
+	kUndefined025              = 25,
+	kUndefined026              = 26,
+	kUndefined027              = 27,
+	kUndefined028              = 28,
+	kUndefined029              = 29,
+	kUndefined030              = 30,
+	kUndefined031              = 31,
+	kSustainOnOff              = 64,
+	kPortamentoOnOff           = 65,
+	kSustenutoOnOff            = 66,
+	kSoftPedalOnOff            = 67,
+	kLegatoOnOff               = 68,
+	kHold2OnOff                = 69,
+	kSoundVariation            = 70,
+	kResonance                 = 71,
+	kReleaseTime               = 72,
+	kAttackTime                = 73,
+	kCutoffFrequency           = 74,
+	kDecayTime                 = 75,
+	kVibratoRate               = 76,
+	kVibratoDepth              = 77,
+	kVibratoDelay              = 78,
+	kSoundControllerUndefined  = 79,
+	kUndefined085              = 85,
+	kUndefined086              = 86,
+	kUndefined087              = 87,
+	kUndefined088              = 88,
+	kUndefined089              = 89,
+	kUndefined090              = 90,
+	kTremoloDepth              = 92,
+	kChorusDepth               = 93,
+	kPhaserDepth               = 95,
+	kUndefined102              = 102,
+	kUndefined103              = 103,
+	kUndefined104              = 104,
+	kUndefined105              = 105,
+	kUndefined106              = 106,
+	kUndefined107              = 107,
+	kUndefined108              = 108,
+	kUndefined109              = 109,
+	kUndefined110              = 110,
+	kUndefined111              = 111,
+	kUndefined112              = 112,
+	kUndefined113              = 113,
+	kUndefined114              = 114,
+	kUndefined115              = 115,
+	kUndefined116              = 116,
+	kUndefined117              = 117,
+	kUndefined118              = 118,
+	kUndefined119              = 119,
+
+	// Channel Mode Messages
+	kAllSoundOff        = 120,  // All Sound Off
+	kResetAllControlers = 121,  // Reset All Controllers
+	kLocalOnOff         = 122,  // Local Control On/Off
+	kAllNotesOff        = 123,  // All Notes Off
+	kOmniModeOff        = 124,  // Omni Mode Off (+ all notes off)
+	kOmniModeOn         = 125,  // Omni Mode On (+ all notes off)
+	kMonoMode           = 126,  // Mono Mode On (+ poly off, + all notes off)
+	kPolyMode           = 127   // Poly Mode On (+ mono off, +all notes off)
+};
+
+
 /** Encapsulates a MIDI message and provides helper functions
  * @ingroup IPlugStructs */
 struct IMidiMsg
@@ -30,116 +137,11 @@ struct IMidiMsg
 	uint8 mData2;
 
 
-	/** /todo */
-	enum class EStatusMsg : uint8
-	{
-		kNone              = 0,
-		kNoteOff           = 8,
-		kNoteOn            = 9,
-		kPolyAftertouch    = 10,
-		kControlChange     = 11,
-		kProgramChange     = 12,
-		kChannelAftertouch = 13,
-		kPitchWheel        = 14
-	};
-
-	/** /todo */
-	enum class EControlChangeMsg : uint8
-	{
-		// Custom
-		kNoCC = 0xFF,
-
-		// Control Changes and Mode Changes
-		kModWheel                  = 1,
-		kBreathController          = 2,
-		kUndefined003              = 3,
-		kFootController            = 4,
-		kPortamentoTime            = 5,
-		kChannelVolume             = 7,
-		kBalance                   = 8,
-		kUndefined009              = 9,
-		kPan                       = 10,
-		kExpressionController      = 11,
-		kEffectControl1            = 12,
-		kEffectControl2            = 13,
-		kUndefined014              = 14,
-		kUndefined015              = 15,
-		kGeneralPurposeController1 = 16,
-		kGeneralPurposeController2 = 17,
-		kGeneralPurposeController3 = 18,
-		kGeneralPurposeController4 = 19,
-		kUndefined020              = 20,
-		kUndefined021              = 21,
-		kUndefined022              = 22,
-		kUndefined023              = 23,
-		kUndefined024              = 24,
-		kUndefined025              = 25,
-		kUndefined026              = 26,
-		kUndefined027              = 27,
-		kUndefined028              = 28,
-		kUndefined029              = 29,
-		kUndefined030              = 30,
-		kUndefined031              = 31,
-		kSustainOnOff              = 64,
-		kPortamentoOnOff           = 65,
-		kSustenutoOnOff            = 66,
-		kSoftPedalOnOff            = 67,
-		kLegatoOnOff               = 68,
-		kHold2OnOff                = 69,
-		kSoundVariation            = 70,
-		kResonance                 = 71,
-		kReleaseTime               = 72,
-		kAttackTime                = 73,
-		kCutoffFrequency           = 74,
-		kDecayTime                 = 75,
-		kVibratoRate               = 76,
-		kVibratoDepth              = 77,
-		kVibratoDelay              = 78,
-		kSoundControllerUndefined  = 79,
-		kUndefined085              = 85,
-		kUndefined086              = 86,
-		kUndefined087              = 87,
-		kUndefined088              = 88,
-		kUndefined089              = 89,
-		kUndefined090              = 90,
-		kTremoloDepth              = 92,
-		kChorusDepth               = 93,
-		kPhaserDepth               = 95,
-		kUndefined102              = 102,
-		kUndefined103              = 103,
-		kUndefined104              = 104,
-		kUndefined105              = 105,
-		kUndefined106              = 106,
-		kUndefined107              = 107,
-		kUndefined108              = 108,
-		kUndefined109              = 109,
-		kUndefined110              = 110,
-		kUndefined111              = 111,
-		kUndefined112              = 112,
-		kUndefined113              = 113,
-		kUndefined114              = 114,
-		kUndefined115              = 115,
-		kUndefined116              = 116,
-		kUndefined117              = 117,
-		kUndefined118              = 118,
-		kUndefined119              = 119,
-
-		// Channel Mode Messages
-		kAllSoundOff        = 120,  // All Sound Off
-		kResetAllControlers = 121,  // Reset All Controllers
-		kLocalOnOff         = 122,  // Local Control On/Off
-		kAllNotesOff        = 123,  // All Notes Off
-		kOmniModeOff        = 124,  // Omni Mode Off (+ all notes off)
-		kOmniModeOn         = 125,  // Omni Mode On (+ all notes off)
-		kMonoMode           = 126,  // Mono Mode On (+ poly off, + all notes off)
-		kPolyMode           = 127   // Poly Mode On (+ mono off, +all notes off)
-	};
-
-	/** /todo 
-   * @param offs /todo
-   * @param s /todo
-   * @param d1 /todo
-   * @param d2 /todo */
+	/** /todo
+	 * @param offs /todo
+	 * @param s /todo
+	 * @param d1 /todo
+	 * @param d2 /todo */
 	IMidiMsg(int32 offset = 0, uint8 status = 0, uint8 data1 = 0, uint8 data2 = 0)
 		: mOffset(offset)
 		, mStatus(status)
@@ -148,42 +150,42 @@ struct IMidiMsg
 	{
 	}
 
-	/** /todo 
-   * @param noteNumber /todo
-   * @param velocity /todo
-   * @param offset /todo
-   * @param channel /todo */
+	/** /todo
+	 * @param noteNumber /todo
+	 * @param velocity /todo
+	 * @param offset /todo
+	 * @param channel /todo */
 	void MakeNoteOnMsg(int16 noteNumber, float velocity, int32 offset, uint8 channel = 0)
 	{
 		assert(velocity <= 1.0f);  // velocity input range 0.0-1.0. please fix.
 
 		Clear();
-		mStatus = channel | (static_cast<uint8>(EStatusMsg::kNoteOn) << 4);
+		mStatus = channel | +EMidiStatusMsg::kNoteOn << 4;
 		mData1  = static_cast<uint8>(noteNumber);
 		mData2  = static_cast<uint8>(velocity * 127);
 		mOffset = offset;
 	}
 
-	/** /todo 
-   * @param noteNumber /todo
-   * @param offset /todo
-   * @param channel /todo */
+	/** /todo
+	 * @param noteNumber /todo
+	 * @param offset /todo
+	 * @param channel /todo */
 	void MakeNoteOffMsg(int16 noteNumber, int32 offset, uint8 channel = 0)
 	{
 		Clear();
-		mStatus = channel | (static_cast<uint8>(EStatusMsg::kNoteOff) << 4);
+		mStatus = channel | +EMidiStatusMsg::kNoteOff << 4;
 		mData1  = static_cast<uint8>(noteNumber);
 		mOffset = offset;
 	}
 
-	/** /todo 
-   * @param value range [-1, 1], converts to [0, 16384) where 8192 = no pitch change.
-   * @param channel /todo
-   * @param offset /todo */
+	/** /todo
+	 * @param value range [-1, 1], converts to [0, 16384) where 8192 = no pitch change.
+	 * @param channel /todo
+	 * @param offset /todo */
 	void MakePitchWheelMsg(float value, uint8 channel = 0, int32 offset = 0)
 	{
 		Clear();
-		mStatus = channel | (static_cast<uint8>(EStatusMsg::kPitchWheel) << 4);
+		mStatus = channel | +EMidiStatusMsg::kPitchWheel << 4;
 		int i   = 8192 + static_cast<int>(value * 8192.0);
 		i       = std::min(std::max(i, 0), 16383);
 		mData2  = static_cast<uint8>(i) >> 7;
@@ -192,14 +194,14 @@ struct IMidiMsg
 	}
 
 	/** /todo
-   * @param idx /todo
-   * @param value range [0, 1] /todo
-   * @param channel /todo
-   * @param offset /todo */
-	void MakeControlChangeMsg(EControlChangeMsg idx, float value, uint8 channel = 0, int32 offset = 0)
+	 * @param idx /todo
+	 * @param value range [0, 1] /todo
+	 * @param channel /todo
+	 * @param offset /todo */
+	void MakeControlChangeMsg(EMidiControlChangeMsg idx, float value, uint8 channel = 0, int32 offset = 0)
 	{
 		Clear();
-		mStatus = channel | (static_cast<uint8>(EStatusMsg::kControlChange) << 4);
+		mStatus = channel | +EMidiStatusMsg::kControlChange << 4;
 		mData1  = static_cast<uint8>(idx);
 		mData2  = static_cast<uint8>(value * 127.0);
 		mOffset = offset;
@@ -209,33 +211,33 @@ struct IMidiMsg
 	void MakeProgramChange(uint8 program, uint8 channel = 0, int32 offset = 0)
 	{
 		Clear();
-		mStatus = channel | (static_cast<uint8>(EStatusMsg::kProgramChange) << 4);
+		mStatus = channel | +EMidiStatusMsg::kProgramChange << 4;
 		mData1  = program;
 		mOffset = offset;
 	}
 
-	/** /todo  
-   * @param pressure /todo
-   * @param offset /todo
-   * @param channel /todo */
+	/** /todo
+	 * @param pressure /todo
+	 * @param offset /todo
+	 * @param channel /todo */
 	void MakeChannelATMsg(uint8 pressure, int32 offset, uint8 channel)
 	{
 		Clear();
-		mStatus = channel | (static_cast<uint8>(EStatusMsg::kChannelAftertouch) << 4);
+		mStatus = channel | +EMidiStatusMsg::kChannelAftertouch << 4;
 		mData1  = pressure;
 		mData2  = 0;
 		mOffset = offset;
 	}
 
-	/** /todo 
-   * @param noteNumber /todo
-   * @param pressure /todo
-   * @param offset /todo
-   * @param channel /todo */
+	/** /todo
+	 * @param noteNumber /todo
+	 * @param pressure /todo
+	 * @param offset /todo
+	 * @param channel /todo */
 	void MakePolyATMsg(uint8 noteNumber, uint8 pressure, int32 offset, uint8 channel)
 	{
 		Clear();
-		mStatus = channel | (static_cast<uint8>(EStatusMsg::kPolyAftertouch) << 4);
+		mStatus = channel | +EMidiStatusMsg::kPolyAftertouch << 4;
 		mData1  = noteNumber;
 		mData2  = pressure;
 		mOffset = offset;
@@ -247,17 +249,16 @@ struct IMidiMsg
 		return mStatus & 0x0F;
 	}
 
-	/** /todo  
-   * @return EStatusMsg /todo */
-	EStatusMsg StatusMsg() const
+	/** /todo
+	 * @return EMidiStatusMsg /todo */
+	EMidiStatusMsg StatusMsg() const
 	{
 		uint8 e = mStatus >> 4;
-		if (e < static_cast<uint8>(EStatusMsg::kNoteOff) ||
-			e > static_cast<uint8>(EStatusMsg::kPitchWheel))  // TODO: if( isValidStatusMsg(e) )
+		if (e < +EMidiStatusMsg::kNoteOff || e > +EMidiStatusMsg::kPitchWheel)  // TODO: if( isValidStatusMsg(e) )
 		{
-			return EStatusMsg::kNone;
+			return EMidiStatusMsg::kNone;
 		}
-		return static_cast<EStatusMsg>(e);
+		return static_cast<EMidiStatusMsg>(e);
 	}
 
 	/** @return [0, 127), -1 if NA. */
@@ -265,10 +266,12 @@ struct IMidiMsg
 	{
 		switch (StatusMsg())
 		{
-			case EStatusMsg::kNoteOn:
-			case EStatusMsg::kNoteOff:
-			case EStatusMsg::kPolyAftertouch: return mData1;
-			default: return -1;
+			case EMidiStatusMsg::kNoteOn:
+			case EMidiStatusMsg::kNoteOff:
+			case EMidiStatusMsg::kPolyAftertouch:
+				return mData1;
+			default:
+				return -1;
 		}
 	}
 
@@ -277,9 +280,11 @@ struct IMidiMsg
 	{
 		switch (StatusMsg())
 		{
-			case EStatusMsg::kNoteOn:
-			case EStatusMsg::kNoteOff: return mData2;
-			default: return -1;
+			case EMidiStatusMsg::kNoteOn:
+			case EMidiStatusMsg::kNoteOff:
+				return mData2;
+			default:
+				return -1;
 		}
 	}
 
@@ -288,8 +293,10 @@ struct IMidiMsg
 	{
 		switch (StatusMsg())
 		{
-			case EStatusMsg::kPolyAftertouch: return mData2;
-			default: return -1;
+			case EMidiStatusMsg::kPolyAftertouch:
+				return mData2;
+			default:
+				return -1;
 		}
 	}
 
@@ -298,15 +305,17 @@ struct IMidiMsg
 	{
 		switch (StatusMsg())
 		{
-			case EStatusMsg::kChannelAftertouch: return mData1;
-			default: return -1;
+			case EMidiStatusMsg::kChannelAftertouch:
+				return mData1;
+			default:
+				return -1;
 		}
 	}
 
 	/** @return [0, 127), -1 if NA. */
 	uint8 Program() const
 	{
-		if (StatusMsg() == EStatusMsg::kProgramChange)
+		if (StatusMsg() == EMidiStatusMsg::kProgramChange)
 		{
 			return mData1;
 		}
@@ -316,7 +325,7 @@ struct IMidiMsg
 	/** @return [-1.0, 1.0], zero if NA.*/
 	float PitchWheel() const
 	{
-		if (StatusMsg() == EStatusMsg::kPitchWheel)
+		if (StatusMsg() == EMidiStatusMsg::kPitchWheel)
 		{
 			float value = static_cast<float>((mData2 << 7) + mData1);
 			return (value - 8192.0f) / 8192.0f;
@@ -324,26 +333,26 @@ struct IMidiMsg
 		return 0.0;
 	}
 
-	/** /todo 
-   * @return EControlChangeMsg /todo */
-	EControlChangeMsg ControlChangeIdx() const
+	/** /todo
+	 * @return EMidiControlChangeMsg /todo */
+	EMidiControlChangeMsg ControlChangeIdx() const
 	{
-		return static_cast<EControlChangeMsg>(mData1);
+		return static_cast<EMidiControlChangeMsg>(mData1);
 	}
 
 	/** @return [0, 1], -1 if NA.*/
-	float ControlChange(EControlChangeMsg idx) const
+	float ControlChange(EMidiControlChangeMsg idx) const
 	{
-		if (StatusMsg() == EStatusMsg::kControlChange && ControlChangeIdx() == idx)
+		if (StatusMsg() == EMidiStatusMsg::kControlChange && ControlChangeIdx() == idx)
 		{
 			return static_cast<float>(mData2) / 127.0f;
 		}
 		return -1.0;
 	}
 
-	/** /todo 
-   * @param msgValue /todo
-   * @return \c true = on */
+	/** /todo
+	 * @param msgValue /todo
+	 * @return \c true = on */
 	static bool ControlChangeOnOff(double msgValue)
 	{
 		return (msgValue >= 0.5);
@@ -356,22 +365,31 @@ struct IMidiMsg
 		mStatus = mData1 = mData2 = 0;
 	}
 
-	/** /todo  
-   * @param msg /todo
-   * @return const char* /todo */
-	static const char* StatusMsgStr(EStatusMsg msg)
+	/** /todo
+	 * @param msg /todo
+	 * @return const char* /todo */
+	static const char* StatusMsgStr(EMidiStatusMsg msg)
 	{
 		switch (msg)
 		{
-			case EStatusMsg::kNone: return "none";
-			case EStatusMsg::kNoteOff: return "noteoff";
-			case EStatusMsg::kNoteOn: return "noteon";
-			case EStatusMsg::kPolyAftertouch: return "aftertouch";
-			case EStatusMsg::kControlChange: return "controlchange";
-			case EStatusMsg::kProgramChange: return "programchange";
-			case EStatusMsg::kChannelAftertouch: return "channelaftertouch";
-			case EStatusMsg::kPitchWheel: return "pitchwheel";
-			default: return "unknown";
+			case EMidiStatusMsg::kNone:
+				return "none";
+			case EMidiStatusMsg::kNoteOff:
+				return "noteoff";
+			case EMidiStatusMsg::kNoteOn:
+				return "noteon";
+			case EMidiStatusMsg::kPolyAftertouch:
+				return "aftertouch";
+			case EMidiStatusMsg::kControlChange:
+				return "controlchange";
+			case EMidiStatusMsg::kProgramChange:
+				return "programchange";
+			case EMidiStatusMsg::kChannelAftertouch:
+				return "channelaftertouch";
+			case EMidiStatusMsg::kPitchWheel:
+				return "pitchwheel";
+			default:
+				return "unknown";
 		};
 	}
 
@@ -414,17 +432,17 @@ struct IMidiMsg
 };
 
 /** A struct for dealing with SysEx messages. Does not own the data.
-  * @ingroup IPlugStructs */
+ * @ingroup IPlugStructs */
 struct ISysEx
 {
 	int mOffset;
 	int mSize;
 	const uint8_t* mData;
 
-	/** /todo  
-   * @param offs /todo
-   * @param pData /todo
-   * @param size /todo */
+	/** /todo
+	 * @param offs /todo
+	 * @param pData /todo
+	 * @param size /todo */
 	ISysEx(int offs = 0, const uint8_t* pData = nullptr, int size = 0) : mOffset(offs), mSize(size), mData(pData) {}
 
 	/** /todo */
@@ -434,12 +452,12 @@ struct ISysEx
 		mData           = NULL;
 	}
 
-	/** /todo 
-   * @param str /todo
-   * @param maxlen /todo
-   * @param pData /todo
-   * @param size /todo
-   * @return char* /todo */
+	/** /todo
+	 * @param str /todo
+	 * @param maxlen /todo
+	 * @param pData /todo
+	 * @param size /todo
+	 * @return char* /todo */
 	char* SysExStr(char* str, int maxlen, const uint8_t* pData, int size)
 	{
 		assert(str != NULL && maxlen >= 3);
@@ -528,17 +546,17 @@ void MyPlug::ProcessBlock(double** inputs, double** outputs, int nFrames)
 {
   for (int offset = 0; offset < nFrames; ++offset)
   {
-    while (!mMidiQueue.Empty())
-    {
-      IMidiMsg* pMsg = mMidiQueue.Peek();
-      if (msg.mOffset > offset) break;
+	while (!mMidiQueue.Empty())
+	{
+	  IMidiMsg* pMsg = mMidiQueue.Peek();
+	  if (msg.mOffset > offset) break;
 
-      // To-do: Handle the MIDI message
+	  // To-do: Handle the MIDI message
 
-      mMidiQueue.Remove();
-    }
+	  mMidiQueue.Remove();
+	}
 
-    // To-do: Process audio
+	// To-do: Process audio
 
   }
   mMidiQueue.Flush(nFrames);
@@ -551,7 +569,7 @@ void MyPlug::ProcessBlock(double** inputs, double** outputs, int nFrames)
 #endif
 
 /** A class to help with queuing timestamped MIDI messages
-  * @ingroup IPlugUtilities */
+ * @ingroup IPlugUtilities */
 class IMidiQueue
 {
  public:

@@ -1,10 +1,10 @@
 /*
  ==============================================================================
- 
- This file is part of the iPlug 2 library. Copyright (C) the iPlug 2 developers. 
- 
+
+ This file is part of the iPlug 2 library. Copyright (C) the iPlug 2 developers.
+
  See LICENSE.txt for  more info.
- 
+
  ==============================================================================
 */
 
@@ -21,13 +21,14 @@
 
 BEGIN_IPLUG_NAMESPACE
 
+
 /** Used to pass various instance info to the API class, where needed */
 struct InstanceInfo
 {
 };
 
 /**  VST3 base class for a non-distributed IPlug VST3 plug-in
-*   @ingroup APIClasses */
+ *   @ingroup APIClasses */
 class IPlugVST3 : public IPlugAPIBase,
 				  public IPlugVST3ProcessorBase,
 				  public IPlugVST3ControllerBase,
@@ -49,38 +50,51 @@ class IPlugVST3 : public IPlugAPIBase,
 	void InformHostOfParameterDetailsChange() override;
 	bool EditorResize(int viewWidth, int viewHeight) override;
 
-  // IEditorDelegate
-  void DirtyParametersFromUI() override;
-  void SendParameterValueFromUI(int paramIdx, double normalisedValue) override;
+	// IEditorDelegate
+	void DirtyParametersFromUI() override;
+	void SendParameterValueFromUI(int paramIdx, double normalisedValue) override;
 
-  // IPlugProcessor
-  void SetLatency(int samples) override;
-  
-  // AudioEffect
-  Steinberg::tresult PLUGIN_API initialize(FUnknown* context) override;
-  Steinberg::tresult PLUGIN_API terminate() override;
-  Steinberg::tresult PLUGIN_API setBusArrangements(Steinberg::Vst::SpeakerArrangement* pInputs, Steinberg::int32 numIns, Steinberg::Vst::SpeakerArrangement* pOutputs, Steinberg::int32 numOuts) override;
-  Steinberg::tresult PLUGIN_API setActive(Steinberg::TBool state) override;
-  Steinberg::tresult PLUGIN_API setupProcessing(Steinberg::Vst::ProcessSetup& newSetup) override;
-  Steinberg::tresult PLUGIN_API setProcessing (Steinberg::TBool state) override;
-  Steinberg::tresult PLUGIN_API process(Steinberg::Vst::ProcessData& data) override;
-  Steinberg::tresult PLUGIN_API canProcessSampleSize(Steinberg::int32 symbolicSampleSize) override;
-  Steinberg::uint32 PLUGIN_API getLatencySamples() override { return GetLatency(); }
-  Steinberg::uint32 PLUGIN_API getTailSamples() override { return GetTailSize(); } //TODO - infinite tail
-  Steinberg::tresult PLUGIN_API setState(Steinberg::IBStream* pState) override;
-  Steinberg::tresult PLUGIN_API getState(Steinberg::IBStream* pState) override;
-    
-  // IEditController
-  Steinberg::Vst::ParamValue PLUGIN_API getParamNormalized(Steinberg::Vst::ParamID tag) override;
-  Steinberg::tresult PLUGIN_API setParamNormalized(Steinberg::Vst::ParamID tag, Steinberg::Vst::ParamValue value) override;
-  Steinberg::IPlugView* PLUGIN_API createView(const char* name) override;
-  Steinberg::tresult PLUGIN_API setComponentState(Steinberg::IBStream *state) override;
- 
-  // IMidiMapping
-  Steinberg::tresult PLUGIN_API getMidiControllerAssignment(Steinberg::int32 busIndex, Steinberg::int16 channel, Steinberg::Vst::CtrlNumber midiCCNumber, Steinberg::Vst::ParamID& tag) override;
-  
-  // IInfoListener
-  Steinberg::tresult PLUGIN_API setChannelContextInfos(Steinberg::Vst::IAttributeList* list) override;
+	// IPlugProcessor
+	void SetLatency(int samples) override;
+
+	// AudioEffect
+	Steinberg::tresult PLUGIN_API initialize(FUnknown* context) override;
+	Steinberg::tresult PLUGIN_API terminate() override;
+	Steinberg::tresult PLUGIN_API setBusArrangements(Steinberg::Vst::SpeakerArrangement* pInputs,
+													 Steinberg::int32 numIns,
+													 Steinberg::Vst::SpeakerArrangement* pOutputs,
+													 Steinberg::int32 numOuts) override;
+	Steinberg::tresult PLUGIN_API setActive(Steinberg::TBool state) override;
+	Steinberg::tresult PLUGIN_API setupProcessing(Steinberg::Vst::ProcessSetup& newSetup) override;
+	Steinberg::tresult PLUGIN_API setProcessing(Steinberg::TBool state) override;
+	Steinberg::tresult PLUGIN_API process(Steinberg::Vst::ProcessData& data) override;
+	Steinberg::tresult PLUGIN_API canProcessSampleSize(Steinberg::int32 symbolicSampleSize) override;
+	Steinberg::uint32 PLUGIN_API getLatencySamples() override
+	{
+		return GetLatency();
+	}
+	Steinberg::uint32 PLUGIN_API getTailSamples() override
+	{
+		return GetTailSize();
+	}  // TODO - infinite tail
+	Steinberg::tresult PLUGIN_API setState(Steinberg::IBStream* pState) override;
+	Steinberg::tresult PLUGIN_API getState(Steinberg::IBStream* pState) override;
+
+	// IEditController
+	Steinberg::Vst::ParamValue PLUGIN_API getParamNormalized(Steinberg::Vst::ParamID tag) override;
+	Steinberg::tresult PLUGIN_API setParamNormalized(Steinberg::Vst::ParamID tag,
+													 Steinberg::Vst::ParamValue value) override;
+	Steinberg::IPlugView* PLUGIN_API createView(const char* name) override;
+	Steinberg::tresult PLUGIN_API setComponentState(Steinberg::IBStream* state) override;
+
+	// IMidiMapping
+	Steinberg::tresult PLUGIN_API getMidiControllerAssignment(Steinberg::int32 busIndex,
+															  Steinberg::int16 channel,
+															  Steinberg::Vst::CtrlNumber midiCCNumber,
+															  Steinberg::Vst::ParamID& tag) override;
+
+	// IInfoListener
+	Steinberg::tresult PLUGIN_API setChannelContextInfos(Steinberg::Vst::IAttributeList* list) override;
 
 	/** Get the color of the track that the plug-in is inserted on */
 	virtual void GetTrackColor(int& r, int& g, int& b) override

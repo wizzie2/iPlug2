@@ -188,13 +188,18 @@ class IVKeyboardControl : public IControl
 	{
 		switch (msg.StatusMsg())
 		{
-			case IMidiMsg::EStatusMsg::kNoteOn: SetNoteFromMidi(msg.NoteNumber(), (msg.Velocity() != 0)); break;
-			case IMidiMsg::EStatusMsg::kNoteOff: SetNoteFromMidi(msg.NoteNumber(), false); break;
-			case IMidiMsg::EStatusMsg::kControlChange:
-				if (msg.ControlChangeIdx() == IMidiMsg::EControlChangeMsg::kAllNotesOff)
+			case EMidiStatusMsg::kNoteOn:
+				SetNoteFromMidi(msg.NoteNumber(), (msg.Velocity() != 0));
+				break;
+			case EMidiStatusMsg::kNoteOff:
+				SetNoteFromMidi(msg.NoteNumber(), false);
+				break;
+			case EMidiStatusMsg::kControlChange:
+				if (msg.ControlChangeIdx() == EMidiControlChangeMsg::kAllNotesOff)
 					ClearNotesFromMidi();
 				break;
-			default: break;
+			default:
+				break;
 		}
 
 		SetDirty(false);
@@ -337,11 +342,11 @@ class IVKeyboardControl : public IControl
 		}
 
 #ifdef _DEBUG
-		//g.DrawRect(COLOR_GREEN, mTargetRECT);
-		//g.DrawRect(COLOR_BLUE, mRECT);
+		// g.DrawRect(COLOR_GREEN, mTargetRECT);
+		// g.DrawRect(COLOR_BLUE, mRECT);
 		WDL_String ti;
 		ti.SetFormatted(32, "key: %d, vel: %3.2f", mLastTouchedKey, mLastVelocity * 127.f);
-		//ti.SetFormatted(16, "mBAlpha: %d", mBAlpha);
+		// ti.SetFormatted(16, "mBAlpha: %d", mBAlpha);
 		IText txt(20, COLOR_RED);
 		IRECT tr(mRECT.L + 20, mRECT.B - 20, mRECT.L + 160, mRECT.B);
 		g.DrawText(txt, ti.Get(), tr, &mBlend);
@@ -746,7 +751,7 @@ class IVKeyboardControl : public IControl
 };
 
 /** Vectorial "wheel" control for pitchbender/modwheel
-* @ingroup IControls */
+ * @ingroup IControls */
 class IWheelControl : public ISliderControlBase
 {
 	static constexpr int kSpringAnimationTime = 50;
@@ -756,11 +761,9 @@ class IWheelControl : public ISliderControlBase
 	static constexpr int kMessageTagSetPitchBendRange = 0;
 
 	/** Create a WheelControl
-   * @param bounds The control's bounds
-   * @param cc A Midi CC to link, defaults to kNoCC which is interpreted as pitch bend */
-	IWheelControl(const IRECT& bounds,
-				  IMidiMsg::EControlChangeMsg cc = IMidiMsg::EControlChangeMsg::kNoCC,
-				  int initBendRange              = 12)
+	 * @param bounds The control's bounds
+	 * @param cc A Midi CC to link, defaults to kNoCC which is interpreted as pitch bend */
+	IWheelControl(const IRECT& bounds, EMidiControlChangeMsg cc = EMidiControlChangeMsg::kNoCC, int initBendRange = 12)
 		: ISliderControlBase(bounds, kNoParameter, EDirection::Vertical, DEFAULT_GEARING, 40.f)
 		, mCC(cc)
 		, mPitchBendRange(initBendRange)
@@ -770,11 +773,11 @@ class IWheelControl : public ISliderControlBase
 		mMenu.AddItem("Fifth");
 		mMenu.AddItem("Octave");
 
-		SetValue(cc == IMidiMsg::EControlChangeMsg::kNoCC ? 0.5 : 0.);
+		SetValue(cc == EMidiControlChangeMsg::kNoCC ? 0.5 : 0.);
 		SetWantsMidi(true);
 		SetActionFunction([cc](IControl* pControl) {
 			IMidiMsg msg;
-			if (cc == IMidiMsg::EControlChangeMsg::kNoCC)  // pitchbend
+			if (cc == EMidiControlChangeMsg::kNoCC)  // pitchbend
 				msg.MakePitchWheelMsg((pControl->GetValue() * 2.) - 1.);
 			else
 				msg.MakeControlChangeMsg(cc, pControl->GetValue());
@@ -822,7 +825,7 @@ class IWheelControl : public ISliderControlBase
 		g.PathFill(
 			IPattern::CreateLinearGradient(cutoutBounds,
 										   EDirection::Vertical,
-										   {//TODO: this can be improved
+										   {// TODO: this can be improved
 											{COLOR_BLACK.WithContrast(iplug::Lerp(0.f, 0.5f, triangleRamp)), 0.f},
 											{COLOR_BLACK.WithContrast(iplug::Lerp(0.5f, 0.f, triangleRamp)), 1.f}}));
 
@@ -833,9 +836,9 @@ class IWheelControl : public ISliderControlBase
 
 	void OnMidi(const IMidiMsg& msg) override
 	{
-		if (mCC == IMidiMsg::EControlChangeMsg::kNoCC)
+		if (mCC == EMidiControlChangeMsg::kNoCC)
 		{
-			if (msg.StatusMsg() == IMidiMsg::EStatusMsg::kPitchWheel)
+			if (msg.StatusMsg() == EMidiStatusMsg::kPitchWheel)
 			{
 				SetValue((msg.PitchWheel() + 1.) * 0.5);
 				SetDirty(false);
@@ -862,11 +865,19 @@ class IWheelControl : public ISliderControlBase
 		{
 			switch (pSelectedMenu->GetChosenItemIdx())
 			{
-				case 0: mPitchBendRange = 1; break;
-				case 1: mPitchBendRange = 2; break;
-				case 2: mPitchBendRange = 7; break;
+				case 0:
+					mPitchBendRange = 1;
+					break;
+				case 1:
+					mPitchBendRange = 2;
+					break;
+				case 2:
+					mPitchBendRange = 7;
+					break;
 				case 3:
-				default: mPitchBendRange = 12; break;
+				default:
+					mPitchBendRange = 12;
+					break;
 			}
 
 			GetDelegate()->SendArbitraryMsgFromUI(
@@ -876,15 +887,24 @@ class IWheelControl : public ISliderControlBase
 
 	void OnMouseDown(float x, float y, const IMouseMod& mod) override
 	{
-		if (mod.R && mCC == IMidiMsg::EControlChangeMsg::kNoCC)
+		if (mod.R && mCC == EMidiControlChangeMsg::kNoCC)
 		{
 			switch (mPitchBendRange)
 			{
-				case 1: mMenu.CheckItemAlone(0); break;
-				case 2: mMenu.CheckItemAlone(1); break;
-				case 7: mMenu.CheckItemAlone(2); break;
-				case 12: mMenu.CheckItemAlone(3); break;
-				default: break;
+				case 1:
+					mMenu.CheckItemAlone(0);
+					break;
+				case 2:
+					mMenu.CheckItemAlone(1);
+					break;
+				case 7:
+					mMenu.CheckItemAlone(2);
+					break;
+				case 12:
+					mMenu.CheckItemAlone(3);
+					break;
+				default:
+					break;
 			}
 
 			GetUI()->CreatePopupMenu(*this, mMenu, x, y);
@@ -895,12 +915,13 @@ class IWheelControl : public ISliderControlBase
 
 	void OnMouseUp(float x, float y, const IMouseMod& mod) override
 	{
-		if (mCC == IMidiMsg::EControlChangeMsg::kNoCC)  // pitchbend
+		if (mCC == EMidiControlChangeMsg::kNoCC)  // pitchbend
 		{
 			float startValue = GetValue();
 			SetAnimation(
 				[startValue](IControl* pCaller) {
-					pCaller->SetValue(iplug::Lerp(startValue, 0.5f, math::Clamp(pCaller->GetAnimationProgress(), 0.0f, 1.0f)));
+					pCaller->SetValue(
+						iplug::Lerp(startValue, 0.5f, math::Clamp(pCaller->GetAnimationProgress(), 0.0f, 1.0f)));
 					if (pCaller->GetAnimationProgress() > 1.)
 					{
 						pCaller->SetDirty(true);
@@ -917,7 +938,7 @@ class IWheelControl : public ISliderControlBase
  private:
 	IPopupMenu mMenu;
 	int mPitchBendRange;
-	IMidiMsg::EControlChangeMsg mCC;
+	EMidiControlChangeMsg mCC;
 	ILayerPtr mLayer;
 };
 

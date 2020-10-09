@@ -1,10 +1,10 @@
 /*
  ==============================================================================
- 
+
  This file is part of the iPlug 2 library. Copyright (C) the iPlug 2 developers.
- 
+
  See LICENSE.txt for  more info.
- 
+
  ==============================================================================
  */
 
@@ -12,11 +12,9 @@
 
 
 using namespace iplug;
-using namespace Steinberg;
-using namespace Vst;
 
 #ifndef CUSTOM_BUSTYPE_FUNC
-uint64_t iplug::GetAPIBusTypeForChannelIOConfig(
+uint64 iplug::GetAPIBusTypeForChannelIOConfig(
 	int configIdx, ERoute dir, int busIdx, const IOConfig* pConfig, WDL_TypedBuf<uint64_t>* APIBusTypes)
 {
 	assert(pConfig != nullptr);
@@ -26,27 +24,41 @@ uint64_t iplug::GetAPIBusTypeForChannelIOConfig(
 
 	switch (numChans)
 	{
-		case 0: return SpeakerArr::kEmpty;
-		case 1: return SpeakerArr::kMono;
-		case 2: return SpeakerArr::kStereo;
-		case 3: return SpeakerArr::k30Cine;  // CHECK - not the same as protools
-		case 4: return SpeakerArr::kAmbi1stOrderACN;
-		case 5: return SpeakerArr::k50;
-		case 6: return SpeakerArr::k51;
-		case 7: return SpeakerArr::k70Cine;
-		case 8: return SpeakerArr::k71CineSideFill;  // CHECK - not the same as protools
-		case 9: return SpeakerArr::kAmbi2cdOrderACN;
-		case 10: return SpeakerArr::k71_2;  // aka k91Atmos
-		case 16: return SpeakerArr::kAmbi3rdOrderACN;
+		case 0:
+			return Steinberg::Vst::SpeakerArr::kEmpty;
+		case 1:
+			return Steinberg::Vst::SpeakerArr::kMono;
+		case 2:
+			return Steinberg::Vst::SpeakerArr::kStereo;
+		case 3:
+			return Steinberg::Vst::SpeakerArr::k30Cine;  // CHECK - not the same as protools
+		case 4:
+			return Steinberg::Vst::SpeakerArr::kAmbi1stOrderACN;
+		case 5:
+			return Steinberg::Vst::SpeakerArr::k50;
+		case 6:
+			return Steinberg::Vst::SpeakerArr::k51;
+		case 7:
+			return Steinberg::Vst::SpeakerArr::k70Cine;
+		case 8:
+			return Steinberg::Vst::SpeakerArr::k71CineSideFill;  // CHECK - not the same as protools
+		case 9:
+			return Steinberg::Vst::SpeakerArr::kAmbi2cdOrderACN;
+		case 10:
+			return Steinberg::Vst::SpeakerArr::k71_2;  // aka k91Atmos
+		case 16:
+			return Steinberg::Vst::SpeakerArr::kAmbi3rdOrderACN;
 		default:
 			DBGMSG("do not yet know what to do here\n");
 			assert(0);
-			return SpeakerArr::kEmpty;
+			return Steinberg::Vst::SpeakerArr::kEmpty;
 	}
 }
 #endif
 
-IPlugVST3ProcessorBase::IPlugVST3ProcessorBase(Config c, IPlugAPIBase& plug) : IPlugProcessor(c, EPlugApi::VST3), mPlug(plug)
+IPlugVST3ProcessorBase::IPlugVST3ProcessorBase(Config c, IPlugAPIBase& plug)
+	: IPlugProcessor(c, EPlugApi::VST3)
+	, mPlug(plug)
 {
 	SetChannelConnections(ERoute::kInput, 0, MaxNChannels(ERoute::kInput), true);
 	SetChannelConnections(ERoute::kOutput, 0, MaxNChannels(ERoute::kOutput), true);
@@ -61,10 +73,10 @@ IPlugVST3ProcessorBase::IPlugVST3ProcessorBase(Config c, IPlugAPIBase& plug) : I
 	}
 
 	// Make sure the process context is predictably initialised in case it is used before process is called
-	memset(&mProcessContext, 0, sizeof(ProcessContext));
+	memset(&mProcessContext, 0, sizeof(Steinberg::Vst::ProcessContext));
 }
 
-void IPlugVST3ProcessorBase::ProcessMidiIn(IEventList* pEventList,
+void IPlugVST3ProcessorBase::ProcessMidiIn(Steinberg::Vst::IEventList* pEventList,
 										   IPlugQueue<IMidiMsg>& editorQueue,
 										   IPlugQueue<IMidiMsg>& processorQueue)
 {
@@ -75,12 +87,12 @@ void IPlugVST3ProcessorBase::ProcessMidiIn(IEventList* pEventList,
 		int32 numEvent = pEventList->getEventCount();
 		for (int32 i = 0; i < numEvent; i++)
 		{
-			Event event;
-			if (pEventList->getEvent(i, event) == kResultOk)
+			Steinberg::Vst::Event event;
+			if (pEventList->getEvent(i, event) == Steinberg::kResultOk)
 			{
 				switch (event.type)
 				{
-					case Event::kNoteOnEvent:
+					case Steinberg::Vst::Event::kNoteOnEvent:
 					{
 						msg.MakeNoteOnMsg(
 							event.noteOn.pitch, event.noteOn.velocity, event.sampleOffset, event.noteOn.channel);
@@ -89,14 +101,14 @@ void IPlugVST3ProcessorBase::ProcessMidiIn(IEventList* pEventList,
 						break;
 					}
 
-					case Event::kNoteOffEvent:
+					case Steinberg::Vst::Event::kNoteOffEvent:
 					{
 						msg.MakeNoteOffMsg(event.noteOff.pitch, event.sampleOffset, event.noteOff.channel);
 						ProcessMidiMsg(msg);
 						processorQueue.Push(msg);
 						break;
 					}
-					case Event::kPolyPressureEvent:
+					case Steinberg::Vst::Event::kPolyPressureEvent:
 					{
 						msg.MakePolyATMsg(event.polyPressure.pitch,
 										  event.polyPressure.pressure * 127.,
@@ -106,7 +118,7 @@ void IPlugVST3ProcessorBase::ProcessMidiIn(IEventList* pEventList,
 						processorQueue.Push(msg);
 						break;
 					}
-					case Event::kDataEvent:
+					case Steinberg::Vst::Event::kDataEvent:
 					{
 						ISysEx syx = ISysEx(event.sampleOffset, event.data.bytes, event.data.size);
 						ProcessSysEx(syx);
@@ -125,23 +137,21 @@ void IPlugVST3ProcessorBase::ProcessMidiIn(IEventList* pEventList,
 
 void IPlugVST3ProcessorBase::ProcessMidiOut(IPlugQueue<SysExData>& sysExQueue,
 											SysExData& sysExBuf,
-											IEventList* pOutputEvents,
+											Steinberg::Vst::IEventList* pOutputEvents,
 											Steinberg::int32 numSamples)
 {
-	using EStatusMsg = IMidiMsg::EStatusMsg;
-
 	if (!mMidiOutputQueue.Empty() && pOutputEvents)
 	{
-		Event toAdd = {0};
+		Steinberg::Vst::Event toAdd = {0};
 		IMidiMsg msg;
 
 		while (!mMidiOutputQueue.Empty())
 		{
 			IMidiMsg& msg = mMidiOutputQueue.Peek();
 
-			if (msg.StatusMsg() == EStatusMsg::kNoteOn)
+			if (msg.StatusMsg() == EMidiStatusMsg::kNoteOn)
 			{
-				Helpers::init(toAdd, Event::kNoteOnEvent, 0 /*bus id*/, msg.mOffset);
+				Steinberg::Vst::Helpers::init(toAdd, Steinberg::Vst::Event::kNoteOnEvent, 0 /*bus id*/, msg.mOffset);
 
 				toAdd.noteOn.channel  = msg.Channel();
 				toAdd.noteOn.pitch    = msg.NoteNumber();
@@ -149,51 +159,52 @@ void IPlugVST3ProcessorBase::ProcessMidiOut(IPlugQueue<SysExData>& sysExQueue,
 				toAdd.noteOn.velocity = (float) msg.Velocity() * (1.f / 127.f);
 				pOutputEvents->addEvent(toAdd);
 			}
-			else if (msg.StatusMsg() == EStatusMsg::kNoteOff)
+			else if (msg.StatusMsg() == EMidiStatusMsg::kNoteOff)
 			{
-				Helpers::init(toAdd, Event::kNoteOffEvent, 0 /*bus id*/, msg.mOffset);
+				Steinberg::Vst::Helpers::init(toAdd, Steinberg::Vst::Event::kNoteOffEvent, 0 /*bus id*/, msg.mOffset);
 
 				toAdd.noteOff.channel  = msg.Channel();
 				toAdd.noteOff.pitch    = msg.NoteNumber();
 				toAdd.noteOff.velocity = (float) msg.Velocity() * (1.f / 127.f);
 				pOutputEvents->addEvent(toAdd);
 			}
-			else if (msg.StatusMsg() == EStatusMsg::kPolyAftertouch)
+			else if (msg.StatusMsg() == EMidiStatusMsg::kPolyAftertouch)
 			{
-				Helpers::initLegacyMIDICCOutEvent(
-					toAdd, ControllerNumbers::kCtrlPolyPressure, msg.Channel(), msg.mData1, msg.mData2);
+				Steinberg::Vst::Helpers::initLegacyMIDICCOutEvent(
+					toAdd, Steinberg::Vst::ControllerNumbers::kCtrlPolyPressure, msg.Channel(), msg.mData1, msg.mData2);
 				toAdd.sampleOffset = msg.mOffset;
 				pOutputEvents->addEvent(toAdd);
 			}
-			else if (msg.StatusMsg() == EStatusMsg::kChannelAftertouch)
+			else if (msg.StatusMsg() == EMidiStatusMsg::kChannelAftertouch)
 			{
-				Helpers::initLegacyMIDICCOutEvent(
-					toAdd, ControllerNumbers::kAfterTouch, msg.Channel(), msg.mData1, msg.mData2);
+				Steinberg::Vst::Helpers::initLegacyMIDICCOutEvent(
+					toAdd, Steinberg::Vst::ControllerNumbers::kAfterTouch, msg.Channel(), msg.mData1, msg.mData2);
 				toAdd.sampleOffset = msg.mOffset;
 				pOutputEvents->addEvent(toAdd);
 			}
-			else if (msg.StatusMsg() == EStatusMsg::kProgramChange)
+			else if (msg.StatusMsg() == EMidiStatusMsg::kProgramChange)
 			{
-				Helpers::initLegacyMIDICCOutEvent(
-					toAdd, ControllerNumbers::kCtrlProgramChange, msg.Channel(), msg.Program(), 0);
+				Steinberg::Vst::Helpers::initLegacyMIDICCOutEvent(
+					toAdd, Steinberg::Vst::ControllerNumbers::kCtrlProgramChange, msg.Channel(), msg.Program(), 0);
 				toAdd.sampleOffset = msg.mOffset;
 				pOutputEvents->addEvent(toAdd);
 			}
-			else if (msg.StatusMsg() == EStatusMsg::kControlChange)
+			else if (msg.StatusMsg() == EMidiStatusMsg::kControlChange)
 			{
-				Helpers::initLegacyMIDICCOutEvent(toAdd, msg.mData1, msg.Channel(), msg.mData2, 0 /* value2?*/);
+				Steinberg::Vst::Helpers::initLegacyMIDICCOutEvent(
+					toAdd, msg.mData1, msg.Channel(), msg.mData2, 0 /* value2?*/);
 				toAdd.sampleOffset = msg.mOffset;
 				pOutputEvents->addEvent(toAdd);
 			}
-			else if (msg.StatusMsg() == EStatusMsg::kPitchWheel)
+			else if (msg.StatusMsg() == EMidiStatusMsg::kPitchWheel)
 			{
-				toAdd.type                    = Event::kLegacyMIDICCOutEvent;
+				toAdd.type                    = Steinberg::Vst::Event::kLegacyMIDICCOutEvent;
 				toAdd.midiCCOut.channel       = msg.Channel();
 				toAdd.sampleOffset            = msg.mOffset;
-				toAdd.midiCCOut.controlNumber = ControllerNumbers::kPitchBend;
-				int16 tmp                     = static_cast<int16>(msg.PitchWheel() * 0x3FFF);
-				toAdd.midiCCOut.value         = (tmp & 0x7F);
-				toAdd.midiCCOut.value2        = ((tmp >> 7) & 0x7F);
+				toAdd.midiCCOut.controlNumber = Steinberg::Vst::ControllerNumbers::kPitchBend;
+				uint16 tmp                    = static_cast<uint16>(msg.PitchWheel() * 0x7fff /*0x3FFF*/);
+				toAdd.midiCCOut.value         = tmp & 0x7F;
+				toAdd.midiCCOut.value2        = (tmp >> 8 /*7*/) & 0x7F;
 				pOutputEvents->addEvent(toAdd);
 			}
 
@@ -206,13 +217,13 @@ void IPlugVST3ProcessorBase::ProcessMidiOut(IPlugQueue<SysExData>& sysExQueue,
 	// Output SYSEX from the editor, which has bypassed the processors' ProcessSysEx()
 	if (sysExQueue.ElementsAvailable())
 	{
-		Event toAdd = {0};
+		Steinberg::Vst::Event toAdd = {0};
 
 		while (sysExQueue.Pop(sysExBuf))
 		{
-			toAdd.type         = Event::kDataEvent;
+			toAdd.type         = Steinberg::Vst::Event::kDataEvent;
 			toAdd.sampleOffset = sysExBuf.mOffset;
-			toAdd.data.type    = DataEvent::kMidiSysEx;
+			toAdd.data.type    = Steinberg::Vst::DataEvent::kMidiSysEx;
 			toAdd.data.size    = sysExBuf.mSize;
 
 			// TODO!  this is a problem if more than one message in this block!
@@ -224,17 +235,19 @@ void IPlugVST3ProcessorBase::ProcessMidiOut(IPlugQueue<SysExData>& sysExQueue,
 }
 
 void IPlugVST3ProcessorBase::AttachBuffers(
-	ERoute direction, int idx, int n, AudioBusBuffers& pBus, int nFrames, Steinberg::int32 sampleSize)
+	ERoute direction, int idx, int n, Steinberg::Vst::AudioBusBuffers& pBus, int nFrames, Steinberg::int32 sampleSize)
 {
-	if (sampleSize == kSample32)
+	if (sampleSize == Steinberg::Vst::kSample32)
 		IPlugProcessor::AttachBuffers(direction, idx, n, pBus.channelBuffers32, nFrames);
-	else if (sampleSize == kSample64)
+	else if (sampleSize == Steinberg::Vst::kSample64)
 		IPlugProcessor::AttachBuffers(direction, idx, n, pBus.channelBuffers64, nFrames);
 }
 
-bool IPlugVST3ProcessorBase::SetupProcessing(const ProcessSetup& setup, ProcessSetup& storedSetup)
+bool IPlugVST3ProcessorBase::SetupProcessing(const Steinberg::Vst::ProcessSetup& setup,
+											 Steinberg::Vst::ProcessSetup& storedSetup)
 {
-	if ((setup.symbolicSampleSize != kSample32) && (setup.symbolicSampleSize != kSample64))
+	if ((setup.symbolicSampleSize != Steinberg::Vst::kSample32) &&
+		(setup.symbolicSampleSize != Steinberg::Vst::kSample64))
 		return false;
 
 	storedSetup = setup;
@@ -261,20 +274,23 @@ bool IPlugVST3ProcessorBase::CanProcessSampleSize(Steinberg::int32 symbolicSampl
 {
 	switch (symbolicSampleSize)
 	{
-		case kSample32:  // fall through
-		case kSample64: return true;
-		default: return false;
+		case Steinberg::Vst::kSample32:  // fall through
+		case Steinberg::Vst::kSample64:
+			return true;
+		default:
+			return false;
 	}
 }
 
-void IPlugVST3ProcessorBase::PrepareProcessContext(ProcessData& data, ProcessSetup& setup)
+void IPlugVST3ProcessorBase::PrepareProcessContext(Steinberg::Vst::ProcessData& data,
+												   Steinberg::Vst::ProcessSetup& setup)
 {
 	ITimeInfo timeInfo;
 
 	if (data.processContext)
-		memcpy(&mProcessContext, data.processContext, sizeof(ProcessContext));
+		memcpy(&mProcessContext, data.processContext, sizeof(Steinberg::Vst::ProcessContext));
 
-	if (mProcessContext.state & ProcessContext::kProjectTimeMusicValid)
+	if (mProcessContext.state & Steinberg::Vst::ProcessContext::kProjectTimeMusicValid)
 		timeInfo.mSamplePos = (double) mProcessContext.projectTimeSamples;
 	timeInfo.mPPQPos               = mProcessContext.projectTimeMusic;
 	timeInfo.mTempo                = mProcessContext.tempo;
@@ -283,16 +299,17 @@ void IPlugVST3ProcessorBase::PrepareProcessContext(ProcessData& data, ProcessSet
 	timeInfo.mCycleEnd             = mProcessContext.cycleEndMusic;
 	timeInfo.mNumerator            = mProcessContext.timeSigNumerator;
 	timeInfo.mDenominator          = mProcessContext.timeSigDenominator;
-	timeInfo.mTransportIsRunning   = mProcessContext.state & ProcessContext::kPlaying;
-	timeInfo.mTransportLoopEnabled = mProcessContext.state & ProcessContext::kCycleActive;
+	timeInfo.mTransportIsRunning   = mProcessContext.state & Steinberg::Vst::ProcessContext::kPlaying;
+	timeInfo.mTransportLoopEnabled = mProcessContext.state & Steinberg::Vst::ProcessContext::kCycleActive;
 	const bool offline             = setup.processMode == Steinberg::Vst::kOffline;
 	SetTimeInfo(timeInfo);
 	SetRenderingOffline(offline);
 }
 
-void IPlugVST3ProcessorBase::ProcessParameterChanges(ProcessData& data, IPlugQueue<IMidiMsg>& fromProcessor)
+void IPlugVST3ProcessorBase::ProcessParameterChanges(Steinberg::Vst::ProcessData& data,
+													 IPlugQueue<IMidiMsg>& fromProcessor)
 {
-	IParameterChanges* paramChanges = data.inputParameterChanges;
+	Steinberg::Vst::IParameterChanges* paramChanges = data.inputParameterChanges;
 
 	if (!paramChanges)
 		return;
@@ -301,7 +318,7 @@ void IPlugVST3ProcessorBase::ProcessParameterChanges(ProcessData& data, IPlugQue
 
 	for (int32 i = 0; i < numParamsChanged; i++)
 	{
-		IParamValueQueue* paramQueue = paramChanges->getParameterData(i);
+		Steinberg::Vst::IParamValueQueue* paramQueue = paramChanges->getParameterData(i);
 		if (!paramQueue)
 			continue;
 
@@ -309,13 +326,13 @@ void IPlugVST3ProcessorBase::ProcessParameterChanges(ProcessData& data, IPlugQue
 		Steinberg::int32 offsetSamples;
 		double value;
 
-		if (paramQueue->getPoint(numPoints - 1, offsetSamples, value) == kResultTrue)
+		if (paramQueue->getPoint(numPoints - 1, offsetSamples, value) == Steinberg::kResultTrue)
 		{
 			uint32 idx = paramQueue->getParameterId();
 
 			switch (idx)
 			{
-				case static_cast<uint32>(EVST3ParamIDs::kBypassParam):
+				case +EVST3ParamIDs::kBypassParam:
 				{
 					const bool bypassed = (value > 0.5);
 
@@ -333,27 +350,29 @@ void IPlugVST3ProcessorBase::ProcessParameterChanges(ProcessData& data, IPlugQue
 #endif
 						mPlug.GetParam(idx)->SetNormalized(value);
 
-						// In VST3 non distributed the same parameter value is also set via IPlugVST3Controller::setParamNormalized(ParamID tag, ParamValue value)
+						// In VST3 non distributed the same parameter value is also set via
+						// IPlugVST3Controller::setParamNormalized(ParamID tag, ParamValue value)
 						mPlug.OnParamChange(idx, EParamSource::kHost, offsetSamples);
 #ifdef PARAMS_MUTEX
 						mPlug.mParams_mutex.Leave();
 #endif
 					}
-					else if (idx >= static_cast<uint32>(EVST3ParamIDs::kMIDICCParamStartIdx))
+					else if (idx >= +EVST3ParamIDs::kMIDICCParamStartIdx)
 					{
-						int index   = idx - static_cast<uint32>(EVST3ParamIDs::kMIDICCParamStartIdx);
-						int channel = index / kCountCtrlNumber;
-						int ctrlr   = index % kCountCtrlNumber;
+						int index   = idx - +EVST3ParamIDs::kMIDICCParamStartIdx;
+						int channel = index / Steinberg::Vst::kCountCtrlNumber;
+
+						EMidiControlChangeMsg ctrlr =
+							static_cast<EMidiControlChangeMsg>(index % Steinberg::Vst::kCountCtrlNumber);
 
 						IMidiMsg msg;
 
-						if (ctrlr == kAfterTouch)
+						if (+ctrlr == Steinberg::Vst::ControllerNumbers::kAfterTouch)
 							msg.MakeChannelATMsg((int) (value * 127.), offsetSamples, channel);
-						else if (ctrlr == kPitchBend)
+						else if (+ctrlr == Steinberg::Vst::ControllerNumbers::kPitchBend)
 							msg.MakePitchWheelMsg((value * 2.) - 1., channel, offsetSamples);
 						else
-							msg.MakeControlChangeMsg(
-								(IMidiMsg::EControlChangeMsg) ctrlr, value, channel, offsetSamples);
+							msg.MakeControlChangeMsg(ctrlr, value, channel, offsetSamples);
 
 						fromProcessor.Push(msg);
 						ProcessMidiMsg(msg);
@@ -365,14 +384,14 @@ void IPlugVST3ProcessorBase::ProcessParameterChanges(ProcessData& data, IPlugQue
 	}
 }
 
-void IPlugVST3ProcessorBase::ProcessAudio(ProcessData& data,
-										  ProcessSetup& setup,
-										  const BusList& ins,
-										  const BusList& outs)
+void IPlugVST3ProcessorBase::ProcessAudio(Steinberg::Vst::ProcessData& data,
+										  Steinberg::Vst::ProcessSetup& setup,
+										  const Steinberg::Vst::BusList& ins,
+										  const Steinberg::Vst::BusList& outs)
 {
 	int32 sampleSize = setup.symbolicSampleSize;
 
-	if (sampleSize == kSample32 || sampleSize == kSample64)
+	if (sampleSize == Steinberg::Vst::kSample32 || sampleSize == Steinberg::Vst::kSample64)
 	{
 		if (data.numInputs)
 		{
@@ -432,7 +451,7 @@ void IPlugVST3ProcessorBase::ProcessAudio(ProcessData& data,
 
 		if (GetBypassed())
 		{
-			if (sampleSize == kSample32)
+			if (sampleSize == Steinberg::Vst::kSample32)
 				PassThroughBuffers(0.f, data.numSamples);  // single precision
 			else
 				PassThroughBuffers(0.0, data.numSamples);  // double precision
@@ -442,7 +461,7 @@ void IPlugVST3ProcessorBase::ProcessAudio(ProcessData& data,
 #ifdef PARAMS_MUTEX
 			mPlug.mParams_mutex.Enter();
 #endif
-			if (sampleSize == kSample32)
+			if (sampleSize == Steinberg::Vst::kSample32)
 				ProcessBuffers(0.f, data.numSamples);  // single precision
 			else
 				ProcessBuffers(0.0, data.numSamples);  // double precision
@@ -453,10 +472,10 @@ void IPlugVST3ProcessorBase::ProcessAudio(ProcessData& data,
 	}
 }
 
-void IPlugVST3ProcessorBase::Process(ProcessData& data,
-									 ProcessSetup& setup,
-									 const BusList& ins,
-									 const BusList& outs,
+void IPlugVST3ProcessorBase::Process(Steinberg::Vst::ProcessData& data,
+									 Steinberg::Vst::ProcessSetup& setup,
+									 const Steinberg::Vst::BusList& ins,
+									 const Steinberg::Vst::BusList& outs,
 									 IPlugQueue<IMidiMsg>& fromEditor,
 									 IPlugQueue<IMidiMsg>& fromProcessor,
 									 IPlugQueue<SysExData>& sysExFromEditor,

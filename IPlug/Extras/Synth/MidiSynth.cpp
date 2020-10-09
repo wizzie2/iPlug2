@@ -36,59 +36,59 @@ VoiceInputEvent MidiSynth::MidiMessageToEventBasic(const IMidiMsg& msg)
 {
 	VoiceInputEvent event {};
 
-	IMidiMsg::EStatusMsg status = msg.StatusMsg();
-	event.mSampleOffset         = msg.mOffset;
-	event.mAddress.mChannel     = msg.Channel();
-	event.mAddress.mKey         = msg.NoteNumber();
+	EMidiStatusMsg status   = msg.StatusMsg();
+	event.mSampleOffset     = msg.mOffset;
+	event.mAddress.mChannel = msg.Channel();
+	event.mAddress.mKey     = msg.NoteNumber();
 
 	switch (status)
 	{
-		case IMidiMsg::EStatusMsg::kNoteOn:
+		case EMidiStatusMsg::kNoteOn:
 		{
 			uint8 v       = math::Clamp(msg.Velocity(), 0, 127);
 			event.mAction = (v == 0) ? kNoteOffAction : kNoteOnAction;
 			event.mValue  = mVelocityLUT[v];
 			break;
 		}
-		case IMidiMsg::EStatusMsg::kNoteOff:
+		case EMidiStatusMsg::kNoteOff:
 		{
 			uint8 v       = math::Clamp(msg.Velocity(), 0, 127);
 			event.mAction = kNoteOffAction;
 			event.mValue  = mVelocityLUT[v];
 			break;
 		}
-		case IMidiMsg::EStatusMsg::kPolyAftertouch:
+		case EMidiStatusMsg::kPolyAftertouch:
 		{
 			event.mAction = kPressureAction;
 			event.mValue  = mAfterTouchLUT[msg.PolyAfterTouch()];
 			break;
 		}
-		case IMidiMsg::EStatusMsg::kChannelAftertouch:
+		case EMidiStatusMsg::kChannelAftertouch:
 		{
 			event.mAction = kPressureAction;
 			event.mValue  = mAfterTouchLUT[msg.ChannelAfterTouch()];
 			break;
 		}
-		case IMidiMsg::EStatusMsg::kPitchWheel:
+		case EMidiStatusMsg::kPitchWheel:
 		{
 			event.mAction   = kPitchBendAction;
 			float bendRange = mChannelStates[event.mAddress.mChannel].pitchBendRange;
 			event.mValue    = static_cast<float>(msg.PitchWheel()) * bendRange / 12.f;
 			break;
 		}
-		case IMidiMsg::EStatusMsg::kControlChange:
+		case EMidiStatusMsg::kControlChange:
 		{
 			event.mControllerNumber = static_cast<int>(msg.ControlChangeIdx());
 			event.mValue            = static_cast<float>(msg.ControlChange(msg.ControlChangeIdx()));
-			switch (static_cast<IMidiMsg::EControlChangeMsg>(event.mControllerNumber))
+			switch (event.mControllerNumber)
 			{
 				// handle special controllers
-				case IMidiMsg::EControlChangeMsg::kCutoffFrequency:
+				case +EMidiControlChangeMsg::kCutoffFrequency:
 				{
 					event.mAction = kTimbreAction;
 					break;
 				}
-				case IMidiMsg::EControlChangeMsg::kAllNotesOff:
+				case +EMidiControlChangeMsg::kAllNotesOff:
 				{
 					event.mAddress.mFlags = kVoicesAll;
 					event.mAction         = kNoteOffAction;
@@ -103,7 +103,7 @@ VoiceInputEvent MidiSynth::MidiMessageToEventBasic(const IMidiMsg& msg)
 			}
 			break;
 		}
-		case IMidiMsg::EStatusMsg::kProgramChange:
+		case EMidiStatusMsg::kProgramChange:
 		{
 			event.mAction           = kProgramChangeAction;
 			event.mControllerNumber = msg.Program();
@@ -122,18 +122,18 @@ VoiceInputEvent MidiSynth::MidiMessageToEventBasic(const IMidiMsg& msg)
 VoiceInputEvent MidiSynth::MidiMessageToEventMPE(const IMidiMsg& msg)
 {
 	VoiceInputEvent event {};
-	IMidiMsg::EStatusMsg status = msg.StatusMsg();
-	event.mSampleOffset         = msg.mOffset;
-	event.mAddress.mChannel     = msg.Channel();
-	event.mAddress.mKey         = msg.NoteNumber();
-	event.mAddress.mZone        = MasterZoneFor(event.mAddress.mChannel);
+	EMidiStatusMsg status   = msg.StatusMsg();
+	event.mSampleOffset     = msg.mOffset;
+	event.mAddress.mChannel = msg.Channel();
+	event.mAddress.mKey     = msg.NoteNumber();
+	event.mAddress.mZone    = MasterZoneFor(event.mAddress.mChannel);
 
 	// handle pitch bend, channel pressure and CC#74 in the same way:
 	// sum main and member channel values
-	bool isPitchBend       = (status == IMidiMsg::EStatusMsg::kPitchWheel);
-	bool isChannelPressure = (status == IMidiMsg::EStatusMsg::kChannelAftertouch);
-	bool isTimbre          = (status == IMidiMsg::EStatusMsg::kControlChange) &&
-					(msg.ControlChangeIdx() == IMidiMsg::EControlChangeMsg::kCutoffFrequency);
+	bool isPitchBend       = (status == EMidiStatusMsg::kPitchWheel);
+	bool isChannelPressure = (status == EMidiStatusMsg::kChannelAftertouch);
+	bool isTimbre          = (status == EMidiStatusMsg::kControlChange) &&
+					(msg.ControlChangeIdx() == EMidiControlChangeMsg::kCutoffFrequency);
 	if (isPitchBend || isChannelPressure || isTimbre)
 	{
 		float* pChannelDestValue {};
@@ -190,7 +190,7 @@ VoiceInputEvent MidiSynth::MidiMessageToEventMPE(const IMidiMsg& msg)
 		// program change:
 		// we are using MIDI mode 3. A program change sent to a master channel
 		// affects all voices within the zone. Program changes sent to member channels are ignored.
-		case IMidiMsg::EStatusMsg::kProgramChange:
+		case EMidiStatusMsg::kProgramChange:
 		{
 			if (IsMasterChannel(event.mAddress.mChannel))
 			{
@@ -204,26 +204,26 @@ VoiceInputEvent MidiSynth::MidiMessageToEventMPE(const IMidiMsg& msg)
 			}
 			break;
 		}
-		case IMidiMsg::EStatusMsg::kNoteOn:
+		case EMidiStatusMsg::kNoteOn:
 		{
 			uint8 v       = math::Clamp<uint8>(msg.Velocity(), 0, 127);
 			event.mAction = (v == 0) ? kNoteOffAction : kNoteOnAction;
 			event.mValue  = mVelocityLUT[v];
 			break;
 		}
-		case IMidiMsg::EStatusMsg::kNoteOff:
+		case EMidiStatusMsg::kNoteOff:
 		{
 			uint8 v       = math::Clamp<uint8>(msg.Velocity(), 0, 127);
 			event.mAction = kNoteOffAction;
 			event.mValue  = mVelocityLUT[v];
 			break;
 		}
-		case IMidiMsg::EStatusMsg::kControlChange:
+		case EMidiStatusMsg::kControlChange:
 		{
 			event.mControllerNumber = static_cast<int>(msg.ControlChangeIdx());
-			switch (static_cast<IMidiMsg::EControlChangeMsg>(event.mControllerNumber))
+			switch (event.mControllerNumber)
 			{
-				case IMidiMsg::EControlChangeMsg::kAllNotesOff:
+				case +EMidiControlChangeMsg::kAllNotesOff:
 				{
 					event.mAddress.mFlags = kVoicesAll;
 					event.mAction         = kNoteOffAction;
@@ -301,8 +301,8 @@ void MidiSynth::SetMPEZones(int channel, int nChans)
 	else
 		SetPitchBendRange(mNonMPEPitchBendRange);
 
-//	std::cout << "MPE mode: " << (mMPEMode ? "ON" : "OFF") << "\n";
-//	std::cout << "MPE channels: \n    lo: " << mMPELowerZoneChannels << " hi " << mMPEUpperZoneChannels << "\n";
+	//	std::cout << "MPE mode: " << (mMPEMode ? "ON" : "OFF") << "\n";
+	//	std::cout << "MPE channels: \n    lo: " << mMPELowerZoneChannels << " hi " << mMPEUpperZoneChannels << "\n";
 }
 
 void MidiSynth::SetChannelPitchBendRange(int channelParam, uint8 rangeParam)
@@ -333,7 +333,7 @@ void MidiSynth::SetChannelPitchBendRange(int channelParam, uint8 rangeParam)
 
 bool IsRPNMessage(IMidiMsg msg)
 {
-	if (msg.StatusMsg() != IMidiMsg::EStatusMsg::kControlChange)
+	if (msg.StatusMsg() != EMidiStatusMsg::kControlChange)
 		return false;
 	int cc = msg.mData1;
 	return (cc == 0x64) || (cc == 0x65) || (cc == 0x26) || (cc == 0x06);
@@ -356,7 +356,9 @@ void MidiSynth::HandleRPN(IMidiMsg msg)
 			state.paramMSB = valueByte;
 			state.valueMSB = state.valueLSB = 0xff;
 			break;
-		case 0x26: state.valueLSB = valueByte; break;
+		case 0x26:
+			state.valueLSB = valueByte;
+			break;
 		case 0x06:
 			// whenever the value MSB byte is received we constuct the value and take action on the RPN.
 			// if only the MSB has been received, it is used as the entire value so the maximum possible value is 127.
@@ -371,7 +373,8 @@ void MidiSynth::HandleRPN(IMidiMsg msg)
 			{
 				value = state.valueMSB & 0xFF;
 			}
-//			std::cout << "RPN received: channel " << channel << ", param " << param << ", value " << value << "\n";
+			//			std::cout << "RPN received: channel " << channel << ", param " << param << ", value " << value <<
+			//"\n";
 			switch (param)
 			{
 				case 0:  // RPN 0 : pitch bend range
@@ -383,11 +386,13 @@ void MidiSynth::HandleRPN(IMidiMsg msg)
 						SetMPEZones(channel, value);
 					}
 					break;
-				default: break;
+				default:
+					break;
 			}
 			break;
 
-		default: break;
+		default:
+			break;
 	}
 }
 
@@ -410,7 +415,8 @@ bool MidiSynth::ProcessBlock(sample** inputs, sample** outputs, uint32 nInputs, 
 			{
 				IMidiMsg msg = mMidiQueue.Peek();
 
-				// we assume the messages are in chronological order. If we find one later than the current block we are done.
+				// we assume the messages are in chronological order. If we find one later than the current block we are
+				// done.
 				if (msg.mOffset > startIndex + blockSize)
 					break;
 
