@@ -128,18 +128,23 @@ using PNTSTATUS = NTSTATUS*;
 // Additional windows headers
 #include <VersionHelpers.h>
 
-#include <intrin.h>          // Intrinsic functions
 #include <intsafe.h>         // Helper functions to prevent integer overflow bugs
 #include <strsafe.h>         // Safer C library string routine replacements
 
-#include <commdlg.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <ctype.h>
+#include <time.h>
+#include <sys/stat.h>
+
+#include <WindowsX.h>
 #include <shellapi.h>
 #include <shlobj.h>
+#include <commdlg.h>
 #include <Shlwapi.h>
-#include <WindowsX.h>
 #include <wininet.h>
 #include <winsock.h>
-#include <sys/stat.h>
+
 
 BEGIN_INCLUDE_DEPENDENCIES
 #if !NO_IGRAPHICS
