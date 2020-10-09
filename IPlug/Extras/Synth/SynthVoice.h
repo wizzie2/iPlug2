@@ -15,10 +15,6 @@
  * @copydoc SynthVoice
  */
 
-#include "IPlugConstants.h"
-#include "IPlugMidi.h"
-#include "IPlugLogger.h"
-#include "IPlugQueue.h"
 
 #include "ControlRamp.h"
 

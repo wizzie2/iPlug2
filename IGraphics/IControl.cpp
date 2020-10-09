@@ -8,6 +8,9 @@
  ==============================================================================
 */
 
+BEGIN_INCLUDE_DEPENDENCIES
+#include <WDL/dirscan.h>
+END_INCLUDE_DEPENDENCIES
 
 BEGIN_IPLUG_NAMESPACE
 BEGIN_IGRAPHICS_NAMESPACE

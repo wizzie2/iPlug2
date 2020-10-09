@@ -14,6 +14,10 @@
  * @ingroup SpecialControls
 */
 
+BEGIN_INCLUDE_DEPENDENCIES
+#include <WDL/wdlutf8.h>
+END_INCLUDE_DEPENDENCIES
+
 #include "ITextEntryControl.h"
 
 #ifdef _MSC_VER

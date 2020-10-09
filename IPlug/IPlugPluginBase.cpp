@@ -13,6 +13,11 @@
  * @brief IPluginBase implementation
  */
 
+BEGIN_INCLUDE_DEPENDENCIES
+#include <WDL/wdl_base64.h>
+#include <WDL/wdlendian.h>
+END_INCLUDE_DEPENDENCIES
+
 #include "IPlugPluginBase.h"
 
 using namespace iplug;
@@ -659,7 +664,7 @@ void IPluginBase::DumpPresetBlob(const char* filename) const
 	int idx = GetCurrentPresetIdx();
 	fprintf(fp, "MakePresetFromBlob(\"%s\", \"", GetPresetName(idx));
 
-	char buf[MAX_BLOB_LENGTH];
+	char buf[Config::maxDumpPresetBlobLength];
 
 	IByteChunk* pPresetChunk = &mPresets.Get(mCurrentPresetIdx)->mChunk;
 	uint8_t* byteStart       = pPresetChunk->GetData();

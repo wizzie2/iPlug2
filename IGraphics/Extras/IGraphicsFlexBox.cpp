@@ -1,3 +1,8 @@
+
+BEGIN_INCLUDE_DEPENDENCIES
+#include <yoga/Yoga.h>
+END_INCLUDE_DEPENDENCIES
+
 #include "Extras/IGraphicsFlexBox.h"
 
 using namespace iplug;

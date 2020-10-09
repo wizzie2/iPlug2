@@ -1,3 +1,9 @@
+
+BEGIN_INCLUDE_DEPENDENCIES
+#include "WDL/jnetlib/util.h"
+#include "WDL/jnetlib/netinc.h"
+END_INCLUDE_DEPENDENCIES
+
 #include "IPlugOSC.h"
 
 using namespace iplug;
