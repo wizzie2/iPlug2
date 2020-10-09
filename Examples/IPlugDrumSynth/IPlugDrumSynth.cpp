@@ -89,7 +89,7 @@ IPlugDrumSynth::IPlugDrumSynth(const InstanceInfo& info) : Plugin(info, Config(k
 #if IPLUG_EDITOR
 void IPlugDrumSynth::OnMidiMsgUI(const IMidiMsg& msg)
 {
-	if (GetUI() && msg.StatusMsg() == IMidiMsg::EStatusMsg::kNoteOn)
+	if (GetUI() && msg.StatusMsg() == EMidiStatusMsg::kNoteOn)
 	{
 		int pitchClass = msg.NoteNumber() % 12;
 
@@ -154,12 +154,12 @@ void IPlugDrumSynth::ProcessMidiMsg(const IMidiMsg& msg)
 {
 	TRACE;
 
-	IMidiMsg::EStatusMsg status = msg.StatusMsg();
+	EMidiStatusMsg status = msg.StatusMsg();
 
 	switch (status)
 	{
-		case IMidiMsg::EStatusMsg::kNoteOn:
-		case IMidiMsg::EStatusMsg::kNoteOff:
+		case EMidiStatusMsg::kNoteOn:
+		case EMidiStatusMsg::kNoteOff:
 		{
 			goto handle;
 		}

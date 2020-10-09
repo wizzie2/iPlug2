@@ -804,7 +804,7 @@ void IPlugControls::OnMidiMsgUI(const IMidiMsg& msg)
 	{
 		switch (msg.StatusMsg())
 		{
-			case iplug::IMidiMsg::EStatusMsg::kNoteOn:
+			case iplug::EMidiStatusMsg::kNoteOn:
 				FlashBlueLED();
 				break;
 			default:

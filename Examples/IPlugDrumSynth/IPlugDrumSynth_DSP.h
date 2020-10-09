@@ -75,7 +75,7 @@ class DrumSynthDSP
 				if (msg.mOffset > s)
 					break;
 
-				if (msg.StatusMsg() == IMidiMsg::EStatusMsg::kNoteOn && msg.Velocity())
+				if (msg.StatusMsg() == EMidiStatusMsg::kNoteOn && msg.Velocity())
 				{
 					int pitchClass = msg.NoteNumber() % 12;
 
