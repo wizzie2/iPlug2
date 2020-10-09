@@ -1,88 +1,81 @@
 /*
  ==============================================================================
- 
- This file is part of the iPlug 2 library. Copyright (C) the iPlug 2 developers. 
- 
+
+ This file is part of the iPlug 2 library. Copyright (C) the iPlug 2 developers.
+
  See LICENSE.txt for  more info.
- 
+
  ==============================================================================
 */
 
-#include "denormal.h"
-#include "IPlugConstants.h"
-
 BEGIN_IPLUG_NAMESPACE
 
-template<typename T, int NC = 1>
+template <typename T, int NC = 1>
 class LogParamSmooth
 {
-private:
-  double mA, mB;
-  T mOutM1[NC];
+ private:
+	double mA, mB;
+	T mOutM1[NC];
 
-public:
-  LogParamSmooth(double timeMs = 5., T initalValue = 0.)
-  {
-    for (auto i = 0; i < NC; i++)
-    {
-      mOutM1[i] = initalValue;
-    }
-    
-    SetSmoothTime(timeMs, DEFAULT_SAMPLE_RATE);
-  }
+ public:
+	LogParamSmooth(double timeMs = 5., T initalValue = 0.)
+	{
+		for (auto i = 0; i < NC; i++)
+		{
+			mOutM1[i] = initalValue;
+		}
 
-  // only works for NC = 1
-  inline T Process(T input)
-  {
-    mOutM1[0] = (input * mB) + (mOutM1[0] * mA);
-#if !PLATFORM_IOS
-    denormal_fix(&mOutM1[0]);
-#endif
-    return mOutM1[0];
-  }
+		SetSmoothTime(timeMs);
+	}
 
-  inline void SetValue(T value)
-  {
-    for (auto i = 0; i < NC; i++)
-    {
-      mOutM1[i] = value;
-    }
-  }
+	// only works for NC = 1
+	constexpr T Process(T input)
+	{
+		mOutM1[0] = (input * mB) + (mOutM1[0] * mA);
+		return mOutM1[0];
+	}
 
-  inline void SetValues(T values[NC])
-  {
-    for (auto i = 0; i < NC; i++)
-    {
-      mOutM1[i] = values[i];
-    }
-  }
+	constexpr void SetValue(T value)
+	{
+		for (auto i = 0; i < NC; i++)
+		{
+			mOutM1[i] = value;
+		}
+	}
 
-  void SetSmoothTime(double timeMs, double sampleRate)
-  {
-    static constexpr double TWO_PI = 6.283185307179586476925286766559;
-    
-    mA = exp(-TWO_PI / (timeMs * 0.001 * sampleRate));
-    mB = 1.0 - mA;
-  }
+	constexpr void SetValues(T values[NC])
+	{
+		for (auto i = 0; i < NC; i++)
+		{
+			mOutM1[i] = values[i];
+		}
+	}
 
-  void ProcessBlock(T inputs[NC], T** outputs, int nFrames, int channelOffset = 0)
-  {
-    const T b = mB;
-    const T a = mA;
+	constexpr void SetSmoothTime(double timeMs, double sampleRate = Config::defaultSampleRate)
+	{
+		static constexpr double TWO_PI = 6.283185307179586476925286766559;
 
-    for (auto s = 0; s < nFrames; ++s)
-    {
-      for (auto c = 0; c < NC; c++)
-      {
-        T output = (inputs[channelOffset + c] * b) + (mOutM1[c] * a);
-#if !PLATFORM_IOS
-        denormal_fix(&output);
-#endif
-        mOutM1[c] = output;
-        outputs[channelOffset + c][s] = output;
-      }
-    }
-  }
+		mA = exp(-TWO_PI / (timeMs * 0.001 * sampleRate));
+		mB = 1.0 - mA;
+	}
+
+	void ProcessBlock(T inputs[NC], T** outputs, int nFrames, int channelOffset = 0)
+	{
+		SCOPED_NO_DENORMALS();
+
+		const T b = mB;
+		const T a = mA;
+
+		for (auto s = 0; s < nFrames; ++s)
+		{
+			for (auto c = 0; c < NC; c++)
+			{
+				T output = (inputs[channelOffset + c] * b) + (mOutM1[c] * a);
+				mOutM1[c]                     = output;
+				outputs[channelOffset + c][s] = output;
+			}
+		}
+	}
 
 } WDL_FIXALIGN;
 
