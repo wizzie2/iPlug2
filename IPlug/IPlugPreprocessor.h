@@ -25,10 +25,10 @@
 #define PREPROCESSOR_STRING(expr)               _INTERNAL_TOKEN_STRING(expr)
 #define PREPROCESSOR_CONCAT(A,B)                _INTERNAL_TOKEN_CONCAT(A,B)
 #define PREPROCESSOR_CONCAT3(A,B,C)             _INTERNAL_TOKEN_CONCAT3(A,B,C)
-#define PREPROCESSOR_CONCAT4(A,B,C,D)           _INTERNAL_TOKEN_CONCAT3(A,B,C,D)
+#define PREPROCESSOR_CONCAT4(A,B,C,D)           _INTERNAL_TOKEN_CONCAT4(A,B,C,D)
 
 // No quotes in filename
-#define PLATFORM_HEADER(filename)               PREPROCESSOR_STRING(PLATFORM_NAME/filename)
+#define PLATFORM_HEADER(filename)               PREPROCESSOR_STRING(PREPROCESSOR_CONCAT3(PLATFORM_NAME/PLATFORM_NAME, _, filename))
 #define PLATFORM_PREFIX_HEADER(filename)        PREPROCESSOR_STRING(PREPROCESSOR_CONCAT(PLATFORM_NAME/PLATFORM_NAME, filename))
 
 #define BEGIN_IPLUG_NAMESPACE                   namespace iplug {
@@ -39,8 +39,6 @@
 #define WARNING_MESSAGE(msg)                    PRAGMA(message(__FILE__ "(" PREPROCESSOR_STRING(__LINE__) ") : " "WARNING: " msg))
 #define REMINDER_MESSAGE(msg)                   PRAGMA(message(__FILE__ "(" PREPROCESSOR_STRING(__LINE__) "): " msg))
 #define PRAGMA_MESSAGE(msg)                     PRAGMA(message(msg))
-
-#define DEPRECATED(version, message)            [[deprecated(message)]]
 
 #ifdef PARAMS_MUTEX
 	#define ENTER_PARAMS_MUTEX                  mParams_mutex.Enter();        Trace(TRACELOC, "%s", "ENTER_PARAMS_MUTEX");
@@ -56,40 +54,32 @@
 
 // clang-format on
 
+#define ENUM_CLASS(className, ...)                                \
+	enum class className                                          \
+	{                                                             \
+		__VA_ARGS__                                               \
+	};                                                            \
+	inline constexpr auto operator+(className const e)            \
+	{                                                             \
+		return static_cast<std::underlying_type_t<className>>(e); \
+	}
+
+#define ENUM_CLASS_TYPE(className, type, ...)                     \
+	enum class className : type                                   \
+	{                                                             \
+		__VA_ARGS__                                               \
+	};                                                            \
+	inline constexpr auto operator+(className const e)            \
+	{                                                             \
+		return static_cast<std::underlying_type_t<className>>(e); \
+	}
+
 #ifndef IGRAPHICS_GL
 	#if defined IGRAPHICS_GLES2 || IGRAPHICS_GLES3 || IGRAPHICS_GL2 || IGRAPHICS_GL3
 		#define IGRAPHICS_GL 1
 	#endif
 #endif
 
-#ifndef PLATFORM_NAME
-	#error "PLATFORM_NAME must be defined. Make sure cmake declared this when generating project."
-#endif
-
-// Set non-active platforms to 0
-#ifndef PLATFORM_WINDOWS
-	#define PLATFORM_WINDOWS 0
-#endif
-
-#ifndef PLATFORM_IOS
-	#define PLATFORM_IOS 0
-#endif
-
-#ifndef PLATFORM_MAC
-	#define PLATFORM_MAC 0
-#endif
-
-#ifndef PLATFORM_LINUX
-	#define PLATFORM_LINUX 0
-#endif
-
-#ifndef PLATFORM_WEB
-	#define PLATFORM_WEB 0
-#endif
-
-#if PLATFORM_WINDOWS + PLATFORM_IOS + PLATFORM_MAC + PLATFORM_LINUX + PLATFORM_WEB != 1
-	#error "One and only one platform should be active. Check cmake settings."
-#endif
 
 // Default floating-point type to use for variables and functions unless explicitly specified
 #ifndef PLUG_TFLOAT_TYPE
