@@ -19,12 +19,38 @@
 #include "IPlugPreprocessor.h"
 #include "PlatformCompiler.h"
 
+
+#ifndef PLATFORM_NAME
+	#error "PLATFORM_NAME must be defined. Make sure cmake declared this when generating project."
+#endif
+
+// Set non-active platforms to 0
+#ifndef PLATFORM_WINDOWS
+	#define PLATFORM_WINDOWS 0
+#endif
+
+#ifndef PLATFORM_IOS
+	#define PLATFORM_IOS 0
+#endif
+
+#ifndef PLATFORM_MAC
+	#define PLATFORM_MAC 0
+#endif
+
+#ifndef PLATFORM_LINUX
+	#define PLATFORM_LINUX 0
+#endif
+
+#ifndef PLATFORM_WEB
+	#define PLATFORM_WEB 0
+#endif
+
+#if PLATFORM_WINDOWS + PLATFORM_IOS + PLATFORM_MAC + PLATFORM_LINUX + PLATFORM_WEB != 1
+	#error "One and only one platform should be active. Check cmake settings."
+#endif
+
 namespace iplug::generic
 {
-	enum class utf8 : unsigned char
-	{
-	};
-
 	// Set default types
 	// std::uint*_t and int*_t are optional implementations
 	// and may not be available on some compilers.
@@ -39,13 +65,12 @@ namespace iplug::generic
 		using int16  = short;
 		using int32  = int;
 		using int64  = long long;
-		using utf8   = ::iplug::generic::utf8;
+		using utf8   = unsigned char;
 		using utf16  = char16_t;
 		using utf32  = char32_t;
 		using size_t = std::size_t;
 	};
 }  // namespace iplug::generic
-
 
 // Include target platform main header file
 #include PLATFORM_PREFIX_HEADER(Platform.h)
@@ -60,10 +85,6 @@ namespace iplug::generic
 // NULL redefinition for compiler conformance and overload type safety
 #undef NULL
 #define NULL nullptr
-
-#ifndef PLATFORM_64BIT
-	#error "PLATFORM_64BIT is undefined. Check PlatformCompiler.h"
-#endif
 
 #ifndef BEGIN_INCLUDE_DEPENDENCIES
 	#define BEGIN_INCLUDE_DEPENDENCIES
@@ -101,20 +122,20 @@ namespace iplug
 	static_assert(std::is_base_of_v<generic::Types, type::Platform>,
 				  "Platform type definition structure inheritance failure.");
 
-	using byte   = type::Platform::byte;    // 8-bit unsigned enum class type
-	using uint8  = type::Platform::uint8;   // 8-bit unsigned
-	using uint16 = type::Platform::uint16;  // 16-bit unsigned
-	using uint32 = type::Platform::uint32;  // 32-bit unsigned
-	using uint64 = type::Platform::uint64;  // 64-bit unsigned
-	using int8   = type::Platform::int8;    // 8-bit signed
-	using int16  = type::Platform::int16;   // 16-bit signed
-	using int32  = type::Platform::int32;   // 32-bit signed
-	using int64  = type::Platform::int64;   // 64-bit signed
-	using utf8   = type::Platform::utf8;    // 8-bit unsigned enum class type
-	using utf16  = type::Platform::utf16;   // 16-bit unsigned
-	using utf32  = type::Platform::utf32;   // 32-bit unsigned
-	using size_t = type::Platform::size_t;  // 32-bit or 64-bit unsigned
-	using tfloat = PLUG_TFLOAT_TYPE;		// defined floating-point type float/double
+	using byte   = type::Platform::byte;    //! 8-bit unsigned enum class type
+	using uint8  = type::Platform::uint8;   //! 8-bit unsigned
+	using uint16 = type::Platform::uint16;  //! 16-bit unsigned
+	using uint32 = type::Platform::uint32;  //! 32-bit unsigned
+	using uint64 = type::Platform::uint64;  //! 64-bit unsigned
+	using int8   = type::Platform::int8;    //! 8-bit signed
+	using int16  = type::Platform::int16;   //! 16-bit signed
+	using int32  = type::Platform::int32;   //! 32-bit signed
+	using int64  = type::Platform::int64;   //! 64-bit signed
+	using utf8   = type::Platform::utf8;    //! 8-bit unsigned
+	using utf16  = type::Platform::utf16;   //! 16-bit unsigned
+	using utf32  = type::Platform::utf32;   //! 32-bit unsigned
+	using size_t = type::Platform::size_t;  //! 32-bit or 64-bit unsigned
+	using tfloat = PLUG_TFLOAT_TYPE;        //! defined floating-point type float or double
 
 
 	//-----------------------------------------------------------------------------
@@ -142,7 +163,6 @@ namespace iplug
 	static_assert(sizeof(utf8) == 1, "utf8 type size failed.");
 	static_assert(sizeof(utf16) == 2, "utf16 type size failed.");
 	static_assert(sizeof(utf32) == 4, "utf32 type size failed.");
-	static_assert(sizeof(size_t) >= 4, "size_t type size failed.");
 	static_assert(sizeof(size_t) == sizeof(nullptr), "size_t type size failed.");
 	static_assert(sizeof(size_t) == (PLATFORM_64BIT + 1) << 2, "size_t type size failed.");
 	static_assert(sizeof(wchar_t) >= 2, "wchar_t type size failed.");
@@ -159,7 +179,7 @@ namespace iplug
 	static_assert(utf16(-1) > utf16(0), "utf16 type sign test failed. utf16 is signed.");
 	static_assert(utf32(-1) > utf32(0), "utf32 type sign test failed. utf32 is signed.");
 	static_assert(size_t(-1) > size_t(0), "size_t type sign test failed. size is signed.");
-	static_assert(wchar_t(-1) > wchar_t(0), "wchar_t type sign test failed. wchar is signed.");
+	static_assert(wchar_t(-1) > wchar_t(0), "wchar_t type sign test failed. wchar_t is signed.");
 
 
 	//-----------------------------------------------------------------------------
@@ -217,13 +237,6 @@ namespace iplug
 		Little = 0,
 		Big    = 1,
 		Native = (PLATFORM_LITTLE_ENDIAN == 1) ? Little : Big
-	};
-
-	enum class EPThreads
-	{
-		Enabled,
-		Disabled,
-		Native = (PLATFORM_PTHREADS == 1) ? Enabled : Disabled
 	};
 
 	enum class ECacheLineSize
@@ -286,125 +299,3 @@ namespace iplug
 	};
 
 }  // namespace iplug
-
-// Cleanup, but keeping PLATFORM_NAME & PLATFORM_<ID>
-#undef PLUG_TFLOAT_TYPE
-#undef PLATFORM_CACHE_LINE_SIZE
-#undef PLATFORM_LITTLE_ENDIAN
-#undef PLATFORM_64BIT
-#undef PLATFORM_PTHREADS
-#undef PLATFORM_COMPILER_APPLECLANG
-#undef PLATFORM_COMPILER_EMSCRIPTEN
-#undef PLATFORM_COMPILER_MSVC
-#undef PLATFORM_COMPILER_GCC
-#undef PLATFORM_COMPILER_CLANG
-
-
-namespace iplug::type
-{
-	template <class>
-	inline constexpr bool Always_false = false;
-
-	template <class T>
-	struct InvalidType
-	{
-		static_assert(Always_false<T>, "Invalid type");
-	};
-
-	// Copy of MSVC internal std::_Is_any_of_v implementation
-	template <class T, class... Types>
-	inline constexpr bool IsAnyOf = std::disjunction_v<std::is_same<T, Types>...>;
-
-	// No bool, char, wchar_t, char16_t or char32_t
-	template <class T>
-	inline constexpr bool IsIntegral = IsAnyOf<std::remove_cv_t<T>,  // remove 'const' and 'volatile' qualifiers
-											   uint8,
-											   uint16,
-											   uint32,
-											   uint64,
-											   int8,
-											   int16,
-											   int32,
-											   int64,
-											   signed char,
-											   unsigned char,
-											   short,
-											   unsigned short,
-											   int,
-											   unsigned int,
-											   long,
-											   unsigned long,
-											   long long,
-											   unsigned long long>;
-
-	template <class Tx, class Ty>
-	inline constexpr bool IsSame = std::is_same_v<std::remove_cv_t<Tx>, Ty>;
-
-	template <class T>
-	inline constexpr bool IsFloatingPoint = std::is_floating_point_v<T>;
-
-	template <class T>
-	inline constexpr bool IsSigned = std::is_signed_v<T>;
-
-	template <class T>
-	inline constexpr bool IsUnsigned = std::is_unsigned_v<T>;
-
-	template <class T>
-	inline constexpr bool IsFloat = IsSame<T, float>;
-
-	template <class T>
-	inline constexpr bool IsDouble = IsSame<T, double>;
-
-	// Using modified is_integral_v without bool or char types
-	template <class T>
-	inline constexpr bool IsArithmetic = IsIntegral<T> || IsFloatingPoint<T>;
-
-	template <class T>
-	using EnableWhenFloatingtPoint = std::enable_if_t<type::IsFloatingPoint<T>, int>;
-
-	template <class T>
-	using EnableWhenIntegral = std::enable_if_t<type::IsIntegral<T>, int>;
-
-	template <class T>
-	using EnableWhenArethmatic = std::enable_if_t<type::IsArithmetic<T>, int>;
-
-
-	// clang-format off
-
-	// Returns uint8, uint16, uint32 or uint64 based on the size of T
-	template <class T>
-	using ConditionalUIntSize = std::conditional_t<sizeof(T) == 1, uint8,
-		                        std::conditional_t<sizeof(T) == 2, uint16,
-		                        std::conditional_t<sizeof(T) == 4, uint32,
-		                        std::conditional_t<sizeof(T) == 8, uint64,
-		                        type::InvalidType<T>>>>>;
-
-	// Returns int8, int16, int32 or int64 based on the size of T
-	template <class T>
-	using ConditionalIntSize =  std::conditional_t<sizeof(T) == 1, int8,
-		                        std::conditional_t<sizeof(T) == 2, int16,
-		                        std::conditional_t<sizeof(T) == 4, int32,
-		                        std::conditional_t<sizeof(T) == 8, int64,
-		                        type::InvalidType<T>>>>>;
-
-	// Emulate C++20 bit_cast, or if available use the real bit_cast
-	#ifndef __cpp_lib_bit_cast
-		template <class To,
-				  class From,
-				  std::enable_if_t<std::conjunction_v<std::bool_constant<sizeof(To) == sizeof(From)>,
-													  std::is_trivially_copyable<To>,
-													  std::is_trivially_copyable<From>>,
-								   int> = 0>
-		NODISCARD constexpr To bit_cast(const From& type) noexcept
-		{
-			To result;
-			memcpy(&result, &type, sizeof(To));
-			return result;
-		}
-	#else
-		template <class To, class From>
-		using bit_cast = ::std::bit_cast<To, From>;
-	#endif
-
-	// clang-format on
-}  // namespace iplug::type
