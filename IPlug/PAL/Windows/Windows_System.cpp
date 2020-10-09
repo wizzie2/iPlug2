@@ -8,11 +8,11 @@
  ==============================================================================
 */
 
-#include "System.h"
+#include "Windows_System.h"
 
-namespace iplug::windows
+namespace iplug
 {
-	static const class WindowsSystem::cpu_id
+	static const class System::cpu_id
 	{
 	 public:
 		cpu_id()
@@ -32,10 +32,12 @@ namespace iplug::windows
 		std::string vendor;
 		std::string brand;
 
-		int nIds                 = 0;
-		int nExIds               = 0;
-		bool isIntel             = false;
-		bool isAMD               = false;
+		int nIds   = 0;
+		int nExIds = 0;
+
+		bool isIntel = false;
+		bool isAMD   = false;
+
 		std::bitset<32> f_1_ECX  = 0;
 		std::bitset<32> f_1_EDX  = 0;
 		std::bitset<32> f_7_EBX  = 0;
@@ -47,7 +49,6 @@ namespace iplug::windows
 		std::vector<std::array<int, 4>> extdata = {};
 	};
 
-	const WindowsSystem::cpu_id System::m_cpu_id;
+	const System::cpu_id System::m_cpu_id;
 
-
-}  // namespace iplug::windows
+}  // namespace iplug

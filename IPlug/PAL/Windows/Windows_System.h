@@ -1,3 +1,5 @@
+#pragma once
+
 /*
  ==============================================================================
 
@@ -9,27 +11,17 @@
 */
 
 
-#pragma once
+#include "PAL/Generic/Generic_System.h"
 
-#include "../System.h"
-
-namespace iplug::windows
+namespace iplug
 {
-	class WindowsSystem : public iplug::generic::GenericSystem
+	class System : public generic::System
 	{
-	 private:
-		class cpu_id;
+		class cpu_id;  // fwd
 
 	 public:
-
 	 private:
 		static const cpu_id m_cpu_id;
 	};
-}  // namespace iplug::windows
+}  // namespace iplug
 
-
-// Declare the class for direct usage in iplug namespace
-namespace iplug
-{
-	using System = iplug::windows::WindowsSystem;
-}

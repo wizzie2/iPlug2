@@ -1,3 +1,5 @@
+#pragma once
+
 /*
  ==============================================================================
 
@@ -8,61 +10,54 @@
  ==============================================================================
 */
 
-
-#pragma once
-
+// Documentation for system.h
+#ifdef DOXYGEN_GENERATING_OUTPUT
 namespace iplug
 {
-	enum class EIntrinsic : uint32
+	struct System
 	{
-		MMX    = 1 << 0,
-		SSE    = 1 << 1,
-		SSE2   = 1 << 2,
-		SSE3   = 1 << 3,
-		SSSE3  = 1 << 4,
-		SSE41  = 1 << 5,
-		SSE42  = 1 << 6,
-		AVX    = 1 << 7,
-		AVX2   = 1 << 8,
-		FMA3   = 1 << 9,
-		FMA4   = 1 << 10,
-		AVX512 = 1 << 11,
-		KNC    = 1 << 12,
-		AMX    = 1 << 13,
-		SVML   = 1 << 14,
+		//! @retval int Pre-defined cache line size
+		static inline constexpr int CacheLineSize();
+
+		//! @retval #EEndian Current runtime endianness
+		static inline const EEndian GetEndianness();
 	};
 }  // namespace iplug
-
-
-namespace iplug::generic
-{
-	struct GenericSystem
-	{
-		//!< @retval int Pre-defined cache line size
-		static inline constexpr int CacheLineSize()
-		{
-			return static_cast<int>(ECacheLineSize::Native);
-		}
-
-		//!< @retval #EEndian Current runtime endianness
-		static inline const EEndian GetEndianness()
-		{
-			static volatile const union
-			{
-				uint16 i;
-				uint8 c[2];
-			} u = {0x0001};
-			return u.c[0] == 0x01 ? EEndian::Little : EEndian::Big;
-		}
-	};
-}  // namespace iplug::generic
+#endif
 
 
 #if __has_include(PLATFORM_HEADER(System.h))
 	#include PLATFORM_HEADER(System.h)
-#else
+#endif
+
+
+// In System.h for now
 namespace iplug
 {
-	using System = iplug::generic::GenericSystem;
-}
+#if PLATFORM_INTRINSIC_X64
+
+	struct MXCSRScope : generic::MXCSRScope
+	{
+		MXCSRScope(uint32 MXCSR_Flags)
+		{
+			m_MXCSR = _mm_getcsr();
+			_mm_setcsr(m_MXCSR | MXCSR_Flags);
+		}
+
+		~MXCSRScope()
+		{
+			_mm_setcsr(m_MXCSR);
+		}
+	};
+
+	#define SCOPED_NO_DENORMALS()        \
+		MXCSRScope PREPROCESSOR_CONCAT4( \
+			_MXCSRScope_, __COUNTER__, _, __LINE__(_MM_FLUSH_ZERO_ON | _MM_DENORMALS_ZERO_ON))
+
+#else
+
+	#define SCOPED_NO_DENORMALS()
+	using MXCSRScope = generic::MXCSRScope;
+
 #endif
+}  // namespace iplug
