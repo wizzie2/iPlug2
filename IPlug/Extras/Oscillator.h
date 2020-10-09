@@ -10,7 +10,6 @@
 
 #pragma once
 
-
 BEGIN_IPLUG_NAMESPACE
 
 template <typename T = tfloat>
@@ -21,7 +20,7 @@ struct IOscillator
 		SetFreqCPS(startFreq);
 	}
 
-//	inline T Process(T freqHz) = 0;
+	//	inline T Process(T freqHz) = 0;
 
 	constexpr void SetFreqCPS(T freqHz)
 	{
@@ -30,7 +29,7 @@ struct IOscillator
 
 	constexpr void SetSampleRate(T sampleRate)
 	{
-		mSampleRateReciprocal = (1. / sampleRate);
+		mSampleRateReciprocal = (1 / sampleRate);
 	}
 
 	constexpr void Reset()
@@ -44,9 +43,9 @@ struct IOscillator
 	}
 
  protected:
-	T mSampleRateReciprocal = 1. / 44100.;
-	T mStartPhase           = 0.;
-	T mPhase                = 0.;  // float phase (goes between 0. and 1.)
+	T mSampleRateReciprocal = 1 / 44100.;
+	T mStartPhase           = 0;
+	T mPhase                = 0;                      // float phase (goes between 0. and 1.)
 	T mPhaseIncr            = mSampleRateReciprocal;  // how much to add to the phase on each T
 };
 
@@ -58,15 +57,15 @@ struct SinOscillator : public IOscillator<T>
 
 	constexpr T Process() const
 	{
-		IOscillator<T>::mPhase = IOscillator<T>::mPhase + IOscillator<T>::mPhaseIncr;
-		return std::sin(IOscillator<T>::mPhase * math::constants::pi_v<T> * 2);
+		this->mPhase = this->mPhase + this->mPhaseIncr;
+		return std::sin(this->mPhase * math::constants::pi_v<T> * 2);
 	}
 
 	constexpr T Process(T freqHz)
 	{
-		IOscillator<T>::SetFreqCPS(freqHz);
-		IOscillator<T>::mPhase = IOscillator<T>::mPhase + IOscillator<T>::mPhaseIncr;
-		return std::sin(IOscillator<T>::mPhase * math::constants::pi_v<T> * 2);
+		this->SetFreqCPS(freqHz);
+		this->mPhase = this->mPhase + this->mPhaseIncr;
+		return std::sin(this->mPhase * math::constants::pi_v<T> * 2);
 	}
 };
 
@@ -105,12 +104,14 @@ struct SinOscillator : public IOscillator<T>
  point representation of the fractional part.
  */
 
+// TODO: Benchmark this...
+
 template <class T = tfloat>
 class FastSinOscillator : public IOscillator<T>
 {
 	static constexpr double UNITBIT32 = 1572864.; /* 3*2^19; bit 32 has place value 1 */
-	static constexpr auto HIOFFSET  = 1;
-	static constexpr auto LOWOFFSET = 0;
+	static constexpr auto HIOFFSET    = 1;
+	static constexpr auto LOWOFFSET   = 0;
 
 	union tabfudge
 	{
@@ -142,41 +143,54 @@ class FastSinOscillator : public IOscillator<T>
 
 	constexpr void ProcessBlock(T* pOutput, int nFrames)
 	{
-		T phase           = IOscillator<T>::mPhase + static_cast<T>(UNITBIT32);
-		const T phaseIncr = IOscillator<T>::mPhaseIncr * tableSize;
+		T phase           = this->mPhase + static_cast<T>(UNITBIT32);
+		const T phaseIncr = this->mPhaseIncr * tableSize;
 
-		union tabfudge tf{UNITBIT32};
+		tabfudge tf {UNITBIT32};
+
 		const int normhipart = tf.i[HIOFFSET];
 
 		for (auto s = 0; s < nFrames; s++)
 		{
 			tf.d = phase;
 			phase += phaseIncr;
-			const double* addr = mLUT + (tf.i[HIOFFSET] & tableSizeM1);  // Obtain the integer portion
-			tf.i[HIOFFSET]     = normhipart;                             // Force the double to wrap.
-			const T frac       = static_cast<T>(tf.d - UNITBIT32);
-			const T f1         = static_cast<T>(addr[0]);
-			const T f2         = static_cast<T>(addr[1]);
+			const int addr = tf.i[HIOFFSET] & tableSizeM1;  // Obtain the integer portion
+			tf.i[HIOFFSET] = normhipart;                    // Force the double to wrap.
+			const T frac   = static_cast<T>(tf.d - UNITBIT32);
+			const T f1     = static_cast<T>(mLUT[addr]);
+			const T f2     = static_cast<T>(mLUT[addr + 1]);
 			mLastOutput = pOutput[s] = T(f1 + frac * (f2 - f1));
 		}
 
 		// Restore mPhase
 		tf.d                  = UNITBIT32 * tableSize;
 		const int normhipart2 = tf.i[HIOFFSET];
-		tf.d =
-			phase + (UNITBIT32 * tableSize - UNITBIT32);  // Remove the offset we introduced at the start of UNITBIT32.
-		tf.i[HIOFFSET]         = normhipart2;
-		IOscillator<T>::mPhase = static_cast<T>(tf.d - UNITBIT32 * tableSize);
+
+		// Remove the offset we introduced at the start of UNITBIT32.
+		tf.d           = phase + (UNITBIT32 * tableSize - UNITBIT32);
+		tf.i[HIOFFSET] = normhipart2;
+		this->mPhase   = static_cast<T>(tf.d - UNITBIT32 * tableSize);
 	}
 
-	T mLastOutput = 0.;
+	static constexpr int tableSize   = 1 << 9;         // 2^9
+	static constexpr int tableSizeM1 = tableSize - 1;  // 2^9 -1  (assumes tableSize is a Pow2 value)
 
- private:
-	static constexpr int tableSize   = 512;  // 2^9
-	static constexpr int tableSizeM1 = 511;  // 2^9 -1
-	alignas(8) static const double mLUT[513];
+	static const std::array<double, tableSize + 1> mLUT;
+
+	T mLastOutput = 0.;
 };
 
-#include "Oscillator_table.h"
+template <class T>
+const std::array<double, FastSinOscillator<T>::tableSize + 1> FastSinOscillator<T>::mLUT = [] {
+	alignas(16) static std::array<double, tableSize + 1> array;
+
+	for (int i = 0; i < tableSize; ++i)
+	{
+		double d = sin(i * math::constants::pi_v<double> * 2 / tableSize);
+		array[i] = math::IsNearlyZero(d) ? 0.0 : d;
+	}
+	array[tableSize] = array[0];
+	return array;
+}();
 
 END_IPLUG_NAMESPACE
