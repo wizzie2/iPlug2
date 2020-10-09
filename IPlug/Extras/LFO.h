@@ -27,24 +27,24 @@ BEGIN_IPLUG_NAMESPACE
 template <typename T = double>
 class LFO : public IOscillator<T>
 {
- public:
+public:
 	enum ETempoDivison
 	{
-		k64th = 0,  // 1 sixty fourth of a beat
-		k32nd,      // 1 thirty second of a beat
-		k16thT,     // 1 sixteenth note tripet
-		k16th,      // 1 sixteenth note
-		k16thD,     // 1 dotted sixteenth note
-		k8th,       // 1 eigth note
-		k8thD,      // 1 dotted eigth note
-		k8thT,      // 1 eigth note tripet
-		k4th,       // 1 quater note a.k.a 1 beat @ 4/4
-		k4thD,      // 1 dotted beat @ 4/4
-		k2th,       // 2 beats @ 4/4
-		k1,         // 1 bar @ 4/4
-		k2,         // 2 bars @ 4/4
-		k4,         // 4 bars @ 4/4
-		k8,         // 8 bars @ 4/4
+		k64th = 0,   // 1 sixty fourth of a beat
+		k32nd,       // 1 thirty second of a beat
+		k16thT,      // 1 sixteenth note triplet
+		k16th,       // 1 sixteenth note
+		k16thD,      // 1 dotted sixteenth note
+		k8thT,       // 1 eighth note triplet
+		k8th,        // 1 eighth note
+		k8thD,       // 1 dotted eighth note
+		k4th,        // 1 quater note a.k.a 1 beat @ 4/4
+		k4thD,       // 1 dotted beat @ 4/4
+		k2th,        // 2 beats @ 4/4
+		k1,          // 1 bar @ 4/4
+		k2,          // 2 bars @ 4/4
+		k4,          // 4 bars @ 4/4
+		k8,          // 8 bars @ 4/4
 		kNumDivisions
 	};
 
@@ -112,7 +112,7 @@ class LFO : public IOscillator<T>
 	void ProcessBlock(T* pOutput, int nFrames, double qnPos = 0., bool transportIsRunning = false, double tempo = 120.)
 	{
 		T oneOverQNScalar = 1. / mQNScalar;
-		T phase           = IOscillator<T>::mPhase;
+		T phase = IOscillator<T>::mPhase;
 
 		if (mRateMode == ERateMode::kBPM && !transportIsRunning)
 			IOscillator<T>::SetFreqCPS(tempo / 60.);
@@ -172,7 +172,7 @@ class LFO : public IOscillator<T>
 		return mLastOutput;
 	}
 
- private:
+private:
 	static inline T WrapPhase(T x, T lo = 0., T hi = 1.)
 	{
 		while (x >= hi)
@@ -184,28 +184,36 @@ class LFO : public IOscillator<T>
 
 	inline T DoProcess(T phase)
 	{
-		auto triangle = [](T x) {
+		auto triangle = [](T x)
+		{
 			return (2. * (1. - std::abs((WrapPhase(x + 0.25) * 2.) - 1.))) - 1.;
 		};
-		auto triangleUnipolar = [](T x) {
+		auto triangleUnipolar = [](T x)
+		{
 			return 1. - std::abs((x * 2.) - 1.);
 		};
-		auto square = [](T x) {
+		auto square = [](T x)
+		{
 			return std::copysign(1., x - 0.5);
 		};
-		auto squareUnipolar = [](T x) {
+		auto squareUnipolar = [](T x)
+		{
 			return std::copysign(0.5, x - 0.5) + 0.5;
 		};
-		auto rampup = [](T x) {
+		auto rampup = [](T x)
+		{
 			return (x * 2.) - 1.;
 		};
-		auto rampupUnipolar = [](T x) {
+		auto rampupUnipolar = [](T x)
+		{
 			return x;
 		};
-		auto rampdown = [](T x) {
+		auto rampdown = [](T x)
+		{
 			return ((1. - x) * 2.) - 1.;
 		};
-		auto rampdownUnipolar = [](T x) {
+		auto rampdownUnipolar = [](T x)
+		{
 			return 1. - x;
 		};
 
@@ -257,11 +265,11 @@ class LFO : public IOscillator<T>
 		return mLastOutput;
 	}
 
- private:
-	T mLastOutput       = 0.;
-	T mLevelScalar      = 1.;  // Non clipped, or smoothed scalar value
-	T mQNScalar         = 1.;
-	EShape mShape       = EShape::kTriangle;
+private:
+	T mLastOutput = 0.;
+	T mLevelScalar = 1.;  // Non clipped, or smoothed scalar value
+	T mQNScalar = 1.;
+	EShape mShape = EShape::kTriangle;
 	EPolarity mPolarity = EPolarity::kUnipolar;
 	ERateMode mRateMode = ERateMode::kHz;
 };
