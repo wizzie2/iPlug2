@@ -286,9 +286,9 @@ if(HAVESDK_VST3)
     target_compile_definitions(${_libName}
         PUBLIC
             $<$<BOOL:${VST3_SDK_UNICODE_OFF}>:UNICODE_OFF>
-            $<$<CONFIG:Debug>:DEVELOPMENT=1>
-            $<$<CONFIG:Release>:RELEASE=1>
-            $<$<CONFIG:Distributed>:RELEASE=1>
+            $<$<CONFIG:Debug>:DEVELOPMENT=1 RELEASE=0>
+            $<$<CONFIG:Release>:DEVELOPMENT=0 RELEASE=1>
+            $<$<CONFIG:Distributed>:DEVELOPMENT=0 RELEASE=1>
     )
 
     target_sources(${_libName}
