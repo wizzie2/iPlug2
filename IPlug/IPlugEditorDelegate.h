@@ -133,9 +133,9 @@ class IEditorDelegate
 	 * @param paramIdx The index of the parameter that changed
 	 * @param source One of the EParamSource options to indicate where the parameter change came from.
 	 * @param sampleOffset For sample accurate parameter changes - index into current block */
-	virtual void OnParamChange(int paramIdx, EParamSource source, int sampleOffset = -1)
+	virtual void OnParamChange(int paramIdx, const EParamSource source, int sampleOffset = -1)
 	{
-		Trace(TRACELOC, "idx:%i src:%s\n", paramIdx, ParamSourceStrs[static_cast<size_t>(source)]);
+		Trace(TRACELOC, "idx:%i src:%s\n", paramIdx, ParamSourceStrs[source]);
 		OnParamChange(paramIdx);
 	}
 

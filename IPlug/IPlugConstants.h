@@ -24,16 +24,10 @@ namespace iplug
 	using PLUG_SAMPLE_SRC = std::conditional_t<type::IsDouble<tfloat>, float, double>;
 	using sample          = tfloat;
 
-	inline constexpr double DEFAULT_SAMPLE_RATE = 44100;
-	inline constexpr int MAX_PRESET_NAME_LEN    = 256;
 
-	inline constexpr int DEFAULT_BLOCK_SIZE = 1024;
-	inline constexpr double DEFAULT_TEMPO   = 120.0;
-
-	inline constexpr int kNoParameter       = -1;
-	inline constexpr int kNoValIdx          = -1;
-	inline constexpr int kNoTag             = -1;
-
+	inline constexpr int kNoParameter = -1;
+	inline constexpr int kNoValIdx    = -1;
+	inline constexpr int kNoTag       = -1;
 
 	enum class EPluginType
 	{
@@ -43,13 +37,12 @@ namespace iplug
 	};
 
 
-	enum class EVST3ParamIDs
+	enum class EVST3ParamIDs : uint32
 	{
 		kBypassParam = 0x10000,
 		kPresetParam,  // not used unless baked in presets declared
 		kMIDICCParamStartIdx
 	};
-
 
 	/** @enum EParamSource
 	 * Used to identify the source of a parameter change
@@ -62,12 +55,15 @@ namespace iplug
 		kUI,
 		kDelegate,
 		kRecompile,  // for FAUST JIT
-		kUnknown,
-		kNumParamSources
+		kUnknown
 	};
-
-	inline constexpr const char* ParamSourceStrs[static_cast<size_t>(EParamSource::kNumParamSources)] = {
-		"Reset", "Host", "Preset", "UI", "Editor Delegate", "Recompile", "Unknown"};
+	static type::EnumStringMap<EParamSource> ParamSourceStrs {{EParamSource::kReset, "Reset"},
+															  {EParamSource::kHost, "Host"},
+															  {EParamSource::kPresetRecall, "Preset"},
+															  {EParamSource::kUI, "UI"},
+															  {EParamSource::kDelegate, "Editor Delegate"},
+															  {EParamSource::kRecompile, "Recompile"},
+															  {EParamSource::kUnknown, "Unknown"}};
 
 
 	/** @enum ERoute
@@ -78,9 +74,7 @@ namespace iplug
 		kInput  = 0,
 		kOutput = 1
 	};
-
-	inline constexpr const char* RoutingDirStrs[2] = {"Input", "Output"};
-
+	static type::EnumStringMap<ERoute> RoutingDirStrs {{ERoute::kInput, "Input"}, {ERoute::kOutput, "Output"}};
 
 	/** @enum EHost
 	 * Host identifier
@@ -306,11 +300,6 @@ namespace iplug
 	};
 
 
-
-#ifndef MAX_BLOB_LENGTH
-	#define MAX_BLOB_LENGTH 2048
-#endif
-
 #ifndef IDLE_TIMER_RATE
 	#define IDLE_TIMER_RATE 20  // this controls the frequency of data going from processor to editor (and OnIdle calls)
 #endif
@@ -320,6 +309,7 @@ namespace iplug
 #endif
 
 
+#define MAX_PRESET_NAME_LEN 256
 
 #define LOGFILE                 "IPlugLog.txt"
 #define MAX_PROCESS_TRACE_COUNT 100
@@ -362,7 +352,6 @@ namespace iplug
 #define IPLUG_VERSION_MAGIC 'pfft'
 
 #define MAX_BUS_CHANS 64  // wild cards in channel i/o strings will result in this many channels
-
 
 
 }  // namespace iplug

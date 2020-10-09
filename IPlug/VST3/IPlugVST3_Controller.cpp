@@ -98,7 +98,7 @@ tresult PLUGIN_API IPlugVST3Controller::getMidiControllerAssignment(Steinberg::i
 {
 	if (busIndex == 0 && midiChannel < VST3_NUM_CC_CHANS)
 	{
-		tag = static_cast<uint32>(EVST3ParamIDs::kMIDICCParamStartIdx) + (midiChannel * kCountCtrlNumber) + midiCCNumber;
+		tag = +EVST3ParamIDs::kMIDICCParamStartIdx + (midiChannel * kCountCtrlNumber) + midiCCNumber;
 		return kResultTrue;
 	}
 
@@ -111,7 +111,7 @@ tresult PLUGIN_API IPlugVST3Controller::getProgramName(ProgramListID listId,
 													   Steinberg::int32 programIndex,
 													   String128 name /*out*/)
 {
-	if (NPresets() && listId == static_cast<int32>(EVST3ParamIDs::kPresetParam))
+	if (NPresets() && listId == +EVST3ParamIDs::kPresetParam)
 	{
 		Steinberg::UString(name, 128).fromAscii(GetPresetName(programIndex));
 		return kResultTrue;

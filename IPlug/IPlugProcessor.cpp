@@ -313,7 +313,7 @@ int IPlugProcessor::ParseChannelIOStr(const char* IOStr,
 				else
 				{
 					DBGMSG("Error: something wrong in the %s part of this io string: %s.\n",
-						   RoutingDirStrs[static_cast<int>(busDir)],
+						   RoutingDirStrs[busDir],
 						   pBusStr);
 					assert(0);
 				}
@@ -329,7 +329,7 @@ int IPlugProcessor::ParseChannelIOStr(const char* IOStr,
 				else if (NBuses > 0)
 				{
 					DBGMSG("Error: with multiple %s buses you can't define one with no channels!\n",
-						   RoutingDirStrs[static_cast<int>(busDir)]);
+						   RoutingDirStrs[busDir]);
 					assert(NChanOnBus > 0);
 				}
 			}
