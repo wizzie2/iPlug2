@@ -53,17 +53,11 @@
 #endif
 
 BEGIN_INCLUDE_DEPENDENCIES
-#define WDL_NO_SUPPORT_UTF8
-#include <WDL/dirscan.h>
-#include <WDL/heapbuf.h>
-#include <WDL/jnetlib/jnetlib.h>
-#include <WDL/mutex.h>
-#include <WDL/ptrlist.h>
-#include <WDL/wdl_base64.h>
 #include <WDL/wdlendian.h>
 #include <WDL/wdlstring.h>
-#include <WDL/wdlutf8.h>
-#include <yoga/Yoga.h>
+#include <WDL/queue.h>
+#include <WDL/mutex.h>
+#include <WDL/ptrlist.h>
 
 #if VST3_API
 	#include <pluginterfaces/base/ibstream.h>
@@ -91,6 +85,8 @@ BEGIN_INCLUDE_DEPENDENCIES
 #endif
 END_INCLUDE_DEPENDENCIES
 
+#include "PAL/Type.h"
+#include "PAL/System.h"
 #include "IPlugConstants.h"
 #include "IPlugLogger.h"
 #include "IPlugMath.h"
@@ -183,5 +179,8 @@ END_INCLUDE_DEPENDENCIES
 	#error "No API defined!"
 #endif
 
+#ifndef IPLUG2_STATIC
 using Plugin = iplug::IPLUG2_PLUGIN;
+#endif
+
 #undef IPLUG2_PLUGIN
