@@ -32,7 +32,7 @@ DOXYFILE_ENCODING      = UTF-8
 # title of most generated pages and in a few other places.
 # The default value is: My Project.
 
-PROJECT_NAME           = 2
+PROJECT_NAME           = IPlug2
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number. This
 # could be handy for archiving the generated documentation or if some version
@@ -442,7 +442,7 @@ INLINE_SIMPLE_STRUCTS  = YES
 # types are typedef'ed and only the typedef is referenced, never the tag name.
 # The default value is: NO.
 
-TYPEDEF_HIDES_STRUCT   = NO
+TYPEDEF_HIDES_STRUCT   = YES
 
 # The size of the symbol lookup cache can be set using LOOKUP_CACHE_SIZE. This
 # cache is used to resolve symbols given their name and scope. Since this can be
@@ -468,7 +468,7 @@ LOOKUP_CACHE_SIZE      = 0
 # DOT_NUM_THREADS setting.
 # Minimum value: 0, maximum value: 32, default value: 1.
 
-NUM_PROC_THREADS       = 1
+NUM_PROC_THREADS       = 0
 
 #---------------------------------------------------------------------------
 # Build related configuration options
@@ -844,9 +844,9 @@ WARN_LOGFILE           = doxygen_warnings.txt
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = . \
-                         ../IPlug \
-                         ../IGraphics
+INPUT                  = ../IPlug \
+                         ../IGraphics \
+                         .
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -888,19 +888,28 @@ RECURSIVE              = YES
 # Note that relative paths are relative to the directory from which doxygen is
 # run.
 
-EXCLUDE                = ../IPlug/AAX/IPlugAAX_Describe.cpp \
-                         ../IPlug/AAX/IPlugAAX_Parameters.cpp \
-                         ../IPlug/AAX/IPlugAAX_Parameters.h \
-                         ../IPlug/AAX/IPlugAAX_TaperDelegate.h \
-                         ../IPlug/AAX/IPlugAAX_view_interface.h \
-                         ../IPlug/AUv3/BufferedAudioBus.hpp \
-                         ../IPlug/AUv3/IPlugAUAudioUnit.h \
-                         ../IPlug/AUv3/IPlugAUAudioUnit.mm \
-                         ../IPlug/AUv3/IPlugAUViewController.mm \
-                         ../IPlug/AUv2/dfx-au-utilities.h \
-                         ../IPlug/AUv2/dfx-au-utilities.c \
-                         ../IPlug/AUv2/IPlugAU_view_factory.mm \
-                         ../IGraphics/Controls/Test
+EXCLUDE                = ../IGraphics/Controls/Test \
+                         ../IPlug/PAL/Generic \
+                         ../IPlug/PAL/Windows \
+                         ../IPlug/PAL/WEB \
+                         ../IPlug/PAL/Mac \
+                         ../IPlug/PAL/Linux \
+                         ../IPlug/PAL/IOS \
+                         ../IPlug/Extras/Cocoa \
+                         ../IPlug/Extras/HIIR \
+                         ../IPlug/Extras/WebSocket \
+                         ../IPlug/Extras/WebView \
+                         ../IPlug/AAX \
+                         ../IPlug/APP \
+                         ../IPlug/AUv2 \
+                         ../IPlug/AUv3 \
+                         ../IPlug/ReaperExt \
+                         ../IPlug/VST2 \
+                         ../IPlug/VST3 \
+                         ../IPlug/WEB
+
+#                         ../IGraphics/Platforms \
+#                         ../IGraphics/Drawing \
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded
@@ -927,7 +936,9 @@ EXCLUDE_PATTERNS       =
 # Note that the wildcards are matched against the file with absolute path, so to
 # exclude all test directories use the pattern */test/*
 
-EXCLUDE_SYMBOLS        = IAutoGUI \
+EXCLUDE_SYMBOLS        = Generic \
+                         _internal \
+                         IAutoGUI \
                          AAX_CEffectGUI_IPLUG \
                          CFStrLocal \
                          CStrLocal \
@@ -2243,17 +2254,12 @@ INCLUDE_FILE_PATTERNS  =
 # This tag requires that the tag ENABLE_PREPROCESSING is set to YES.
 
 PREDEFINED             = DOXYGEN_SHOULD_SKIP_THIS \
+                         DOXYGEN_GENERATING_OUTPUT \
                          "BEGIN_IPLUG_NAMESPACE=\"namespace iplug {\"" \
                          "END_IPLUG_NAMESPACE=\"}\"" \
                          "BEGIN_IGRAPHICS_NAMESPACE=\"namespace igraphics {\"" \
-                         "END_IGRAPHICS_NAMESPACE\"}\"" \
-                         IGRAPHICS_NANOVG \
-                         IGRAPHICS_GL3 \
-                         "PLATFORM_NAME=\"Windows\"" \
-                         "PLATFORM_WINDOWS=\"1\"" \
-                         VST3_API \
-                         "IPLUG_EDITOR=\"1\"" \
-                         "IPLUG_DSP=\"1\""
+                         "END_IGRAPHICS_NAMESPACE=\"}\"" \
+						 PLATFORM_INTRINSIC_X64
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
 # tag can be used to specify a list of macro names that should be expanded. The
@@ -2272,7 +2278,7 @@ EXPAND_AS_DEFINED      =
 # The default value is: YES.
 # This tag requires that the tag ENABLE_PREPROCESSING is set to YES.
 
-SKIP_FUNCTION_MACROS   = YES
+SKIP_FUNCTION_MACROS   = NO
 
 #---------------------------------------------------------------------------
 # Configuration options related to external references
