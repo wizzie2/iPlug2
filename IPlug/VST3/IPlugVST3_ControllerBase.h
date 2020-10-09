@@ -11,7 +11,6 @@
 #pragma once
 
 #include "IPlugVST3_Parameter.h"
-#include "IPlugVST3_Defs.h"
 
 BEGIN_IPLUG_NAMESPACE
 
@@ -123,7 +122,7 @@ class IPlugVST3ControllerBase
 			unitNameSetter.fromAscii(VST3_CC_UNITNAME);
 			pEditController->addUnit(new Steinberg::Vst::Unit(unitInfo));
 
-			Steinberg::Vst::ParamID paramIdx = static_cast<uint32>(EVST3ParamIDs::kMIDICCParamStartIdx);
+			Steinberg::Vst::ParamID paramIdx = +EVST3ParamIDs::kMIDICCParamStartIdx;
 
 			WDL_String chanGroupStr;
 			Steinberg::Vst::UnitID midiCCsUnitID = unitID;
@@ -164,11 +163,11 @@ class IPlugVST3ControllerBase
 		if (!SetVST3ParamNormalized(tag, value))
 			return false;
 
-		if (tag >= static_cast<uint32>(EVST3ParamIDs::kBypassParam))
+		if (tag >= +EVST3ParamIDs::kBypassParam)
 		{
 			switch (tag)
 			{
-				case static_cast<uint32>(EVST3ParamIDs::kPresetParam):
+				case +EVST3ParamIDs::kPresetParam:
 				{
 					pPlug->RestorePreset(std::round((pPlug->NPresets() - 1.0) * value));
 					break;
