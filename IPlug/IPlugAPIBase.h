@@ -22,8 +22,6 @@
 
 BEGIN_IPLUG_NAMESPACE
 
-struct Config;
-
 /** The base class of an IPlug plug-in, which interacts with the different plug-in APIs.
  *  This interface does not handle audio processing, see @IPlugProcessor  */
 class IPlugAPIBase : public IPluginBase

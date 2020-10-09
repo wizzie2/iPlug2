@@ -30,7 +30,7 @@ IPlugAPP::IPlugAPP(const InstanceInfo& info, const Config& config)
 	SetChannelConnections(ERoute::kInput, 0, MaxNChannels(ERoute::kInput), true);
 	SetChannelConnections(ERoute::kOutput, 0, MaxNChannels(ERoute::kOutput), true);
 
-	SetBlockSize(DEFAULT_BLOCK_SIZE);
+	SetBlockSize(Config::defaultBlockSize);
 
 	CreateTimer();
 }

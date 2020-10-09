@@ -20,6 +20,53 @@
 
 namespace iplug
 {
+	// Struct to set compile time options
+	struct Config
+	{
+		const int nParams;
+		const int nPresets;
+
+		static constexpr EPluginType plugType               = EPluginType::PLUG_TYPE;
+		static constexpr const char* channelIOStr           = PLUG_CHANNEL_IO;
+		static constexpr const char* pluginName             = PLUG_NAME;
+		static constexpr const char* productName            = "";
+		static constexpr const char* mfrName                = PLUG_MFR;
+		static constexpr int vendorVersion                  = PLUG_VERSION_HEX;
+		static constexpr int uniqueID                       = PLUG_UNIQUE_ID;
+		static constexpr int mfrID                          = PLUG_MFR_ID;
+		static constexpr int latency                        = PLUG_LATENCY;
+		static constexpr bool plugDoesMidiIn                = PLUG_DOES_MIDI_IN;
+		static constexpr bool plugDoesMidiOut               = PLUG_DOES_MIDI_OUT;
+		static constexpr bool plugDoesMPE                   = PLUG_DOES_MPE;
+		static constexpr bool plugDoesChunks                = PLUG_DOES_STATE_CHUNKS;
+		static constexpr bool plugHasUI                     = PLUG_HAS_UI;
+		static constexpr int plugFPS                        = PLUG_FPS;
+		static constexpr int plugWidth                      = PLUG_WIDTH;
+		static constexpr int plugHeight                     = PLUG_HEIGHT;
+		static constexpr int plugMinWidth                   = PLUG_MIN_WIDTH;
+		static constexpr int plugMaxWidth                   = PLUG_MAX_WIDTH;
+		static constexpr int plugMinHeight                  = PLUG_MIN_HEIGHT;
+		static constexpr int plugMaxHeight                  = PLUG_MAX_HEIGHT;
+		static constexpr bool plugHostResize                = PLUG_HOST_RESIZE;
+		static constexpr const char* bundleID               = BUNDLE_ID;
+		static constexpr const char* sharedResourcesSubpath = SHARED_RESOURCES_SUBPATH;
+
+
+		// clang-format off
+		// TODO: add option to set values from cmake configuration
+
+		static constexpr bool   sortIMidiQueue          = true;   // SORT_IMIDIQUEUE (was DONT_SORT_IMIDIQUEUE)
+		static constexpr int    defaultBlockSize        = 1024;   // DEFAULT_BLOCK_SIZE
+		static constexpr double defaultTempo            = 120;    // DEFAULT_TEMPO
+		static constexpr double defaultSampleRate       = 44100;  // DEFAULT_SAMPLE_RATE
+		static constexpr size_t maxDumpPresetBlobLength = 2048;   // MAX_BLOB_LENGTH
+
+		// clang-format on
+
+		explicit Config(int nParams, int nPresets) : nParams(nParams), nPresets(nPresets) {};
+	};
+
+
 	/** In certain cases we need to queue parameter changes for transferral between threads */
 	struct ParamTuple
 	{
@@ -386,40 +433,6 @@ namespace iplug
 		int mPos;
 	};
 
-	/** Helper struct to set compile time options to an API class constructor  */
-	struct Config
-	{
-		const int nParams;
-		const int nPresets;
-
-		static constexpr EPluginType plugType               = EPluginType::PLUG_TYPE;
-		static constexpr const char* channelIOStr           = PLUG_CHANNEL_IO;
-		static constexpr const char* pluginName             = PLUG_NAME;
-		static constexpr const char* productName            = "";
-		static constexpr const char* mfrName                = PLUG_MFR;
-		static constexpr int vendorVersion                  = PLUG_VERSION_HEX;
-		static constexpr int uniqueID                       = PLUG_UNIQUE_ID;
-		static constexpr int mfrID                          = PLUG_MFR_ID;
-		static constexpr int latency                        = PLUG_LATENCY;
-		static constexpr bool plugDoesMidiIn                = PLUG_DOES_MIDI_IN;
-		static constexpr bool plugDoesMidiOut               = PLUG_DOES_MIDI_OUT;
-		static constexpr bool plugDoesMPE                   = PLUG_DOES_MPE;
-		static constexpr bool plugDoesChunks                = PLUG_DOES_STATE_CHUNKS;
-		static constexpr bool plugHasUI                     = PLUG_HAS_UI;
-		static constexpr int plugFPS                        = PLUG_FPS;
-		static constexpr int plugWidth                      = PLUG_WIDTH;
-		static constexpr int plugHeight                     = PLUG_HEIGHT;
-		static constexpr int plugMinWidth                   = PLUG_MIN_WIDTH;
-		static constexpr int plugMaxWidth                   = PLUG_MAX_WIDTH;
-		static constexpr int plugMinHeight                  = PLUG_MIN_HEIGHT;
-		static constexpr int plugMaxHeight                  = PLUG_MAX_HEIGHT;
-		static constexpr bool plugHostResize                = PLUG_HOST_RESIZE;
-		static constexpr const char* bundleID               = BUNDLE_ID;
-		static constexpr const char* sharedResourcesSubpath = SHARED_RESOURCES_SUBPATH;
-
-		explicit Config(int nParams, int nPresets) : nParams(nParams), nPresets(nPresets) {};
-	};
-
 	/** Used to manage scratch buffers for each channel of I/O, which may involve converting from single to double
 	 * precision */
 	template <class TIN = PLUG_SAMPLE_SRC, class TOUT = PLUG_SAMPLE_DST>
@@ -475,7 +488,7 @@ namespace iplug
 		 * @param label /todo */
 		void AddBusInfo(ERoute direction, int NChans)
 		{
-			mBusInfo[static_cast<int>(direction)].Add(new IBusInfo(direction, NChans));
+			mBusInfo[+direction].Add(new IBusInfo(direction, NChans));
 		}
 
 		/** /todo
@@ -484,8 +497,8 @@ namespace iplug
 		 * @return IBusInfo* /todo */
 		const IBusInfo* GetBusInfo(ERoute direction, int index) const
 		{
-			assert(index >= 0 && index < mBusInfo[static_cast<int>(direction)].GetSize());
-			return mBusInfo[static_cast<int>(direction)].Get(index);
+			assert(index >= 0 && index < mBusInfo[+direction].GetSize());
+			return mBusInfo[+direction].Get(index);
 		}
 
 		/** /todo
@@ -496,8 +509,8 @@ namespace iplug
 		{
 			int NChans = 0;
 
-			if (index >= 0 && index < mBusInfo[static_cast<int>(direction)].GetSize())
-				NChans = mBusInfo[static_cast<int>(direction)].Get(index)->NChans();
+			if (index >= 0 && index < mBusInfo[+direction].GetSize())
+				NChans = mBusInfo[+direction].Get(index)->NChans();
 
 			return NChans;
 		}
@@ -507,7 +520,7 @@ namespace iplug
 		 * @return int /todo */
 		int NBuses(ERoute direction) const
 		{
-			return mBusInfo[static_cast<int>(direction)].GetSize();
+			return mBusInfo[+direction].GetSize();
 		}
 
 		/** Get the total number of channels across all direction buses for this IOConfig
@@ -517,8 +530,8 @@ namespace iplug
 		{
 			int total = 0;
 
-			for (int i = 0; i < mBusInfo[static_cast<int>(direction)].GetSize(); i++)
-				total += mBusInfo[static_cast<int>(direction)].Get(i)->NChans();
+			for (int i = 0; i < mBusInfo[+direction].GetSize(); i++)
+				total += mBusInfo[+direction].Get(i)->NChans();
 
 			return total;
 		}
@@ -529,9 +542,9 @@ namespace iplug
 		 * @return false /todo */
 		bool ContainsWildcard(ERoute direction) const
 		{
-			for (auto i = 0; i < mBusInfo[static_cast<int>(direction)].GetSize(); i++)
+			for (auto i = 0; i < mBusInfo[+direction].GetSize(); i++)
 			{
-				if (mBusInfo[static_cast<int>(direction)].Get(i)->NChans() < 0)
+				if (mBusInfo[+direction].Get(i)->NChans() < 0)
 					return true;
 			}
 
@@ -542,7 +555,7 @@ namespace iplug
 	/** Encapsulates information about the host transport state */
 	struct ITimeInfo
 	{
-		double mTempo      = DEFAULT_TEMPO;
+		double mTempo      = Config::defaultTempo;
 		double mSamplePos  = -1.0;
 		double mPPQPos     = -1.0;
 		double mLastBar    = -1.0;

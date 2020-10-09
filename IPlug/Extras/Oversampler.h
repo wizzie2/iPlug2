@@ -132,7 +132,7 @@ public:
   OverSampler(const OverSampler&) = delete;
   OverSampler& operator=(const OverSampler&) = delete;
     
-  void Reset(int blockSize = DEFAULT_BLOCK_SIZE)
+  void Reset(int blockSize = Config::defaultBlockSize)
   {
     int numBufSamples = 1;
     

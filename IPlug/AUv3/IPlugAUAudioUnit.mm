@@ -142,7 +142,7 @@ static AUAudioUnitPreset* NewAUPreset(NSInteger number, NSString* pName)
     int busChans = 2;
     AVAudioFormat* pOutputBusFormat = nil;
     AVAudioChannelLayout* pChannelLayout = [[AVAudioChannelLayout alloc] initWithLayoutTag: kAudioChannelLayoutTag_Stereo];
-    pOutputBusFormat = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:DEFAULT_SAMPLE_RATE channelLayout:pChannelLayout ];
+    pOutputBusFormat = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:Config::defaultSampleRate channelLayout:pChannelLayout ];
     
     if(pOutputBusFormat)
       pBufferedOutputBus->init(pOutputBusFormat, busChans);
@@ -164,7 +164,7 @@ static AUAudioUnitPreset* NewAUPreset(NSInteger number, NSString* pName)
       
       AVAudioFormat* pInputBusFormat = nil;
       AVAudioChannelLayout* pChannelLayout = [[AVAudioChannelLayout alloc] initWithLayoutTag: kAudioChannelLayoutTag_Stereo]; // TODO: get tag
-      pInputBusFormat = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:DEFAULT_SAMPLE_RATE channelLayout:pChannelLayout ];
+      pInputBusFormat = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:Config::defaultSampleRate channelLayout:pChannelLayout ];
       if(pInputBusFormat)
         pBufferedInputBus->init(pInputBusFormat, busChans);
       
@@ -187,7 +187,7 @@ static AUAudioUnitPreset* NewAUPreset(NSInteger number, NSString* pName)
       
       AVAudioFormat* pOutputBusFormat = nil;
       AVAudioChannelLayout* pChannelLayout = [[AVAudioChannelLayout alloc] initWithLayoutTag: kAudioChannelLayoutTag_Stereo]; // TODO: get tag
-      pOutputBusFormat = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:DEFAULT_SAMPLE_RATE channelLayout:pChannelLayout ];
+      pOutputBusFormat = [[AVAudioFormat alloc] initStandardFormatWithSampleRate:Config::defaultSampleRate channelLayout:pChannelLayout ];
       if(pOutputBusFormat)
       {
         pBufferedOutputBus->init(pOutputBusFormat, busChans);

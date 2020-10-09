@@ -108,7 +108,7 @@ IPlugAAX::IPlugAAX(const InstanceInfo& info, const Config& config)
     mLatencyDelay->SetDelayTime(config.latency);
   }
   
-  SetBlockSize(DEFAULT_BLOCK_SIZE);
+  SetBlockSize(Config::defaultBlockSize);
   
   mMaxNChansForMainInputBus = MaxNChannelsForBus(kInput, 0);
   

@@ -165,7 +165,7 @@ IPlugVST2::IPlugVST2(const InstanceInfo& info, const Config& config)
   SetChannelConnections(ERoute::kInput, 0, nInputs, true);
   SetChannelConnections(ERoute::kOutput, 0, nOutputs, true);
 
-  SetBlockSize(DEFAULT_BLOCK_SIZE);
+  SetBlockSize(Config::defaultBlockSize);
 
   if(config.plugHasUI)
   {

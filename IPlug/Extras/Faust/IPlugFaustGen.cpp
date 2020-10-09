@@ -480,7 +480,7 @@ void FaustGen::Init()
  
   mDSP->buildUserInterface(mMidiUI.get());
   mDSP->buildUserInterface(this);
-  mDSP->init(DEFAULT_SAMPLE_RATE);
+  mDSP->init(Config::defaultSampleRate);
   
   assert((mDSP->getNumInputs() <= mMaxNInputs) && (mDSP->getNumOutputs() <= mMaxNOutputs)); // don't have enough buffers to process the DSP
   

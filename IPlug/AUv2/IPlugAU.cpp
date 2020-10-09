@@ -1842,7 +1842,7 @@ IPlugAU::IPlugAU(const InstanceInfo& info, const Config& config)
 
   AssessInputConnections();
 
-  SetBlockSize(DEFAULT_BLOCK_SIZE);
+  SetBlockSize(Config::defaultBlockSize);
   ResizeScratchBuffers();
   
   CreateTimer();

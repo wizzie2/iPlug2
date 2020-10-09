@@ -21,8 +21,6 @@
 
 BEGIN_IPLUG_NAMESPACE
 
-struct Config;
-
 /** The base class for IPlug Audio Processing. It knows nothing about presets or parameters or user interface.  */
 class IPlugProcessor
 {
@@ -384,7 +382,7 @@ class IPlugProcessor
 	/** Plug-in latency (in samples) */
 	int mLatency;
 	/** Current sample rate (in Hz) */
-	double mSampleRate = DEFAULT_SAMPLE_RATE;
+	double mSampleRate = Config::defaultSampleRate;
 	/** Current block size (in samples) */
 	int mBlockSize = 0;
 	/** Current tail size (in samples) */
