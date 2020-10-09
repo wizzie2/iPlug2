@@ -18,6 +18,39 @@
 #define PLATFORM_COMPILER_GCC        0
 #define PLATFORM_COMPILER_CLANG      0
 #define PLATFORM_COMPILER_APPLECLANG 0
+#define PLATFORM_ISA_X86_64          0
+#define PLATFORM_ISA_ARM             0
+#define PLATFORM_64BIT               0
+#define PLATFORM_INTRINSIC_X64       0
+#define PLATFORM_INTRINSIC_ARM       0
+#define PLATFORM_PTHREADS            0
+
+#ifndef __has_include
+	#error "Compiler does not have __has_include support. Upgrade compiler version."
+#endif
+
+// Header files for intrinsic functions
+#if __has_include(<intrin.h>)
+	#undef PLATFORM_INTRINSIC_X64
+	#define PLATFORM_INTRINSIC_X64 1
+	#include <intrin.h>
+#elif __has_include(<immintrin.h>)
+	#undef PLATFORM_INTRINSIC_X64
+	#define PLATFORM_INTRINSIC_X64 1
+	#include <immintrin.h>
+	#include <ammintrin.h>
+#elif __has_include(<arm64intr.h>)  // Not supporting 32bit
+	#undef PLATFORM_INTRINSIC_ARM
+	#define PLATFORM_INTRINSIC_ARM 1
+	#include <arm64intr.h>
+	#include <arm64_neon.h>
+#endif
+
+#if __has_include(<pthread.h>)
+	#undef PLATFORM_PTHREADS
+	#define PLATFORM_PTHREADS 1
+	#include <pthread.h>
+#endif
 
 #if defined __EMSCRIPTEN__
 	#undef PLATFORM_COMPILER_EMSCRIPTEN
@@ -37,7 +70,6 @@
 #else
 	#error "Unsupported compiler."
 #endif
-
 
 // clang-format off
 
@@ -60,19 +92,31 @@
 	#error "Unsupported compiler."
 #endif
 
-#define NODISCARD [[nodiscard]]
-#define NORETURN  [[noreturn]]
-
+#define DEPRECATED(version, message) [[deprecated(message)]]
+#define NODISCARD                    [[nodiscard]]
+#define NORETURN                     [[noreturn]]
 
 //---------------------------------------------------------
-// Set 32/64 bit platform architecture via the hail mary method (should probably get this from cmake instead)
+// Set 32/64 bit platform architecture via the hail mary method
 
 #if _WIN64 || __64BIT__ || __x86_64__ || __ia64__ || _M_IA64 || _M_X64 || _M_AMD64 || _M_ARM64 || __LP64__ || __aarch64__
+	#undef PLATFORM_64BIT
 	#define PLATFORM_64BIT 1
-#else
-	#define PLATFORM_64BIT 0
 #endif
 
+#if __AVX__ || __amd64__ || _M_AMD64 || __x86_64__ || _M_X86 || _M_X64 || _M_IX86 || __X86__ || _X86_ || __I86__ || __IA64__ || _M_IA64
+	#undef PLATFORM_ISA_X86_64
+	#define PLATFORM_ISA_X86_64 1
+#endif
+
+#if __arm__ || _M_ARM || _M_ARM64 || __aarch64__
+	#undef PLATFORM_ISA_ARM
+	#define PLATFORM_ISA_ARM 0
+#endif
+
+#if PLATFORM_ISA_X86_64 + PLATFORM_ISA_ARM != 1
+#error "Panic! ?Syntax Error! Guru Meditation!! x86/64 or ARM? Which one is it?"
+#endif
 
 //---------------------------------------------------------
 // Additional MSVC Settings
@@ -90,10 +134,8 @@
 		#error "Visual Studio 2019 version 16.4 or higher is required to compile."
 	#endif
 
-
 	//---------------------------------------------------------
 	// Setup compiler warnings
-
 
 	// Mark warnings as errors that needs to be corrected. Don't be lazy.
 	// List provided by the good people over at Epic Games.

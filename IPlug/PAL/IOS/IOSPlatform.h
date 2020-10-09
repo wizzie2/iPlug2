@@ -16,7 +16,6 @@
 
 #define PLATFORM_LITTLE_ENDIAN   1
 #define PLATFORM_CACHE_LINE_SIZE 64
-#define PLATFORM_PTHREADS        0
 
 // https://stackoverflow.com/questions/44140778/resumable-assert-breakpoint-on-ios-like-debugbreak-with-ms-compiler/44142833#44142833
 #if defined(__aarch64__)  // ARM64
