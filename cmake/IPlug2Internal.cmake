@@ -37,40 +37,12 @@ set(_projectConfigArgs
     "OBJC_PREFIX"
 )
 
-set(_projectConfigArgs_overridable
-    "BUNDLE_NAME"
-    "BUNDLE_DOMAIN"
-    "BUNDLE_ICON"
-    "PLUG_NAME"
-    "PLUG_NAME_SHORT"
-    "PLUG_CLASS_NAME"
-    "PLUG_UNIQUE_ID"
-    "PLUG_MFR_ID"
-    "PLUG_URL_STR"
-    "PLUG_EMAIL_STR"
-    "PLUG_COPYRIGHT_STR"
-    "PLUG_CHANNEL_IO"
-    "PLUG_LATENCY"
-    "PLUG_DOES_MIDI_IN"
-    "PLUG_DOES_MIDI_OUT"
-    "PLUG_DOES_MPE"
-    "PLUG_DOES_STATE_CHUNKS"
-    "PLUG_HAS_UI"
-    "PLUG_WIDTH"
-    "PLUG_HEIGHT"
-    "PLUG_MIN_WIDTH"
-    "PLUG_MIN_HEIGHT"
-    "PLUG_MAX_WIDTH"
-    "PLUG_MAX_HEIGHT"
-    "PLUG_FPS"
-    "PLUG_SHARED_RESOURCES"
-    "PLUG_TYPE"
-    "PLUG_HOST_RESIZE"
-    "PLUG_TFLOAT_TYPE"
-    "SHARED_RESOURCES_SUBPATH"
-    "OBJC_PREFIX"
+set(_projectConfigArgs_overridable ${_projectConfigArgs})
+list(REMOVE_ITEM _projectConfigArgs_overridable
+    "PLUG_MFR"
+    "PLUG_VERSION_STR"
+    "PCH_FOLDER_NAME"
 )
-
 
 # configuration variables that are considered string values and gets quotation marks applied in the definition
 set(_iplug_config_string_variables
