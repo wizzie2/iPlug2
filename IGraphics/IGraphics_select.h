@@ -62,3 +62,14 @@ BEGIN_INCLUDE_DEPENDENCIES
 END_INCLUDE_DEPENDENCIES
 #endif
 
+#if PLATFORM_WINDOWS
+	#include "Platforms/IGraphicsWin.h"
+#elif PLATFORM_MAC
+	#include "Platforms/IGraphicsMac.h"
+#elif PLATFORM_IOS
+	#include "Platforms/IGraphicsIOS.h"
+#elif PLATFORM_LINUX
+	#include "Platforms/IGraphicsLinux.h"
+#elif PLATFORM_WEB
+	#include "Platforms/IGraphicsWeb.h"
+#endif

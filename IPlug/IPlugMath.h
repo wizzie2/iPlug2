@@ -13,3 +13,4 @@
 #include "IPlugMathConstants.h"
 #include "IPlugMathCommon.h"
 #include "IPlugMathConversions.h"
+#include "Extras/Easing.h"

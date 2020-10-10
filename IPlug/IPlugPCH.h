@@ -103,7 +103,6 @@ END_INCLUDE_DEPENDENCIES
 #include "IPlugAPIBase.h"
 #include "IPlugProcessor.h"
 #include "ISender.h"
-#include "Extras/Easing.h"
 #ifndef NO_IGRAPHICS
 	#include "IGraphicsConstants.h"
 	#include "IGraphicsStructs.h"
@@ -127,18 +126,6 @@ END_INCLUDE_DEPENDENCIES
 	#include "IVMeterControl.h"
 	#include "IVMultiSliderControl.h"
 	#include "IVScopeControl.h"
-
-	#if PLATFORM_WINDOWS
-		#include "Platforms/IGraphicsWin.h"
-	#elif PLATFORM_MAC
-		#include "Platforms/IGraphicsMac.h"
-	#elif PLATFORM_IOS
-		#include "Platforms/IGraphicsIOS.h"
-	#elif PLATFORM_LINUX
-		#include "Platforms/IGraphicsLinux.h"
-	#elif PLATFORM_WEB
-		#include "Platforms/IGraphicsWeb.h"
-	#endif
 #endif
 
 #if VST2_API
