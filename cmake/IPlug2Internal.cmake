@@ -347,16 +347,16 @@ macro(_iplug_check_initialized)
 endmacro()
 
 #------------------------------------------------------------------------------
+macro(_iplug_set_ifndef _var _value)
+    if(NOT DEFINED ${_var})
+        set(${_var} ${_value})
+    endif()
+endmacro()
+
+#------------------------------------------------------------------------------
 macro(_iplug_set_default_compiler_options)
-    # Default settings for all new targets on all platforms
-    set(CMAKE_CXX_STANDARD                  17     )
-    set(CMAKE_CXX_STANDARD_REQUIRED         YES    )
-    set(CMAKE_CXX_EXTENSIONS                OFF    )
 
-    # Default symbols visibility
-    set(CMAKE_CXX_VISIBILITY_PRESET         hidden )
-    set(CMAKE_CXX_VISIBILITY_INLINES_HIDDEN YES    )
-
+    # Required compiler version checking
     if(MSVC AND NOT Clang)
         # The minimum compatible compiler version still needs adjusting
         if(MSVC_VERSION LESS 1911)
@@ -364,153 +364,176 @@ macro(_iplug_set_default_compiler_options)
         elseif(MSVC_TOOLSET_VERSION LESS 141)
             iplug_syntax_error("MSVC Toolset v141 or higher is required.")
         endif()
-
-        set(_obx /Ob3)
-        # Ob3 requires VC++ 16.3 (MSVC_VERSION 1923) or higher
-        if(MSVC_VERSION LESS 1923)
-            set(_obx /Ob2)
-        endif()
-
-        # Flags that are set as default for every new target configuration
-        set(CL_FLAGS
-            /D_CRT_SECURE_NO_DEPRECATE    # Disable deprecation warnings for Unsafe CRT Library functions
-            /D_CRT_NONSTDC_NO_DEPRECATE   # Disable deprecation warnings for POSIX function names
-            /D_MBCS                       # _UNICODE, _MBCS or _SBCS. _MBCS is the same as _SBCS but with additional typesafety checks
-                                          # If using _UNICODE, it's recommended to set both _UNICODE and UNICODE.
-
-            /GR               # Enable Run-Time Type Information
-            /EHsc             # Exception handling model, assume extern "C" functions never throw a C++ exception
-            /W3               # Warning level 3 (Default)
-            /MP               # Build with Multiple Processes
-            /arch:AVX         # Enables the use of Intel Advanced Vector Extensions instructions
-            /fp:fast          # Floating Point Model '/fp:fast'. This is also the default used by Steinberg VST3 SDK.
-            /Zc:preprocessor  # C++ conforming preprocessor
-            /Zc:rvalueCast    # Enforce type conversion rules. Conform to the C++11 standard
-			/Zc:__cplusplus   # Enables the __cplusplus preprocessor macro to report an updated value for recent C++ language standards support. If not specified __cplusplus will always be 199711L
-            /volatile:iso     # Strict volatile semantics. Acquire/release semantics are not guaranteed
-            /utf-8            # Specifies UTF-8 character set, this is the default for GCC & Clang
-            /Zp8              # Packs structures on 8-byte boundaries. Default is 16
-            /TP               # Treat all as C++ source files
-            /permissive-      # Set standard-conformance mode. "Should" be default since VC++ 2017 v15.5
-            /GF               # Eliminate Duplicate Strings (string pooling) (Enabled in debug as well to avoid behaviour differences)
-            /JMC              # Just My Code debugging
-            /wd5045           # Disable Spectre mitigation warnings
-            /wd4652           # Compiler option 'option' inconsistent with precompiled header; current command-line option will override that defined in the precompiled header
-        )
-
-        # Debug
-        set(CL_FLAGS_DEBUG
-            /D_DEBUG          # Specify debug versions of the C run-time library
-            /GS               # Buffer Security Checks. Detects some buffer overruns that overwrite a function's return address, exception handler address, or certain types of parameters
-            # /sdl              # Enable Additional Security Development Lifecycle Checks
-            /Zi               # Generates complete debugging information. /ZI (edit and continue) can cause issues in code size, performance, and compiler conformance
-            /Ob0              # Disables inline expansions
-            /Od               # Disables optimization
-            /RTC1             # Stack frame and uninitialized variable run-time error checking
-        )
-
-        # Release
-        set(CL_FLAGS_RELEASE
-            /DNDEBUG          # Turn off assertion checks
-            /GS               # Buffer Security Checks. Detects some buffer overruns that overwrite a function's return address, exception handler address, or certain types of parameters
-            # /sdl              # Enable Additional Security Development Lifecycle Checks
-            /Zo               # Enhance Optimized Debugging for optimized code in non-debug builds. Tells the compiler to generate additional debugging information for local variables and inlined functions
-            /GL               # Whole Program Optimization
-            /O2               # Creates fast code
-            /Oi               # Generates intrinsic functions
-            /Ob2              # Inline Function Expansion
-            /Gy               # Enables function-level linking
-            /Oy               # Suppresses creation of frame pointers on the call stack (x86 only)
-            /Ot               # Favor Fast Code (implied by the /O2, but just to be sure)
-        )
-
-        # Distributed (lean and mean version, ready for worldwide distribution)
-        set(CL_FLAGS_DISTRIBUTED
-            /DNDEBUG          # Turn off assertion checks
-            /DDISTRIBUTED=1   # Set DISTRIBUTED preprocessor variable
-            /GL               # Whole Program Optimization
-            /Oi               # Generates intrinsic functions
-            /O2               # Creates fast code
-            ${_obx}           # Inline Function Expansion (/Ob3 if supported, otherwise /Ob2)
-            /Gy               # Enables function-level linking
-            /GS-              # Disable buffers security checks
-            /Oy               # Suppresses creation of frame pointers on the call stack (x86 only)
-            /Ot               # Favor Fast Code (implied by the /O2, but just to be sure)
-        )
-
-        list(JOIN CL_FLAGS             " " CL_FLAGS            )
-        list(JOIN CL_FLAGS_DEBUG       " " CL_FLAGS_DEBUG      )
-        list(JOIN CL_FLAGS_RELEASE     " " CL_FLAGS_RELEASE    )
-        list(JOIN CL_FLAGS_DISTRIBUTED " " CL_FLAGS_DISTRIBUTED)
-
-        foreach(_lang IN ITEMS C CXX)
-            set(CMAKE_${_lang}_FLAGS             ${CL_FLAGS}            )
-            set(CMAKE_${_lang}_FLAGS_DEBUG       ${CL_FLAGS_DEBUG}      )
-            set(CMAKE_${_lang}_FLAGS_RELEASE     ${CL_FLAGS_RELEASE}    )
-            set(CMAKE_${_lang}_FLAGS_DISTRIBUTED ${CL_FLAGS_DISTRIBUTED})
-        endforeach()
-
-        # Use multithreaded, static versions of the MSVC run-time library (LIBCMT.lib/LIBCMTD.lib)
-        set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-
-        foreach(_type IN ITEMS EXE SHARED MODULE)
-            foreach(_cfg RELEASE DISTRIBUTED)
-                set(CMAKE_${_type}_LINKER_FLAGS_${_cfg} "/LTCG /INCREMENTAL:NO")
-            endforeach()
-        endforeach()
-
     elseif(GNU OR Clang OR AppleClang)
+        # TODO: add minimum version check for these compilers
+    endif()
 
-        set(CL_FLAGS
-            -fmessage-length=0
-            -pipe
-            -fexceptions
-            -fasm-blocks
-            -fno-math-errno
-            -fno-trapping-math
-            -mavx
-            -Wdelete-non-virtual-dtor
-        )
+    # Default settings for all new targets on all platforms if not set by consumer
+    _iplug_set_ifndef(CMAKE_CXX_STANDARD          17  )
+    _iplug_set_ifndef(CMAKE_CXX_STANDARD_REQUIRED YES )
+    _iplug_set_ifndef(CMAKE_CXX_EXTENSIONS        OFF )
 
-        set(CL_FLAGS_DEBUG
-            /D_DEBUG
-            $<$<BOOL:${enable_address_sanitizer}>:-fsanitize=address>
-            $<$<BOOL:${enable_thread_sanitizer}>:-fsanitize=thread>
-            $<$<BOOL:${enable_undefined_behavior_sanitizer}>:-fsanitize=undefined>
-        )
+    # Default symbols visibility
+    _iplug_set_ifndef(CMAKE_CXX_VISIBILITY_PRESET         hidden )
+    _iplug_set_ifndef(CMAKE_CXX_VISIBILITY_INLINES_HIDDEN YES    )
 
-        set(CL_FLAGS_RELEASE
-            /DNDEBUG
-            -O3
-        )
+    option(IPLUG2_USE_TUNED_COMPILER_SETTINGS "Use optimized settings for the compiler and linker." ON)
 
-        set(CL_FLAGS_DISTRIBUTED
-            /DNDEBUG
-            /DDISTRIBUTED=1
-            -O3
-        )
+    if(IPLUG2_USE_TUNED_COMPILER_SETTINGS)
+        if(MSVC AND NOT Clang)
+            set(_obx /Ob3)
+            # Ob3 requires VC++ 16.3 (MSVC_VERSION 1923) or higher
+            if(MSVC_VERSION LESS 1923)
+                set(_obx /Ob2)
+            endif()
 
-        list(JOIN CL_FLAGS             " " CL_FLAGS            )
-        list(JOIN CL_FLAGS_DEBUG       " " CL_FLAGS_DEBUG      )
-        list(JOIN CL_FLAGS_RELEASE     " " CL_FLAGS_RELEASE    )
-        list(JOIN CL_FLAGS_DISTRIBUTED " " CL_FLAGS_DISTRIBUTED)
+            # Flags that are set as default for every new target configuration
+            set(CL_FLAGS
+                /D_CRT_SECURE_NO_DEPRECATE    # Disable deprecation warnings for Unsafe CRT Library functions
+                /D_CRT_NONSTDC_NO_DEPRECATE   # Disable deprecation warnings for POSIX function names
+                /D_MBCS                       # _UNICODE, _MBCS or _SBCS. _MBCS is the same as _SBCS but with additional typesafety checks
+                                              # If using _UNICODE, it's recommended to set both _UNICODE and UNICODE.
 
+                /GR               # Enable Run-Time Type Information
+                /EHsc             # Exception handling model, assume extern "C" functions never throw a C++ exception
+                /W3               # Warning level 3 (Default)
+                /MP               # Build with Multiple Processes
+                /arch:AVX         # Enables the use of Intel Advanced Vector Extensions instructions
+                /fp:fast          # Floating Point Model '/fp:fast'. This is also the default used by Steinberg VST3 SDK.
+                /Zc:preprocessor  # C++ conforming preprocessor
+                /Zc:rvalueCast    # Enforce type conversion rules. Conform to the C++11 standard
+                /Zc:__cplusplus   # Enables the __cplusplus preprocessor macro to report an updated value for recent C++ language standards support. If not specified __cplusplus will always be 199711L
+                /volatile:iso     # Strict volatile semantics. Acquire/release semantics are not guaranteed
+                /utf-8            # Specifies UTF-8 character set, this is the default for GCC & Clang
+                /Zp8              # Packs structures on 8-byte boundaries. Default is 16
+                /TP               # Treat all as C++ source files
+                /permissive-      # Set standard-conformance mode. "Should" be default since VC++ 2017 v15.5
+                /GF               # Eliminate Duplicate Strings (string pooling) (Enabled in debug as well to avoid behaviour differences)
+                /JMC              # Just My Code debugging
+                /wd5045           # Disable Spectre mitigation warnings
+                /wd4652           # Compiler option 'option' inconsistent with precompiled header; current command-line option will override that defined in the precompiled header
+            )
+
+            # Debug
+            set(CL_FLAGS_DEBUG
+                /D_DEBUG          # Specify debug versions of the C run-time library
+                /GS               # Buffer Security Checks. Detects some buffer overruns that overwrite a function's return address, exception handler address, or certain types of parameters
+                /Zi               # Generates complete debugging information. /ZI (edit and continue) can cause issues in code size, performance, and compiler conformance
+                /Ob0              # Disables inline expansions
+                /Od               # Disables optimization
+                /RTC1             # Stack frame and uninitialized variable run-time error checking
+            )
+
+            # Release
+            set(CL_FLAGS_RELEASE
+                /DNDEBUG          # Turn off assertion checks
+                /GS               # Buffer Security Checks. Detects some buffer overruns that overwrite a function's return address, exception handler address, or certain types of parameters
+                /Zo               # Enhance Optimized Debugging for optimized code in non-debug builds. Tells the compiler to generate additional debugging information for local variables and inlined functions
+                /GL               # Whole Program Optimization
+                /O2               # Creates fast code
+                /Oi               # Generates intrinsic functions
+                /Ob2              # Inline Function Expansion
+                /Gy               # Enables function-level linking
+                /Oy               # Suppresses creation of frame pointers on the call stack (x86 only)
+                /Ot               # Favor Fast Code (implied by the /O2, but just to be sure)
+            )
+
+            # Distributed (lean and mean version, ready for worldwide distribution)
+            set(CL_FLAGS_DISTRIBUTED
+                /DNDEBUG          # Turn off assertion checks
+                /DDISTRIBUTED=1   # Set DISTRIBUTED preprocessor variable
+                /GL               # Whole Program Optimization
+                /Oi               # Generates intrinsic functions
+                /O2               # Creates fast code
+                ${_obx}           # Inline Function Expansion (/Ob3 if supported, otherwise /Ob2)
+                /Gy               # Enables function-level linking
+                /GS-              # Disable buffers security checks
+                /Oy               # Suppresses creation of frame pointers on the call stack (x86 only)
+                /Ot               # Favor Fast Code (implied by the /O2, but just to be sure)
+            )
+
+            list(JOIN CL_FLAGS             " " CL_FLAGS            )
+            list(JOIN CL_FLAGS_DEBUG       " " CL_FLAGS_DEBUG      )
+            list(JOIN CL_FLAGS_RELEASE     " " CL_FLAGS_RELEASE    )
+            list(JOIN CL_FLAGS_DISTRIBUTED " " CL_FLAGS_DISTRIBUTED)
+
+            foreach(_lang IN ITEMS C CXX)
+                set(CMAKE_${_lang}_FLAGS             ${CL_FLAGS}            )
+                set(CMAKE_${_lang}_FLAGS_DEBUG       ${CL_FLAGS_DEBUG}      )
+                set(CMAKE_${_lang}_FLAGS_RELEASE     ${CL_FLAGS_RELEASE}    )
+                set(CMAKE_${_lang}_FLAGS_DISTRIBUTED ${CL_FLAGS_DISTRIBUTED})
+            endforeach()
+
+            # Use multithreaded, static versions of the MSVC run-time library (LIBCMT.lib/LIBCMTD.lib)
+            _iplug_set_ifndef(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
+            foreach(_type IN ITEMS EXE SHARED MODULE)
+                foreach(_cfg RELEASE DISTRIBUTED)
+                    set(CMAKE_${_type}_LINKER_FLAGS_${_cfg} "/LTCG /INCREMENTAL:NO")
+                endforeach()
+            endforeach()
+
+        elseif(GNU OR Clang OR AppleClang)
+
+            set(CL_FLAGS
+                -fmessage-length=0
+                -pipe
+                -fexceptions
+                -fasm-blocks
+                -fno-math-errno
+                -fno-trapping-math
+                -mavx
+                -Wdelete-non-virtual-dtor
+            )
+
+            set(CL_FLAGS_DEBUG
+                /D_DEBUG
+                $<$<BOOL:${enable_address_sanitizer}>:-fsanitize=address>
+                $<$<BOOL:${enable_thread_sanitizer}>:-fsanitize=thread>
+                $<$<BOOL:${enable_undefined_behavior_sanitizer}>:-fsanitize=undefined>
+            )
+
+            set(CL_FLAGS_RELEASE
+                /DNDEBUG
+                -O3
+            )
+
+            set(CL_FLAGS_DISTRIBUTED
+                /DNDEBUG
+                /DDISTRIBUTED=1
+                -O3
+            )
+
+            list(JOIN CL_FLAGS             " " CL_FLAGS            )
+            list(JOIN CL_FLAGS_DEBUG       " " CL_FLAGS_DEBUG      )
+            list(JOIN CL_FLAGS_RELEASE     " " CL_FLAGS_RELEASE    )
+            list(JOIN CL_FLAGS_DISTRIBUTED " " CL_FLAGS_DISTRIBUTED)
+
+            foreach(_lang IN ITEMS C CXX)
+                list(APPEND CMAKE_${_lang}_FLAGS             ${CL_FLAGS}            )
+                list(APPEND CMAKE_${_lang}_FLAGS_DEBUG       ${CL_FLAGS_DEBUG}      )
+                list(APPEND CMAKE_${_lang}_FLAGS_RELEASE     ${CL_FLAGS_RELEASE}    )
+                list(APPEND CMAKE_${_lang}_FLAGS_DISTRIBUTED ${CL_FLAGS_DISTRIBUTED})
+                # set(CMAKE_${_lang}_FLAGS             ${CL_FLAGS}            )
+                # set(CMAKE_${_lang}_FLAGS_DEBUG       ${CL_FLAGS_DEBUG}      )
+                # set(CMAKE_${_lang}_FLAGS_RELEASE     ${CL_FLAGS_RELEASE}    )
+                # set(CMAKE_${_lang}_FLAGS_DISTRIBUTED ${CL_FLAGS_DISTRIBUTED})
+            endforeach()
+
+            foreach(_type IN ITEMS EXE SHARED MODULE)
+                foreach(_cfg RELEASE DISTRIBUTED)
+                    list(APPEND CMAKE_${_type}_LINKER_FLAGS_${_cfg} "$<$<CXX_COMPILER_ID:AppleClang>:-dead_strip>")
+                    # set(CMAKE_${_type}_LINKER_FLAGS_${_cfg} "$<$<CXX_COMPILER_ID:AppleClang>:-dead_strip>")
+                endforeach()
+            endforeach()
+        endif()
+    else()
         foreach(_lang IN ITEMS C CXX)
-            list(APPEND CMAKE_${_lang}_FLAGS             ${CL_FLAGS}            )
-            list(APPEND CMAKE_${_lang}_FLAGS_DEBUG       ${CL_FLAGS_DEBUG}      )
-            list(APPEND CMAKE_${_lang}_FLAGS_RELEASE     ${CL_FLAGS_RELEASE}    )
-            list(APPEND CMAKE_${_lang}_FLAGS_DISTRIBUTED ${CL_FLAGS_DISTRIBUTED})
-            # set(CMAKE_${_lang}_FLAGS             ${CL_FLAGS}            )
-            # set(CMAKE_${_lang}_FLAGS_DEBUG       ${CL_FLAGS_DEBUG}      )
-            # set(CMAKE_${_lang}_FLAGS_RELEASE     ${CL_FLAGS_RELEASE}    )
-            # set(CMAKE_${_lang}_FLAGS_DISTRIBUTED ${CL_FLAGS_DISTRIBUTED})
+            _iplug_set_ifndef(CMAKE_${_lang}_FLAGS_DISTRIBUTED "${CMAKE_${_lang}_FLAGS_RELEASE} /DDISTRIBUTED=1")
         endforeach()
 
         foreach(_type IN ITEMS EXE SHARED MODULE)
-            foreach(_cfg RELEASE DISTRIBUTED)
-                list(APPEND CMAKE_${_type}_LINKER_FLAGS_${_cfg} "$<$<CXX_COMPILER_ID:AppleClang>:-dead_strip>")
-                # set(CMAKE_${_type}_LINKER_FLAGS_${_cfg} "$<$<CXX_COMPILER_ID:AppleClang>:-dead_strip>")
-            endforeach()
+            _iplug_set_ifndef(CMAKE_${_type}_LINKER_FLAGS_DISTRIBUTED "${CMAKE_${_type}_LINKER_FLAGS_RELEASE}")
         endforeach()
     endif()
 endmacro()
