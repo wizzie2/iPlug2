@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.17)
+cmake_minimum_required(VERSION 3.16)
 include_guard(GLOBAL)
 
 set(_LIBFOLDER "Libraries")
@@ -76,7 +76,6 @@ target_compile_definitions(${_libName}
         # __WINDOWS_WASAPI__   WASAPI (Prefered on windows 10)
         $<$<BOOL:${PLATFORM_WINDOWS}>: __WINDOWS_ASIO__ __WINDOWS_DS__ __WINDOWS_WASAPI__ >
         $<$<BOOL:${PLATFORM_MAC}>:     __MACOSX_CORE__                                    >
-
 )
 
 target_include_directories(${_libName}
@@ -111,7 +110,6 @@ target_sources(${_libName}
 get_target_property(DEPSOURCE_LIST ${_libName} SOURCES)
 source_group(TREE "${_libPath}" FILES ${DEPSOURCE_LIST})
 set_target_properties(${_libName} PROPERTIES FOLDER "${_LIBFOLDER}")
-
 
 
 # -----------------------------------------------------------------------------
@@ -194,9 +192,9 @@ get_target_property(DEPSOURCE_LIST ${_libName} SOURCES)
 source_group(TREE "${_libPath}" FILES ${DEPSOURCE_LIST})
 set_target_properties(${_libName} PROPERTIES FOLDER "${_LIBFOLDER}")
 
+
 # -----------------------------------------------------------------------------
 # NanoVG
-#
 # -----------------------------------------------------------------------------
 
 set(_libName "NanoVG")
@@ -212,7 +210,10 @@ target_include_directories(${_libName}
         $<$<BOOL:${IPLUG2_ENABLE_METAL}>:${IPLUG2_ROOT_PATH}/Dependencies/IGraphics/MetalNanoVG/src>
 )
 
-# FONS_USE_FREETYPE
+target_compile_definitions(${_libName}
+    PRIVATE
+        # FONS_USE_FREETYPE
+)
 
 target_sources(${_libName}
     PRIVATE
@@ -248,6 +249,7 @@ set_target_properties(${_libName} PROPERTIES FOLDER "${_LIBFOLDER}")
 # -----------------------------------------------------------------------------
 # VST3_SDK
 # -----------------------------------------------------------------------------
+
 if(HAVESDK_VST3)
     set(_libName "VST3SDK")
     set(_libPath "${VST3_SDK_PATH}")
@@ -276,7 +278,6 @@ if(HAVESDK_VST3)
         endif()
     endif()
 
-
     add_library(${_libName} STATIC)
 
     target_compile_options(${_libName} PRIVATE ${_DEPENDENCIES_WARNINGS})
@@ -284,11 +285,11 @@ if(HAVESDK_VST3)
     target_include_directories(${_libName} PUBLIC "${VST3_SDK_PATH}")
 
     target_compile_definitions(${_libName}
-        PUBLIC
+        PRIVATE
             $<$<BOOL:${VST3_SDK_UNICODE_OFF}>:UNICODE_OFF>
-            $<$<CONFIG:Debug>:DEVELOPMENT=1 RELEASE=0>
-            $<$<CONFIG:Release>:DEVELOPMENT=0 RELEASE=1>
-            $<$<CONFIG:Distributed>:DEVELOPMENT=0 RELEASE=1>
+            $<$<CONFIG:Debug>:DEVELOPMENT=1>
+            $<$<CONFIG:Release>:RELEASE=1>
+            $<$<CONFIG:Distributed>:RELEASE=1>
     )
 
     target_sources(${_libName}

@@ -1,8 +1,6 @@
-cmake_minimum_required(VERSION 3.17)
-include_guard(GLOBAL)
+cmake_minimum_required(VERSION 3.16)
 
 add_library(WDL STATIC)
-
 
 target_compile_options(WDL
     PRIVATE
@@ -11,7 +9,6 @@ target_compile_options(WDL
             /wd5105                 # macro expansion producing 'defined' has undefined behavior
         >
 )
-
 
 target_include_directories(WDL
     PRIVATE
@@ -484,7 +481,6 @@ if(NOT PLATFORM_MAC)
         "swell/test.cpp"
     )
 endif()
-
 
 get_target_property(SOURCE_LIST WDL SOURCES)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_LIST})
