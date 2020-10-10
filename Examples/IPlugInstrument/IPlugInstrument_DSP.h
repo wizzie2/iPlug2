@@ -19,7 +19,7 @@ struct EModulations
 	};
 };
 
-template <typename T>
+template <class T>
 class IPlugInstrumentDSP
 {
  public:
@@ -45,9 +45,9 @@ class IPlugInstrumentDSP
 			mOSC.Reset();
 
 			if (isRetrigger)
-				mAMPEnv.Retrigger(level);
+				mAMPEnv.Retrigger(static_cast<T>(level));
 			else
-				mAMPEnv.Start(level);
+				mAMPEnv.Start(static_cast<T>(level));
 		}
 
 		void Release() override
@@ -67,7 +67,7 @@ class IPlugInstrumentDSP
 			mInputs[kVoiceControlTimbre].Write(mTimbreBuffer.Get(), startIdx, nFrames);
 
 			// convert from "1v/oct" pitch space to frequency in Hertz
-			double osc1Freq = 440. * pow(2., pitch + pitchBend + inputs[EModulations::kModLFO][0]);
+			T osc1Freq = static_cast<T>(440 * pow(2, pitch + pitchBend + inputs[EModulations::kModLFO][0]));
 
 			// make sound output for each output channel
 			for (auto i = startIdx; i < startIdx + nFrames; i++)
@@ -75,15 +75,15 @@ class IPlugInstrumentDSP
 				float noise = mTimbreBuffer.Get()[i] * Rand();
 				// an MPE synth can use pressure here in addition to gain
 				outputs[0][i] += (mOSC.Process(osc1Freq) + noise) *
-								 mAMPEnv.Process(inputs[EModulations::kModSustainSmoother][i]) * mGain;
+								 mAMPEnv.Process(inputs[EModulations::kModSustainSmoother][i]) * static_cast<T>(mGain);
 				outputs[1][i] = outputs[0][i];
 			}
 		}
 
 		void SetSampleRateAndBlockSize(double sampleRate, int blockSize) override
 		{
-			mOSC.SetSampleRate(sampleRate);
-			mAMPEnv.SetSampleRate(sampleRate);
+			mOSC.SetSampleRate(static_cast<T>(sampleRate));
+			mAMPEnv.SetSampleRate(static_cast<T>(sampleRate));
 
 			mTimbreBuffer.Resize(blockSize);
 		}
@@ -107,14 +107,13 @@ class IPlugInstrumentDSP
 		WDL_TypedBuf<float> mTimbreBuffer;
 
 		// noise generator for test
-		uint32_t mRandSeed = 0;
+		uint32 mRandSeed = 0;
 
 		// return single-precision floating point number on [-1, 1]
-		float Rand()
+		inline const float Rand()
 		{
-			mRandSeed     = mRandSeed * 0x0019660D + 0x3C6EF35F;
-			uint32_t temp = ((mRandSeed >> 9) & 0x007FFFFF) | 0x3F800000;
-			return (*reinterpret_cast<float*>(&temp)) * 2.f - 3.f;
+			mRandSeed = mRandSeed * 0x0019660D + 0x3C6EF35F;
+			return type::bit_cast<float>(((mRandSeed >> 9) & 0x007FFFFF) | 0x3F800000) * 2 - 3;
 		}
 	};
 
@@ -133,13 +132,8 @@ class IPlugInstrumentDSP
 		// mSynth.SetNoteGlideTime(0.5); // portamento
 	}
 
-	void ProcessBlock(T** inputs,
-					  T** outputs,
-					  int nOutputs,
-					  int nFrames,
-					  double qnPos            = 0.,
-					  bool transportIsRunning = false,
-					  double tempo            = 120.)
+	void ProcessBlock(
+		T** inputs, T** outputs, int nOutputs, int nFrames, T qnPos = 0, bool transportIsRunning = false, T tempo = 120)
 	{
 		// clear outputs
 		for (auto i = 0; i < nOutputs; i++)
@@ -163,7 +157,7 @@ class IPlugInstrumentDSP
 	{
 		mSynth.SetSampleRateAndBlockSize(sampleRate, blockSize);
 		mSynth.Reset();
-		mLFO.SetSampleRate(sampleRate);
+		mLFO.SetSampleRate(static_cast<T>(sampleRate));
 		mModulationsData.Resize(blockSize * EModulations::kNumModulations);
 		mModulations.Empty();
 
@@ -178,7 +172,7 @@ class IPlugInstrumentDSP
 		mSynth.AddMidiMsgToQueue(msg);
 	}
 
-	void SetParam(int paramIdx, double value)
+	void SetParam(int paramIdx, T value)
 	{
 		using EEnvStage = ADSREnvelope<sample>::EStage;
 
@@ -216,7 +210,7 @@ class IPlugInstrumentDSP
 				mLFO.SetRateMode(value > 0.5);
 				break;
 			case kParamLFOShape:
-				mLFO.SetShape(static_cast<int>(value));
+				mLFO.SetShape(static_cast<LFO<>::EShape>(value));
 				break;
 			default:
 				break;

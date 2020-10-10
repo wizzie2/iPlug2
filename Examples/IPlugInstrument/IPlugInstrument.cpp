@@ -12,9 +12,9 @@ IPlugInstrument::IPlugInstrument(const InstanceInfo& info) : Plugin(info, Config
 		->InitDouble("Decay", 10., 1., 1000., 0.1, "ms", IParam::kFlagsNone, "ADSR", IParam::ShapePowCurve(3.));
 	GetParam(kParamSustain)->InitDouble("Sustain", 50., 0., 100., 1, "%", IParam::kFlagsNone, "ADSR");
 	GetParam(kParamRelease)->InitDouble("Release", 10., 2., 1000., 0.1, "ms", IParam::kFlagsNone, "ADSR");
-	GetParam(kParamLFOShape)->InitEnum("LFO Shape", LFO<>::kTriangle, {LFO_SHAPE_VALIST});
+	GetParam(kParamLFOShape)->InitEnum("LFO Shape", +LFO<>::EShape::kTriangle, LFO<>::LFO_SHAPE_VALIST);
 	GetParam(kParamLFORateHz)->InitFrequency("LFO Rate", 1., 0.01, 40.);
-	GetParam(kParamLFORateTempo)->InitEnum("LFO Rate", LFO<>::k1, {LFO_TEMPODIV_VALIST});
+	GetParam(kParamLFORateTempo)->InitEnum("LFO Rate", +LFO<>::ETempoDivison::k1, LFO<>::LFO_TEMPODIV_VALIST);
 	GetParam(kParamLFORateMode)->InitBool("LFO Sync", true);
 	GetParam(kParamLFODepth)->InitPercentage("LFO Depth");
 
@@ -151,7 +151,7 @@ IPlugInstrument::IPlugInstrument(const InstanceInfo& info) : Plugin(info, Config
 #if IPLUG_DSP
 void IPlugInstrument::ProcessBlock(sample** inputs, sample** outputs, int nFrames)
 {
-	mDSP.ProcessBlock(nullptr, outputs, 2, nFrames, mTimeInfo.mPPQPos, mTimeInfo.mTransportIsRunning);
+	mDSP.ProcessBlock(nullptr, outputs, 2, nFrames, static_cast<sample>(mTimeInfo.mPPQPos), mTimeInfo.mTransportIsRunning);
 	mMeterSender.ProcessBlock(outputs, nFrames, kCtrlTagMeter);
 	mLFOVisSender.PushData({kCtrlTagLFOVis, {float(mDSP.mLFO.GetLastOutput())}});
 }
@@ -196,7 +196,7 @@ handle:
 
 void IPlugInstrument::OnParamChange(int paramIdx)
 {
-	mDSP.SetParam(paramIdx, GetParam(paramIdx)->Value());
+	mDSP.SetParam(paramIdx, static_cast<sample>(GetParam(paramIdx)->Value()));
 }
 
 bool IPlugInstrument::OnMessage(int msgTag, int ctrlTag, int dataSize, const void* pData)

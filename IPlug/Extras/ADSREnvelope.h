@@ -142,9 +142,9 @@ class ADSREnvelope
 	 * based on the key pressed */
 	constexpr void Retrigger(TFLOAT newStartLevel, TFLOAT timeScalar = 1.)
 	{
-		mEnvValue      = 1.;
+		mEnvValue      = 1;
 		mNewStartLevel = newStartLevel;
-		mScalar        = 1. / timeScalar;
+		mScalar        = 1 / timeScalar;
 		mReleaseLevel  = mPrevResult;
 		mStage         = EStage::kReleasedToRetrigger;
 		mReleased      = false;

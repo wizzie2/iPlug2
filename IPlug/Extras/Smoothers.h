@@ -14,11 +14,11 @@ template <typename T, int NC = 1>
 class LogParamSmooth
 {
  private:
-	double mA, mB;
+	T mA, mB;
 	T mOutM1[NC];
 
  public:
-	LogParamSmooth(double timeMs = 5., T initalValue = 0.)
+	LogParamSmooth(T timeMs = 5., T initalValue = 0.)
 	{
 		for (auto i = 0; i < NC; i++)
 		{
@@ -51,12 +51,15 @@ class LogParamSmooth
 		}
 	}
 
-	constexpr void SetSmoothTime(double timeMs, double sampleRate = Config::defaultSampleRate)
+	constexpr void SetSmoothTime(T timeMs, T sampleRate = Config::defaultSampleRate)
 	{
-		static constexpr double TWO_PI = 6.283185307179586476925286766559;
+		static constexpr T TWO_PI = 6.283185307179586476925286766559;
 
-		mA = exp(-TWO_PI / (timeMs * 0.001 * sampleRate));
-		mB = 1.0 - mA;
+		if constexpr (type::IsFloat<T>)
+			mA = expf(-TWO_PI / (timeMs * 0.001f * sampleRate));
+		else
+			mA = exp(-TWO_PI / (timeMs * 0.001 * sampleRate));
+		mB = 1 - mA;
 	}
 
 	void ProcessBlock(T inputs[NC], T** outputs, int nFrames, int channelOffset = 0)
@@ -70,7 +73,7 @@ class LogParamSmooth
 		{
 			for (auto c = 0; c < NC; c++)
 			{
-				T output = (inputs[channelOffset + c] * b) + (mOutM1[c] * a);
+				T output                      = (inputs[channelOffset + c] * b) + (mOutM1[c] * a);
 				mOutM1[c]                     = output;
 				outputs[channelOffset + c][s] = output;
 			}
