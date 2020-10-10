@@ -111,6 +111,7 @@ target_compile_definitions(IPlug_SharedDefinitions
         ${PLATFORM_ID}=1
         PLATFORM_NAME=${PLATFORM_NAME}
         _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
+        _SILENCE_CXX20_CODECVT_FACETS_DEPRECATION_WARNING
 
         _CRT_SECURE_NO_DEPRECATE    # Disable deprecation warnings for Unsafe CRT Library functions
         _CRT_NONSTDC_NO_DEPRECATE   # Disable deprecation warnings for POSIX function names
