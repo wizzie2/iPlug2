@@ -72,12 +72,10 @@ add_library(IPlug_WAM                  INTERFACE)
 add_library(IPlug_WEB                  INTERFACE)
 
 set(_CONFIGURE_DEPENDS "")
-if(NOT IPLUG2_EXTERNAL_PROJECT)
-    # Create source list for IPlug & IGraphics with a one time glob dependency check
-    option(IPLUG2_DEVELOPER_ENABLE_GLOB_DEPENDENCY "Enable glob dependency check on IPlug and IGraphics when compiling." OFF)
-    if(IPLUG2_DEVELOPER_ENABLE_GLOB_DEPENDENCY)
-        set(_CONFIGURE_DEPENDS CONFIGURE_DEPENDS)
-    endif()
+# Create source list for IPlug & IGraphics with glob dependency check
+option(IPLUG2_DEVELOPER_ENABLE_GLOB_DEPENDENCY "Enable glob dependency check on IPlug and IGraphics when compiling." OFF)
+if(IPLUG2_DEVELOPER_ENABLE_GLOB_DEPENDENCY)
+	set(_CONFIGURE_DEPENDS CONFIGURE_DEPENDS)
 endif()
 
 file(GLOB_RECURSE IPLUG_SOURCE_LIST ${_CONFIGURE_DEPENDS} "${IPLUG2_ROOT_PATH}/IPlug/*")
@@ -97,7 +95,7 @@ add_subdirectory(Dependencies)
 if(MSVC AND NOT Clang)
     set(_flags /W4)
 elseif(AppleClang OR Clang OR GNU)
-    set(_flags -Wall -Werror -Wshadow -Wno-error=shadow -Wundef -Wno-error=undef -pedantic)
+    set(_flags -Wall -Wextra -Wconversion -Wshadow -Wno-error=shadow -pedantic)
 endif()
 
 target_compile_options(IPlug_CompileOptions INTERFACE ${_flags})
