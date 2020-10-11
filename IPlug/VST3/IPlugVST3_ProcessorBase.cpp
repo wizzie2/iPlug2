@@ -202,9 +202,13 @@ void IPlugVST3ProcessorBase::ProcessMidiOut(IPlugQueue<SysExData>& sysExQueue,
 				toAdd.midiCCOut.channel       = msg.Channel();
 				toAdd.sampleOffset            = msg.mOffset;
 				toAdd.midiCCOut.controlNumber = Steinberg::Vst::ControllerNumbers::kPitchBend;
-				uint16 tmp                    = static_cast<uint16>(msg.PitchWheel() * 0x7fff /*0x3FFF*/);
-				toAdd.midiCCOut.value         = tmp & 0x7F;
-				toAdd.midiCCOut.value2        = (tmp >> 8 /*7*/) & 0x7F;
+
+				// int16 tmp             = static_cast<int16>(msg.PitchWheel() * 0x3FFF);
+				// toAdd.midiCCOut.value  = tmp & 0x7F;
+				// toAdd.midiCCOut.value2 = (tmp >> 7) & 0x7F;
+				toAdd.midiCCOut.value  = msg.mData1;
+				toAdd.midiCCOut.value2 = msg.mData2;
+
 				pOutputEvents->addEvent(toAdd);
 			}
 
@@ -360,7 +364,7 @@ void IPlugVST3ProcessorBase::ProcessParameterChanges(Steinberg::Vst::ProcessData
 					else if (idx >= +EVST3ParamIDs::kMIDICCParamStartIdx)
 					{
 						int index   = idx - +EVST3ParamIDs::kMIDICCParamStartIdx;
-						int channel = index / Steinberg::Vst::kCountCtrlNumber;
+						uint8 channel = static_cast<uint8>(index / Steinberg::Vst::kCountCtrlNumber);
 
 						EMidiControlChangeMsg ctrlr =
 							static_cast<EMidiControlChangeMsg>(index % Steinberg::Vst::kCountCtrlNumber);
@@ -368,9 +372,9 @@ void IPlugVST3ProcessorBase::ProcessParameterChanges(Steinberg::Vst::ProcessData
 						IMidiMsg msg;
 
 						if (+ctrlr == Steinberg::Vst::ControllerNumbers::kAfterTouch)
-							msg.MakeChannelATMsg((int) (value * 127.), offsetSamples, channel);
+							msg.MakeChannelATMsg(static_cast<uint8>(value * 127), offsetSamples, channel);
 						else if (+ctrlr == Steinberg::Vst::ControllerNumbers::kPitchBend)
-							msg.MakePitchWheelMsg((value * 2.) - 1., channel, offsetSamples);
+							msg.MakePitchWheelMsg((value * 2) - 1, channel, offsetSamples);
 						else
 							msg.MakeControlChangeMsg(ctrlr, value, channel, offsetSamples);
 

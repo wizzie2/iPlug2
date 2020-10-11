@@ -21,7 +21,7 @@
 BEGIN_IPLUG_NAMESPACE
 
 /** /todo */
-enum class EMidiStatusMsg : uint8
+enum class EMidiStatusMsg : uint32
 {
 	kNone              = 0,
 	kNoteOff           = 8,
@@ -35,7 +35,7 @@ enum class EMidiStatusMsg : uint8
 
 
 /** /todo */
-enum class EMidiControlChangeMsg : uint8
+enum class EMidiControlChangeMsg : uint32
 {
 	// Custom
 	kNoCC = 0xFF,
@@ -155,7 +155,7 @@ struct IMidiMsg
 	 * @param velocity /todo
 	 * @param offset /todo
 	 * @param channel /todo */
-	void MakeNoteOnMsg(int16 noteNumber, float velocity, int32 offset, uint8 channel = 0)
+	constexpr void MakeNoteOnMsg(int16 noteNumber, float velocity, int32 offset, uint8 channel = 0)
 	{
 		assert(velocity <= 1.0f);  // velocity input range 0.0-1.0. please fix.
 
@@ -170,7 +170,7 @@ struct IMidiMsg
 	 * @param noteNumber /todo
 	 * @param offset /todo
 	 * @param channel /todo */
-	void MakeNoteOffMsg(int16 noteNumber, int32 offset, uint8 channel = 0)
+	constexpr void MakeNoteOffMsg(int16 noteNumber, int32 offset, uint8 channel = 0)
 	{
 		Clear();
 		mStatus = channel | +EMidiStatusMsg::kNoteOff << 4;
@@ -179,15 +179,15 @@ struct IMidiMsg
 	}
 
 	/** /todo
-	 * @param value range [-1, 1], converts to [0, 16384) where 8192 = no pitch change.
+	 * @param value range [-1, 1], converts to [0, 16383) where 8192 = no pitch change.
 	 * @param channel /todo
 	 * @param offset /todo */
-	void MakePitchWheelMsg(float value, uint8 channel = 0, int32 offset = 0)
+	constexpr void MakePitchWheelMsg(float value, uint8 channel = 0, int32 offset = 0)
 	{
 		Clear();
 		mStatus = channel | +EMidiStatusMsg::kPitchWheel << 4;
-		int i   = 8192 + static_cast<int>(value * 8192.0);
-		i       = std::min(std::max(i, 0), 16383);
+		int32 i = static_cast<int32>(value * 8191.5f + 8192);
+		DEBUG_ASSERT(math::ClampEval(i, 0, 16383));
 		mData2  = static_cast<uint8>(i) >> 7;
 		mData1  = static_cast<uint8>(i) & 0x7F;
 		mOffset = offset;
@@ -198,7 +198,7 @@ struct IMidiMsg
 	 * @param value range [0, 1] /todo
 	 * @param channel /todo
 	 * @param offset /todo */
-	void MakeControlChangeMsg(EMidiControlChangeMsg idx, float value, uint8 channel = 0, int32 offset = 0)
+	constexpr void MakeControlChangeMsg(EMidiControlChangeMsg idx, float value, uint8 channel = 0, int32 offset = 0)
 	{
 		Clear();
 		mStatus = channel | +EMidiStatusMsg::kControlChange << 4;
@@ -208,7 +208,7 @@ struct IMidiMsg
 	}
 
 	/** /todo */
-	void MakeProgramChange(uint8 program, uint8 channel = 0, int32 offset = 0)
+	constexpr void MakeProgramChange(uint8 program, uint8 channel = 0, int32 offset = 0)
 	{
 		Clear();
 		mStatus = channel | +EMidiStatusMsg::kProgramChange << 4;
@@ -220,7 +220,7 @@ struct IMidiMsg
 	 * @param pressure /todo
 	 * @param offset /todo
 	 * @param channel /todo */
-	void MakeChannelATMsg(uint8 pressure, int32 offset, uint8 channel)
+	constexpr void MakeChannelATMsg(uint8 pressure, int32 offset, uint8 channel)
 	{
 		Clear();
 		mStatus = channel | +EMidiStatusMsg::kChannelAftertouch << 4;
@@ -234,7 +234,7 @@ struct IMidiMsg
 	 * @param pressure /todo
 	 * @param offset /todo
 	 * @param channel /todo */
-	void MakePolyATMsg(uint8 noteNumber, uint8 pressure, int32 offset, uint8 channel)
+	constexpr void MakePolyATMsg(uint8 noteNumber, uint8 pressure, int32 offset, uint8 channel)
 	{
 		Clear();
 		mStatus = channel | +EMidiStatusMsg::kPolyAftertouch << 4;
@@ -244,14 +244,14 @@ struct IMidiMsg
 	}
 
 	/** @return [0, 15] for midi channels 1 ... 16 */
-	uint8 Channel() const
+	constexpr uint8 Channel() const
 	{
 		return mStatus & 0x0F;
 	}
 
 	/** /todo
 	 * @return EMidiStatusMsg /todo */
-	EMidiStatusMsg StatusMsg() const
+	constexpr EMidiStatusMsg StatusMsg() const
 	{
 		uint8 e = mStatus >> 4;
 		if (e < +EMidiStatusMsg::kNoteOff || e > +EMidiStatusMsg::kPitchWheel)  // TODO: if( isValidStatusMsg(e) )
@@ -262,7 +262,7 @@ struct IMidiMsg
 	}
 
 	/** @return [0, 127), -1 if NA. */
-	uint8 NoteNumber() const
+	constexpr uint8 NoteNumber() const
 	{
 		switch (StatusMsg())
 		{
@@ -276,7 +276,7 @@ struct IMidiMsg
 	}
 
 	/** @return returns [0, 127), -1 if NA. */
-	uint8 Velocity() const
+	constexpr uint8 Velocity() const
 	{
 		switch (StatusMsg())
 		{
@@ -289,7 +289,7 @@ struct IMidiMsg
 	}
 
 	/** @return [0, 127), -1 if NA. */
-	uint8 PolyAfterTouch() const
+	constexpr uint8 PolyAfterTouch() const
 	{
 		switch (StatusMsg())
 		{
@@ -301,7 +301,7 @@ struct IMidiMsg
 	}
 
 	/** @return [0, 127), -1 if NA. */
-	uint8 ChannelAfterTouch() const
+	constexpr uint8 ChannelAfterTouch() const
 	{
 		switch (StatusMsg())
 		{
@@ -313,7 +313,7 @@ struct IMidiMsg
 	}
 
 	/** @return [0, 127), -1 if NA. */
-	uint8 Program() const
+	constexpr uint8 Program() const
 	{
 		if (StatusMsg() == EMidiStatusMsg::kProgramChange)
 		{
@@ -323,25 +323,25 @@ struct IMidiMsg
 	}
 
 	/** @return [-1.0, 1.0], zero if NA.*/
-	float PitchWheel() const
+	constexpr float PitchWheel() const
 	{
 		if (StatusMsg() == EMidiStatusMsg::kPitchWheel)
 		{
-			float value = static_cast<float>((mData2 << 7) + mData1);
-			return (value - 8192.0f) / 8192.0f;
+			float value = (static_cast<float>((mData2 << 7) | mData1) - 8191.5f) / 8191.5f;
+			return math::IsNearlyZero(value, 0.0001f) ? 0.0f : value;
 		}
-		return 0.0;
+		return 0.0f;
 	}
 
 	/** /todo
 	 * @return EMidiControlChangeMsg /todo */
-	EMidiControlChangeMsg ControlChangeIdx() const
+	constexpr EMidiControlChangeMsg ControlChangeIdx() const
 	{
 		return static_cast<EMidiControlChangeMsg>(mData1);
 	}
 
 	/** @return [0, 1], -1 if NA.*/
-	float ControlChange(EMidiControlChangeMsg idx) const
+	constexpr float ControlChange(EMidiControlChangeMsg idx) const
 	{
 		if (StatusMsg() == EMidiStatusMsg::kControlChange && ControlChangeIdx() == idx)
 		{
@@ -353,13 +353,13 @@ struct IMidiMsg
 	/** /todo
 	 * @param msgValue /todo
 	 * @return \c true = on */
-	static bool ControlChangeOnOff(double msgValue)
-	{
-		return (msgValue >= 0.5);
-	}
+	// static constexpr bool ControlChangeOnOff(double msgValue)
+	//{
+	//	return (msgValue >= 0.5);
+	//}
 
 	/** /todo */
-	void Clear()
+	constexpr void Clear()
 	{
 		mOffset = 0;
 		mStatus = mData1 = mData2 = 0;
@@ -368,7 +368,7 @@ struct IMidiMsg
 	/** /todo
 	 * @param msg /todo
 	 * @return const char* /todo */
-	static const char* StatusMsgStr(EMidiStatusMsg msg)
+	static constexpr const char* StatusMsgStr(EMidiStatusMsg msg)
 	{
 		switch (msg)
 		{
@@ -393,9 +393,9 @@ struct IMidiMsg
 		};
 	}
 
-	static const char* CCNameStr(int idx)
+	static constexpr const char* CCNameStr(int idx)
 	{
-		static const char* ccNameStrs[128] = {
+		constexpr const char* ccNameStrs[128] = {
 			"BankSel.MSB", "Modulation",  "BreathCtrl",   "Contr. 3",    "Foot Ctrl",   "Porta.Time",  "DataEntMSB",
 			"MainVolume",  "Balance",     "Contr. 9",     "Pan",         "Expression",  "FXControl1",  "FXControl2",
 			"Contr. 14",   "Contr. 15",   "Gen.Purp.1",   "Gen.Purp.2",  "Gen.Purp.3",  "Gen.Purp.4",  "Contr. 20",
@@ -419,13 +419,13 @@ struct IMidiMsg
 		return ccNameStrs[idx];
 	}
 	/** /todo */
-	void LogMsg()
+	inline const void LogMsg()
 	{
 		Trace(TRACELOC, "midi:(%s:%d:%d:%d)", StatusMsgStr(StatusMsg()), Channel(), mData1, mData2);
 	}
 
 	/** /todo */
-	void PrintMsg() const
+	inline const void PrintMsg() const
 	{
 		DBGMSG("midi: offset %i, (%s:%d:%d:%d)\n", mOffset, StatusMsgStr(StatusMsg()), Channel(), mData1, mData2);
 	}
