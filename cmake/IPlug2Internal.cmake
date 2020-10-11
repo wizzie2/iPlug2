@@ -340,8 +340,17 @@ macro(_iplug_set_default_compiler_options)
         # TODO: add minimum version check for these compilers
     endif()
 
-    # Default settings for all new targets on all platforms if not set by consumer
-    _iplug_set_ifndef(CMAKE_CXX_STANDARD          17  )
+    # Option to set C++ standard without affecting any files under source control.
+    set(IPLUG2_CXX_STANDARD "Default" CACHE STRING "C++ language standard to use. Default option uses project settings if specified, otherwise C++17.")
+    set_property(CACHE IPLUG2_CXX_STANDARD PROPERTY STRINGS Default C++17 C++20)
+    if(IPLUG2_CXX_STANDARD STREQUAL "Default")
+        _iplug_set_ifndef(CMAKE_CXX_STANDARD 17)
+    elseif(IPLUG2_CXX_STANDARD STREQUAL "C++17")
+        set(CMAKE_CXX_STANDARD 17)
+    elseif(IPLUG2_CXX_STANDARD STREQUAL "C++20")
+        set(CMAKE_CXX_STANDARD 20)
+    endif()
+
     _iplug_set_ifndef(CMAKE_CXX_STANDARD_REQUIRED YES )
     _iplug_set_ifndef(CMAKE_CXX_EXTENSIONS        OFF )
 
