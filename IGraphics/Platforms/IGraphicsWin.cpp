@@ -2134,121 +2134,153 @@ void IGraphicsWin::StopVBlankThread()
 
 // Nasty kernel level definitions for wait for vblank.  Including the
 // proper include file requires "d3dkmthk.h" from the driver development
-// kit.  Instead we define the minimum needed to call the three methods we need.
-// and use LoadLibrary/GetProcAddress to accomplish the same thing.
+// kit.
 // See https://docs.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dkmthk/
 //
 // Heres another link (rant) with a lot of good information about vsync on firefox
 // https://www.vsynctester.com/firefoxisbroken.html
 // https://bugs.chromium.org/p/chromium/issues/detail?id=467617
 
-// structs to use
-// using D3DKMT_HANDLE                  = uint32;
-// using D3DDDI_VIDEO_PRESENT_SOURCE_ID = uint32;
-//
-// typedef struct _D3DKMT_OPENADAPTERFROMHDC
-//{
-//	HDC                            hDc;
-//	D3DKMT_HANDLE                  hAdapter;
-//	LUID                           AdapterLuid;
-//	D3DDDI_VIDEO_PRESENT_SOURCE_ID VidPnSourceId;
-//} D3DKMT_OPENADAPTERFROMHDC;
-//
-// typedef struct _D3DKMT_CLOSEADAPTER
-//{
-//	D3DKMT_HANDLE hAdapter;
-//} D3DKMT_CLOSEADAPTER;
-//
-// typedef struct _D3DKMT_WAITFORVERTICALBLANKEVENT
-//{
-//	D3DKMT_HANDLE                  hAdapter;
-//	D3DKMT_HANDLE                  hDevice;
-//	D3DDDI_VIDEO_PRESENT_SOURCE_ID VidPnSourceId;
-//} D3DKMT_WAITFORVERTICALBLANKEVENT;
-//
-//// entry points
-// typedef long(WINAPI* D3DKMTOpenAdapterFromHdc)(D3DKMT_OPENADAPTERFROMHDC* Arg1);
-// typedef long(WINAPI* D3DKMTCloseAdapter)(const D3DKMT_CLOSEADAPTER* Arg1);
-// typedef long(WINAPI* D3DKMTWaitForVerticalBlankEvent)(const D3DKMT_WAITFORVERTICALBLANKEVENT* Arg1);
-
 DWORD IGraphicsWin::OnVBlankRun()
 {
-	// THREAD_PRIORITY_TIME_CRITICAL will cause priority problems with input and events
-	//  SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
+	enum class EState
+	{
+		None,
+		GetDC,
+		ReleaseDC,
+		OpenAdapter,
+		CloseAdapter,
+		Retry,
+		TimeOut,
+		VBlank,
+		FallbackTimer
+	};
 
-	// TODO: get expected vsync value.  For now we will use a fallback
-	// of 60Hz
-	float rateFallback = 60.0f;
-	int rateMS         = (int) (1000.0f / rateFallback);
+	// ::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
 
-	// TODO: handle low power modes
+	static constexpr auto RetryTime      = 1000;       // milliseconds to sleep between retries
+	static constexpr auto RetryTimeOut   = 1000 * 10;  // milliseconds until timeout
+	static constexpr auto fallbackRateMS = Config::plugFPS <= 1000 ? 1000 / Config::plugFPS : 1;
 
-	// we have a good set of functions to call.  We need to keep
-	// track of the adapter and reask for it if the device is lost.
-	bool adapterIsOpen                   = false;
-	size_t adapterLastFailTime           = 0;
-	_D3DKMT_WAITFORVERTICALBLANKEVENT we = {0};
+	auto adapterIsOpen         = false;
+	auto adapterRetryCounter   = 0;
+	auto adapterTimeoutCounter = 0;
+	auto currentState          = EState::None;
+	auto previousState         = currentState;
+	auto msgState              = currentState;
+	auto ret                   = STATUS_SUCCESS;
+	uint64 VBlankTime          = 0;
+
+	D3DKMT_WAITFORVERTICALBLANKEVENT we       = {};
+	D3DKMT_OPENADAPTERFROMHDC openAdapterData = {};
+	D3DKMT_CLOSEADAPTER ca                    = {};
+
+	auto SetState = [&currentState, &previousState](
+						EState newState, bool condition = true, EState newFalseState = EState::Retry) {
+		previousState = currentState;
+		currentState  = condition ? newState : newFalseState;
+	};
+
+	auto EnterStateMsg = [&currentState, &msgState]() {
+		constexpr const char* str = "OnVBlankRun() Entering state";
+		if (msgState != currentState)
+		{  // clang-format off
+			msgState = currentState;
+			switch (msgState)
+			{
+				case EState::None:          DBGMSG("%s None",          str); break;
+				case EState::GetDC:         DBGMSG("%s GetDC",         str); break;
+				case EState::ReleaseDC:     DBGMSG("%s ReleaseDC",     str); break;
+				case EState::OpenAdapter:   DBGMSG("%s OpenAdapter",   str); break;
+				case EState::CloseAdapter:  DBGMSG("%s CloseAdapter",  str); break;
+				case EState::Retry:         DBGMSG("%s Retry",         str); break;
+				case EState::TimeOut:       DBGMSG("%s TimeOut",       str); break;
+				case EState::VBlank:        DBGMSG("%s VBlank",        str); break;
+				case EState::FallbackTimer: DBGMSG("%s FallbackTimer", str); break;
+			}
+		}  // clang-format on
+	};
 
 	while (mVBlankShutdown == false)
 	{
-		if (!adapterIsOpen)
-		{
-			// reacquire the adapter (at most once a second).
-			if (adapterLastFailTime < ::GetTickCount64() - 1000)
-			{
-				// try to get adapter
-				D3DKMT_OPENADAPTERFROMHDC openAdapterData = {0};
-				HDC hDC                                   = GetDC(mVBlankWindow);
-				openAdapterData.hDc                       = hDC;
+		if constexpr (EBuildType::Native == EBuildType::Debug)
+			EnterStateMsg();
 
-				if (/*pOpen*/ D3DKMTOpenAdapterFromHdc(&openAdapterData) == S_OK)
+		switch (currentState)
+		{
+			case EState::VBlank:
+				VBlankNotify();
+				SetState(EState::CloseAdapter, D3DKMTWaitForVerticalBlankEvent(&we) != STATUS_SUCCESS, EState::VBlank);
+				break;
+			case EState::FallbackTimer:
+				VBlankNotify();
+				previousState = currentState;
+				::Sleep(fallbackRateMS);
+				break;
+			case EState::GetDC:
+				openAdapterData.hDc = ::GetDC(mVBlankWindow);
+				SetState(EState::OpenAdapter, openAdapterData.hDc != NULL);
+				break;
+			case EState::ReleaseDC:
+				ret = ::ReleaseDC(mVBlankWindow, openAdapterData.hDc);
+				SetState(EState::VBlank, ret == 1);
+				break;
+			case EState::OpenAdapter:
+				ret = D3DKMTOpenAdapterFromHdc(&openAdapterData);
+				if (ret == STATUS_SUCCESS)
 				{
-					// success, setup wait request parameters.
-					adapterLastFailTime = 0;
-					adapterIsOpen       = true;
-					we.hAdapter         = openAdapterData.hAdapter;
-					we.hDevice          = 0;
-					we.VidPnSourceId    = openAdapterData.VidPnSourceId;
+					we.hDevice       = 0;
+					we.hAdapter      = openAdapterData.hAdapter;
+					we.VidPnSourceId = openAdapterData.VidPnSourceId;
+					ca.hAdapter      = we.hAdapter;
+					adapterIsOpen    = true;
 				}
-				else
+				SetState(EState::ReleaseDC, ret == STATUS_SUCCESS);
+				break;
+			case EState::CloseAdapter:
+				ret = D3DKMTCloseAdapter(&ca);
+				if (ret == STATUS_SUCCESS)
 				{
-					// failed
-					adapterLastFailTime = ::GetTickCount64();
+					we.hDevice       = 0;
+					we.hAdapter      = 0;
+					we.VidPnSourceId = 0;
+					ca.hAdapter      = 0;
+					adapterIsOpen    = false;
 				}
-				DeleteDC(hDC);
-			}
+				SetState(EState::GetDC, ret == STATUS_SUCCESS);
+				break;
+			case EState::Retry:
+				if (auto tickCount = ::GetTickCount64(); VBlankTime < tickCount - fallbackRateMS)
+				{
+					VBlankNotify();
+					VBlankTime = tickCount;
+					adapterRetryCounter += fallbackRateMS;
+					if (adapterRetryCounter >= RetryTime)
+					{
+						adapterTimeoutCounter += adapterRetryCounter;
+						adapterRetryCounter = 0;
+						if (adapterTimeoutCounter >= RetryTimeOut)
+							SetState(EState::TimeOut);
+						else
+							SetState(previousState);
+					}
+				}
+				break;
+			case EState::TimeOut:
+				// TODO: add additional testing before using permanent fallback timer
+				SetState(EState::FallbackTimer);
+				break;
+			default:
+				SetState(EState::GetDC);
+				break;
 		}
-
-		if (adapterIsOpen)
-		{
-			// Finally we can wait on VBlank
-			if (/*pWait*/ D3DKMTWaitForVerticalBlankEvent(&we) != S_OK)
-			{
-				// failed, close now and try again on the next pass.
-				_D3DKMT_CLOSEADAPTER ca;
-				ca.hAdapter = we.hAdapter;
-				/*(*pClose)*/ D3DKMTCloseAdapter(&ca);
-				adapterIsOpen = false;
-			}
-		}
-
-		// Temporary fallback for lost adapter or failed call.
-		if (!adapterIsOpen)
-		{
-			::Sleep(rateMS);
-		}
-
-		// notify logic
-		VBlankNotify();
 	}
 
 	// cleanup adapter before leaving
 	if (adapterIsOpen)
 	{
-		_D3DKMT_CLOSEADAPTER ca;
-		ca.hAdapter  = we.hAdapter;
-		NTSTATUS ret = D3DKMTCloseAdapter(&ca);
-		assert(ret == D3DKMT_MIRACAST_DEVICE_STATUS_SUCCESS);
+		ret = D3DKMTCloseAdapter(&ca);
+		assert(ret == STATUS_SUCCESS);
 		adapterIsOpen = false;
 	}
 	return 0;
