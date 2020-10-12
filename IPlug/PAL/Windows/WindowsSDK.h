@@ -78,15 +78,15 @@
 //	#define NOWINSTYLES       // WS_*, CS_*, ES_*, LBS_*, SBS_*, CBS_*
 //	#define NOSYSMETRICS      // SM_*
 //	#define NOMENUS           // MF_*
-//	#define NOICONS           // IDI_*
+	#define NOICONS           // IDI_*
 //	#define NOKEYSTATES       // MK_*
-//	#define NOSYSCOMMANDS     // SC_*
-//	#define NORASTEROPS       // Binary and Tertiary raster ops
+	#define NOSYSCOMMANDS     // SC_*
+	#define NORASTEROPS       // Binary and Tertiary raster ops
 //	#define NOSHOWWINDOW      // SW_*
 	#define OEMRESOURCE       // OEM Resource values
 	#define NOATOM            // Atom Manager routines
 //	#define NOCLIPBOARD       // Clipboard routines
-//	#define NOCOLOR           // Screen colors
+	#define NOCOLOR           // Screen colors
 //	#define NOCTLMGR          // Control and Dialog routines
 	#define NODRAWTEXT        // DrawText() and DT_*
 //	#define NOGDI             // All GDI defines and routines
@@ -95,7 +95,7 @@
 //	#define NONLS             // All NLS defines and routines
 //	#define NOMB              // MB_* and MessageBox()
 	#define NOMEMMGR          // GMEM_*, LMEM_*, GHND, LHND, associated routines
-//	#define NOMETAFILE        // typedef METAFILEPICT
+	#define NOMETAFILE        // typedef METAFILEPICT
 	#define NOMINMAX          // Macros min(a,b) and max(a,b)
 //	#define NOMSG             // typedef MSG and associated routines
 	#define NOOPENFILE        // OpenFile(), OemToAnsi, AnsiToOem, and OF_*
@@ -103,7 +103,7 @@
 	#define NOSERVICE         // All Service Controller routines, SERVICE_ equates, etc.
 	#define NOSOUND           // Sound driver routines
 //	#define NOTEXTMETRIC      // typedef TEXTMETRIC and associated routines
-//	#define NOWH              // SetWindowsHook and WH_*
+	#define NOWH              // SetWindowsHook and WH_*
 //	#define NOWINOFFSETS      // GWL_*, GCL_*, associated routines
 	#define NOCOMM            // COMM driver routines
 	#define NOKANJI           // Kanji support stuff.
@@ -114,12 +114,15 @@
 
 // clang-format on
 
+#define VC_EXTRALEAN
+#define WIN32_NO_STATUS
 #define WIN32_LEAN_AND_MEAN  // Exclude alot of stuff
 #define STRICT               // Should be default when using WIN32_LEAN_AND_MEAN. but just to be sure
 
 #include <windows.h>
 
 #pragma pack(pop)
+#undef WIN32_NO_STATUS
 
 // Make sure NTSTATUS is defined since we're using WIN32_LEAN_AND_MEAN
 using NTSTATUS  = _Return_type_success_(return >= 0) long;
@@ -127,6 +130,7 @@ using PNTSTATUS = NTSTATUS*;
 
 // Additional windows headers
 #include <VersionHelpers.h>
+#include <ntstatus.h>
 
 #include <intsafe.h>         // Helper functions to prevent integer overflow bugs
 #include <strsafe.h>         // Safer C library string routine replacements
