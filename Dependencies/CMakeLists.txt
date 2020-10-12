@@ -285,7 +285,7 @@ if(HAVESDK_VST3)
     target_include_directories(${_libName} PUBLIC "${VST3_SDK_PATH}")
 
     target_compile_definitions(${_libName}
-        PRIVATE
+        PUBLIC
             $<$<BOOL:${VST3_SDK_UNICODE_OFF}>:UNICODE_OFF>
             $<$<CONFIG:Debug>:DEVELOPMENT=1>
             $<$<CONFIG:Release>:RELEASE=1>
