@@ -298,4 +298,15 @@ namespace iplug
 		// clang-format on
 	};
 
+	// Result codes returned by various functions
+	enum class EResult : int32
+	{
+		SUCCESS = 0x00000000,  // Success
+
+		WARNING = (1 << 30) | 0x00000001,  // Warnings
+
+		FAILED = (1 << 31) | 0x00000001,  // Errors
+	};
+
+
 }  // namespace iplug
