@@ -197,6 +197,22 @@ namespace iplug
 	// Enum class helpers with compile-time information
 	// Can be used to for replacing #ifdef/#endif with 'if constexpr(ENUM::Native == ENUM::Value){...}'
 
+	enum class EBuildType
+	{   // clang-format off
+		Debug,
+		Release,
+		Distributed,
+		Native =
+			#if DISTRIBUTED
+				Distributed
+			#elif NDEBUG
+				Release
+			#elif _DEBUG
+				Debug
+			#endif
+		// clang-format on
+	};
+
 	enum class ECompiler
 	{   // clang-format off
 		Emscripten,
