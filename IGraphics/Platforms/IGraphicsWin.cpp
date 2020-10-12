@@ -2209,13 +2209,13 @@ DWORD IGraphicsWin::OnVBlankRun()
 		switch (currentState)
 		{
 			case EState::VBlank:
-				VBlankNotify();
 				SetState(EState::CloseAdapter, D3DKMTWaitForVerticalBlankEvent(&we) != STATUS_SUCCESS, EState::VBlank);
+				VBlankNotify();
 				break;
 			case EState::FallbackTimer:
-				VBlankNotify();
 				previousState = currentState;
 				::Sleep(fallbackRateMS);
+				VBlankNotify();
 				break;
 			case EState::GetDC:
 				openAdapterData.hDc = ::GetDC(mVBlankWindow);
