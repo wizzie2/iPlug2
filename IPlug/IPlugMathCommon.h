@@ -28,7 +28,7 @@ namespace iplug::math
 	NODISCARD constexpr auto Abs(const T& value)
 	{
 		static_assert(type::IsArithmetic<T>);
-		if constexpr (type::IsUnsigned<T>)
+		if constexpr (std::is_unsigned_v<T>)
 			return value;
 		return value >= 0 ? value : -value;
 	}
@@ -209,7 +209,7 @@ namespace iplug::math
 			return (value & (value - 1)) == 0;
 		else
 		{
-			using Tx = type::ConditionalUIntSize<T>;
+			using Tx = type::uint_sizeof<T>;
 			Tx v     = static_cast<Tx>(value);
 			return (v & (v - 1)) == 0;
 		}
@@ -338,14 +338,14 @@ namespace iplug::math
 	{
 		static_assert(type::IsArithmetic<T>);
 		static_assert(type::IsIntegral<Ta>);
-		static_assert(type::IsUnsigned<Ta>);
+		static_assert(std::is_unsigned_v<Ta>);
 		DEBUG_ASSERT(IsPow2(alignment));  // alignment must be a power of 2 number
 
 		if constexpr (type::IsIntegral<T>)
 			return (value + alignment - 1) & ~(alignment - 1);
 		else
 		{
-			using Tx = type::ConditionalUIntSize<std::conditional_t<sizeof(T) < sizeof(Ta), Ta, T>>;
+			using Tx = type::uint_sizeof<std::conditional_t<sizeof(T) < sizeof(Ta), Ta, T>>;
 			Tx v     = static_cast<Tx>(value);
 			return (value + alignment - 1) & ~(alignment - 1);
 		}
@@ -360,7 +360,7 @@ namespace iplug::math
 		DEBUG_ASSERT(value >= 1);
 		if (IsPow2(value))
 			return value;
-		using Tx = type::ConditionalUIntSize<T>;
+		using Tx = type::uint_sizeof<T>;
 		Tx val   = static_cast<Tx>(value);
 		Tx x     = val - 1;
 		x |= x >> 1;
@@ -386,7 +386,7 @@ namespace iplug::math
 		DEBUG_ASSERT(value >= 1);
 		if (IsPow2(value))
 			return value;
-		using Tx = type::ConditionalUIntSize<T>;
+		using Tx = type::uint_sizeof<T>;
 		Tx val   = static_cast<Tx>(value);
 		Tx x     = val - 1;
 		x |= x >> 1;
@@ -411,7 +411,7 @@ namespace iplug::math
 		DEBUG_ASSERT(value >= 1);
 		if (IsPow2(value))
 			return value;
-		using Tx = type::ConditionalUIntSize<T>;
+		using Tx = type::uint_sizeof<T>;
 		Tx val   = static_cast<Tx>(value);
 		Tx x     = val - 1;
 		x |= x >> 1;

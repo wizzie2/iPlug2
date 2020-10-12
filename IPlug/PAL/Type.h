@@ -51,17 +51,14 @@ namespace iplug::type  // move everything to iplug namespace?
 											   long long,
 											   unsigned long long>;
 
+	// No long double
+	template <class T>
+	inline constexpr bool IsFloatingPoint = IsAnyOf<std::remove_cv_t<T>,  // remove 'const' and 'volatile' qualifiers
+													float,
+													double>;
+
 	template <class Tx, class Ty>
-	inline constexpr bool IsSame = std::is_same_v<std::remove_cv_t<Tx>, Ty>;
-
-	template <class T>
-	inline constexpr bool IsFloatingPoint = std::is_floating_point_v<T>;
-
-	template <class T>
-	inline constexpr bool IsSigned = std::is_signed_v<T>;
-
-	template <class T>
-	inline constexpr bool IsUnsigned = std::is_unsigned_v<T>;
+	inline constexpr bool IsSame = std::is_same_v<std::remove_cv_t<Tx>, std::remove_cv_t<Ty>>;
 
 	template <class T>
 	inline constexpr bool IsFloat = IsSame<T, float>;
@@ -83,34 +80,31 @@ namespace iplug::type  // move everything to iplug namespace?
 	using EnableWhenIntegral = std::enable_if_t<IsIntegral<T>, int>;
 
 	template <class T>
-	using EnableWhenArethmatic = std::enable_if_t<IsArithmetic<T>, int>;
+	using EnableWhenArithmetic = std::enable_if_t<IsArithmetic<T>, int>;
 
 	// clang-format off
 
-	// Returns uint8, uint16, uint32 or uint64 based on the size of T
+	// Returns uint8, uint16, uint32 or uint64 depending on the size of T
 	template <class T>
-	using ConditionalUIntSize = std::conditional_t<sizeof(T) == 1, uint8,
-		                        std::conditional_t<sizeof(T) == 2, uint16,
-		                        std::conditional_t<sizeof(T) == 4, uint32,
-		                        std::conditional_t<sizeof(T) == 8, uint64,
-		                        _internal::InvalidType<T>>>>>;
+	using uint_sizeof = std::conditional_t<sizeof(T) == 1, uint8,
+						std::conditional_t<sizeof(T) == 2, uint16,
+						std::conditional_t<sizeof(T) == 4, uint32,
+						std::conditional_t<sizeof(T) == 8, uint64,
+						_internal::InvalidType<T>>>>>;
 
 	// Returns int8, int16, int32 or int64 based on the size of T
 	template <class T>
-	using ConditionalIntSize =  std::conditional_t<sizeof(T) == 1, int8,
-		                        std::conditional_t<sizeof(T) == 2, int16,
-		                        std::conditional_t<sizeof(T) == 4, int32,
-		                        std::conditional_t<sizeof(T) == 8, int64,
-		                        _internal::InvalidType<T>>>>>;
+	using int_sizeof = std::conditional_t<sizeof(T) == 1, int8,
+					   std::conditional_t<sizeof(T) == 2, int16,
+					   std::conditional_t<sizeof(T) == 4, int32,
+					   std::conditional_t<sizeof(T) == 8, int64,
+					   _internal::InvalidType<T>>>>>;
 
-
-	template <class To,
-			  class From,
+	template <class To, class From,
 			  std::enable_if_t<std::conjunction_v<std::bool_constant<sizeof(To) == sizeof(From)>,
 												  std::is_trivially_copyable<To>,
-												  std::is_trivially_copyable<From>>,
-							   int> = 0>
-	NODISCARD inline constexpr To bit_cast(const From& type) noexcept
+												  std::is_trivially_copyable<From>>, int> = 0>
+	NODISCARD constexpr To bit_cast(const From& type) noexcept
 	{
 		// Use std::bit_cast if available, otherwise emulate it
 		#ifdef __cpp_lib_bit_cast
@@ -127,7 +121,7 @@ namespace iplug::type  // move everything to iplug namespace?
 	struct EnumHash
 	{
 		template <class T>
-		inline constexpr auto operator()(const T& index) const
+		constexpr auto operator()(const T& index) const
 			-> std::enable_if_t<std::is_enum_v<T>, std::underlying_type_t<T>>
 		{
 			return std::hash<std::underlying_type_t<T>>()(static_cast<std::underlying_type_t<T>>(index));
