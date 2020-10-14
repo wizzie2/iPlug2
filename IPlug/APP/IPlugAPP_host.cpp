@@ -728,65 +728,65 @@ namespace iplug
 									RtAudioStreamStatus status,
 									void* pUserData)
 	{
-		IPlugAPPHost* _this = (IPlugAPPHost*) pUserData;
+		IPlugAPPHost* pHost = (IPlugAPPHost*) pUserData;
 
-		int nins  = _this->GetPlug()->MaxNChannels(ERoute::kInput);
-		int nouts = _this->GetPlug()->MaxNChannels(ERoute::kOutput);
+		int nins  = pHost->GetPlug()->MaxNChannels(ERoute::kInput);
+		int nouts = pHost->GetPlug()->MaxNChannels(ERoute::kOutput);
 
 		double* pInputBufferD  = static_cast<double*>(pInputBuffer);
 		double* pOutputBufferD = static_cast<double*>(pOutputBuffer);
 
 		// wait APP_N_VECTOR_WAIT * iovs before processing audio, to avoid clicks
-		bool startWait = _this->mVecWait >= APP_N_VECTOR_WAIT;
-		bool doFade    = _this->mVecWait == APP_N_VECTOR_WAIT || _this->mAudioEnding;
+		bool startWait = pHost->mVecWait >= APP_N_VECTOR_WAIT;
+		bool doFade    = pHost->mVecWait == APP_N_VECTOR_WAIT || pHost->mAudioEnding;
 
-		if (startWait && !_this->mAudioDone)
+		if (startWait && !pHost->mAudioDone)
 		{
 			if (doFade)
-				ApplyFades(pInputBufferD, nins, nFrames, _this->mAudioEnding);
+				ApplyFades(pInputBufferD, nins, nFrames, pHost->mAudioEnding);
 
 			for (uint32 i = 0; i < nFrames; i++)
 			{
-				_this->mBufIndex %= APP_SIGNAL_VECTOR_SIZE;
+				pHost->mBufIndex %= APP_SIGNAL_VECTOR_SIZE;
 
-				if (_this->mBufIndex == 0)
+				if (pHost->mBufIndex == 0)
 				{
 					for (int c = 0; c < nins; c++)
 					{
-						_this->mInputBufPtrs.Set(c, (pInputBufferD + (c * nFrames)) + i);
+						pHost->mInputBufPtrs.Set(c, (pInputBufferD + (c * nFrames)) + i);
 					}
 
 					for (int c = 0; c < nouts; c++)
 					{
-						_this->mOutputBufPtrs.Set(c, (pOutputBufferD + (c * nFrames)) + i);
+						pHost->mOutputBufPtrs.Set(c, (pOutputBufferD + (c * nFrames)) + i);
 					}
 
-					_this->mIPlug->AppProcess(
-						_this->mInputBufPtrs.GetList(), _this->mOutputBufPtrs.GetList(), APP_SIGNAL_VECTOR_SIZE);
+					pHost->mIPlug->AppProcess(
+						pHost->mInputBufPtrs.GetList(), pHost->mOutputBufPtrs.GetList(), APP_SIGNAL_VECTOR_SIZE);
 
-					_this->mSamplesElapsed += APP_SIGNAL_VECTOR_SIZE;
+					pHost->mSamplesElapsed += APP_SIGNAL_VECTOR_SIZE;
 				}
 
-				for (int c = 0; c < nouts; c++)
-				{
-					pOutputBufferD[c * nFrames + i] *= APP_MULT;
-				}
+				//for (int c = 0; c < nouts; c++)
+				//{
+				//	pOutputBufferD[c * nFrames + i] *= APP_MULT;
+				//}
 
-				_this->mBufIndex++;
+				pHost->mBufIndex++;
 			}
 
 			if (doFade)
-				ApplyFades(pOutputBufferD, nouts, nFrames, _this->mAudioEnding);
+				ApplyFades(pOutputBufferD, nouts, nFrames, pHost->mAudioEnding);
 
-			if (_this->mAudioEnding)
-				_this->mAudioDone = true;
+			if (pHost->mAudioEnding)
+				pHost->mAudioDone = true;
 		}
 		else
 		{
 			memset(pOutputBufferD, 0, nFrames * nouts * sizeof(double));
 		}
 
-		_this->mVecWait = std::min(_this->mVecWait + 1, uint32_t(APP_N_VECTOR_WAIT + 1));
+		pHost->mVecWait = std::min(pHost->mVecWait + 1, uint32_t(APP_N_VECTOR_WAIT + 1));
 
 		return 0;
 	}
@@ -794,9 +794,9 @@ namespace iplug
 	// static
 	void IPlugAPPHost::MIDICallback(double deltatime, std::vector<uint8_t>* pMsg, void* pUserData)
 	{
-		IPlugAPPHost* _this = (IPlugAPPHost*) pUserData;
+		IPlugAPPHost* pHost = (IPlugAPPHost*) pUserData;
 
-		if (pMsg->size() == 0 || _this->mExiting)
+		if (pMsg->size() == 0 || pHost->mExiting)
 			return;
 
 		if (pMsg->size() > 3)
@@ -809,7 +809,7 @@ namespace iplug
 
 			SysExData data {0, static_cast<int>(pMsg->size()), pMsg->data()};
 
-			_this->mIPlug->mSysExMsgsFromCallback.Push(data);
+			pHost->mIPlug->mSysExMsgsFromCallback.Push(data);
 			return;
 		}
 		else if (pMsg->size())
@@ -819,7 +819,7 @@ namespace iplug
 			pMsg->size() > 1 ? msg.mData1 = pMsg->at(1) : msg.mData1 = 0;
 			pMsg->size() > 2 ? msg.mData2 = pMsg->at(2) : msg.mData2 = 0;
 
-			_this->mIPlug->mMidiMsgsFromCallback.Push(msg);
+			pHost->mIPlug->mMidiMsgsFromCallback.Push(msg);
 		}
 	}
 

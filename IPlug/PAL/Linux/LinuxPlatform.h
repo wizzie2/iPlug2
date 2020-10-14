@@ -44,8 +44,8 @@ BEGIN_INCLUDE_DEPENDENCIES
 #include <unistd.h>
 #include <sys/types.h>
 #include <dirent.h>
-
 #if !NO_IGRAPHICS
 	#include <OpenGL/gl.h>
 #endif
+#include <IPlugSWELL.h>
 END_INCLUDE_DEPENDENCIES

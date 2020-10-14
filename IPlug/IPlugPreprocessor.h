@@ -163,11 +163,6 @@
 	#define PLUG_CLASS_NAME VST3Controller
 #endif
 
-#if VST3P_API || WAM_API
-	#undef NO_IGRAPHICS
-	#define NO_IGRAPHICS 1
-#endif
-
 #define API_EXT2
 #if VST2_API
 	#define API_EXT "vst"

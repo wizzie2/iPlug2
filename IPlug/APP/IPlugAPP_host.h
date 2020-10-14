@@ -34,18 +34,10 @@
 	#define DEFAULT_INPUT_DEV  "Default Device"
 	#define DEFAULT_OUTPUT_DEV "Default Device"
 #elif PLATFORM_MAC
-	#include "IPlugSWELL.h"
 	#define SLEEP(milliseconds) usleep((unsigned long) (milliseconds * 1000.0))
 	#define DEFAULT_INPUT_DEV   "Built-in Input"
 	#define DEFAULT_OUTPUT_DEV  "Built-in Output"
-#elif PLATFORM_LINUX
-	#include "IPlugSWELL.h"
 #endif
-
-BEGIN_INCLUDE_DEPENDENCIES
-#include <RtAudio.h>
-#include <RtMidi.h>
-END_INCLUDE_DEPENDENCIES
 
 #define OFF_TEXT "off"
 

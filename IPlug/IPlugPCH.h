@@ -43,11 +43,11 @@
 #include <set>
 #include <stack>
 #include <string>
+#include <tuple>
 #include <unordered_map>
 #include <utility>
 #include <vector>
 #include <version>
-
 #if __cpp_lib_bit_cast
 	#include <bit>
 #endif
@@ -59,7 +59,20 @@ BEGIN_INCLUDE_DEPENDENCIES
 #include <WDL/mutex.h>
 #include <WDL/ptrlist.h>
 
-#if VST3_API
+#if VST2_API
+#elif AU_API
+#elif AUv3_API
+#elif AAX_API
+#elif APP_API
+	#include <RtAudio.h>
+	#include <RtMidi.h>
+#elif WAM_API
+#elif WEB_API
+#elif VST3_API
+	#if VST3C_API
+	#elif VST3P_API
+	#else
+	#endif
 	#include <pluginterfaces/base/ibstream.h>
 	#include <pluginterfaces/base/keycodes.h>
 	#include <pluginterfaces/base/ustring.h>
@@ -82,6 +95,8 @@ BEGIN_INCLUDE_DEPENDENCIES
 	#include <public.sdk/source/vst/vstsinglecomponenteffect.h>
 	#include <public.sdk/source/vst/hosting/parameterchanges.h>
 	#include "public.sdk/source/main/pluginfactory.h"
+	#undef stricmp
+	#undef strnicmp
 #endif
 END_INCLUDE_DEPENDENCIES
 

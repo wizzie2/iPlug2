@@ -11,10 +11,6 @@
 #include "IPlugAPP.h"
 #include "IPlugAPP_host.h"
 
-#if PLATFORM_MAC || PLATFORM_LINUX
-	#include <IPlugSWELL.h>
-#endif
-
 BEGIN_IPLUG_NAMESPACE
 
 extern HWND gHWND;

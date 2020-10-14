@@ -22,24 +22,11 @@ void* gHINSTANCE = nullptr;
 
 // clang-format off
 
-#if PLATFORM_WINDOWS && !VST3C_API
-
-	#if VST2_API || AAX_API
+#if PLATFORM_WINDOWS && (VST2_API || AAX_API)
 	BOOL WINAPI DllMain(HINSTANCE hDllInst, DWORD fdwReason, LPVOID res)
 	{
 		gHINSTANCE = hDllInst;
 		return true;
-	}
-	#endif
-
-
-	// TODO: move function. This function doesn't belong in an api header include, it should be something like PAL::System::GetDPI()
-	const int GetScaleForHWND(const HWND hWnd, const bool useCachedResult=true)
-	{
-		static int CachedScale = 0;
-		if(useCachedResult == false || CachedScale == 0)
-			CachedScale = math::IntegralDivide(GetDpiForWindow(hWnd), USER_DEFAULT_SCREEN_DPI);
-		return CachedScale;
 	}
 #endif
 

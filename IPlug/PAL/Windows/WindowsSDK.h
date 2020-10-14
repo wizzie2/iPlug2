@@ -155,4 +155,7 @@ BEGIN_INCLUDE_DEPENDENCIES
 	#include <d3dkmthk.h>
 	#include <glad.h>
 #endif
+#if APP_API
+	#include <asio.h>
+#endif
 END_INCLUDE_DEPENDENCIES

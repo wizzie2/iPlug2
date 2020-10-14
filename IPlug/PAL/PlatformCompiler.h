@@ -30,10 +30,10 @@
 #endif
 
 // Header files for intrinsic functions
-#if __has_include(<intrin.h>)
+#if __has_include(<DirectXMath.h>)
 	#undef PLATFORM_INTRINSIC_X64
 	#define PLATFORM_INTRINSIC_X64 1
-	#include <intrin.h>
+	#include <DirectXMath.h>
 #elif __has_include(<immintrin.h>)
 	#undef PLATFORM_INTRINSIC_X64
 	#define PLATFORM_INTRINSIC_X64 1

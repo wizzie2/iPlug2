@@ -115,10 +115,6 @@ namespace iplug
 	}
 	#pragma mark - MAC
 #elif PLATFORM_MAC
-	#import <Cocoa/Cocoa.h>
-	#include "IPlugSWELL.h"
-	#include "IPlugPaths.h"
-
 HWND gHWND;
 extern HMENU SWELL_app_stocksysmenu;
 

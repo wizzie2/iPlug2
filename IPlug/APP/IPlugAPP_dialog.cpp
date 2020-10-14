@@ -11,21 +11,22 @@
 #include "IPlugAPP_host.h"
 #include "resource.h"
 
-BEGIN_INCLUDE_DEPENDENCIES
+using namespace iplug;
+using namespace igraphics;
+
 #if PLATFORM_WINDOWS
-	#include <asio.h>
+const int GetScaleForHWND(const HWND hWnd, const bool useCachedResult = true)
+{
+	static int CachedScale = 0;
+	if (useCachedResult == false || CachedScale == 0)
+		CachedScale = math::IntegralDivide(GetDpiForWindow(hWnd), USER_DEFAULT_SCREEN_DPI);
+	return CachedScale;
+}
 	#define GET_MENU() GetMenu(gHWND)
 #elif PLATFORM_MAC
 	#define GET_MENU() SWELL_GetCurrentMenu()
 #endif
-END_INCLUDE_DEPENDENCIES
 
-using namespace iplug;
-
-#if defined _DEBUG && !defined NO_IGRAPHICS
-	#include "IGraphics.h"
-using namespace igraphics;
-#endif
 
 // check the input and output devices, find matching srs
 void IPlugAPPHost::PopulateSampleRateList(HWND hwndDlg,
@@ -549,10 +550,6 @@ static void ClientResize(HWND hWnd, int nWidth, int nHeight)
 	SetWindowPos(hWnd, 0, x, y, nWidth + ptDiff.x, nHeight + ptDiff.y, 0);
 	//  MoveWindow(hWnd, x, y, nWidth + ptDiff.x, nHeight + ptDiff.y, FALSE);
 }
-
-#if PLATFORM_WINDOWS
-extern const int GetScaleForHWND(const HWND hWnd, const bool useCachedResult = true);
-#endif
 
 // static
 WDL_DLGRET IPlugAPPHost::MainDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
