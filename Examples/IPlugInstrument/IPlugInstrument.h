@@ -43,6 +43,10 @@ class IPlugInstrument final : public Plugin
 public:
   IPlugInstrument(const InstanceInfo& info);
 
+#if IPLUG_EDITOR
+  bool OnMessage(int msgTag, int ctrlTag, int dataSize, const void* pData) override;
+#endif
+
 #if IPLUG_DSP // http://bit.ly/2S64BDd
 public:
   void ProcessBlock(sample** inputs, sample** outputs, int nFrames) override;
@@ -50,7 +54,6 @@ public:
   void OnReset() override;
   void OnParamChange(int paramIdx) override;
   void OnIdle() override;
-  bool OnMessage(int msgTag, int ctrlTag, int dataSize, const void* pData) override;
 
 private:
   IPlugInstrumentDSP<sample> mDSP {16};

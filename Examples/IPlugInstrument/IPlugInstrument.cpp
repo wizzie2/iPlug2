@@ -148,6 +148,20 @@ IPlugInstrument::IPlugInstrument(const InstanceInfo& info) : Plugin(info, Config
 #endif
 }
 
+#if IPLUG_EDITOR
+bool IPlugInstrument::OnMessage(int msgTag, int ctrlTag, int dataSize, const void* pData)
+{
+	if (ctrlTag == kCtrlTagBender && msgTag == IWheelControl::kMessageTagSetPitchBendRange)
+	{
+		const int bendRange = *static_cast<const int*>(pData);
+		mDSP.mSynth.SetPitchBendRange(bendRange);
+	}
+
+	return false;
+}
+#endif
+
+
 #if IPLUG_DSP
 void IPlugInstrument::ProcessBlock(sample** inputs, sample** outputs, int nFrames)
 {
@@ -197,16 +211,5 @@ handle:
 void IPlugInstrument::OnParamChange(int paramIdx)
 {
 	mDSP.SetParam(paramIdx, static_cast<sample>(GetParam(paramIdx)->Value()));
-}
-
-bool IPlugInstrument::OnMessage(int msgTag, int ctrlTag, int dataSize, const void* pData)
-{
-	if (ctrlTag == kCtrlTagBender && msgTag == IWheelControl::kMessageTagSetPitchBendRange)
-	{
-		const int bendRange = *static_cast<const int*>(pData);
-		mDSP.mSynth.SetPitchBendRange(bendRange);
-	}
-
-	return false;
 }
 #endif
