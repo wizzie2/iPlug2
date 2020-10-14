@@ -22,7 +22,8 @@ namespace iplug
 {
 	// Struct to set compile time options
 	struct Config
-	{
+	{  // clang-format off
+
 		const int nParams;
 		const int nPresets;
 
@@ -31,40 +32,36 @@ namespace iplug
 		static constexpr const char* pluginName             = PLUG_NAME;
 		static constexpr const char* productName            = "";
 		static constexpr const char* mfrName                = PLUG_MFR;
-		static constexpr int vendorVersion                  = PLUG_VERSION_HEX;
-		static constexpr int uniqueID                       = PLUG_UNIQUE_ID;
-		static constexpr int mfrID                          = PLUG_MFR_ID;
-		static constexpr int latency                        = PLUG_LATENCY;
-		static constexpr bool plugDoesMidiIn                = PLUG_DOES_MIDI_IN;
-		static constexpr bool plugDoesMidiOut               = PLUG_DOES_MIDI_OUT;
-		static constexpr bool plugDoesMPE                   = PLUG_DOES_MPE;
-		static constexpr bool plugDoesChunks                = PLUG_DOES_STATE_CHUNKS;
-		static constexpr bool plugHasUI                     = PLUG_HAS_UI;
-		static constexpr int plugFPS                        = PLUG_FPS;
-		static constexpr int plugWidth                      = PLUG_WIDTH;
-		static constexpr int plugHeight                     = PLUG_HEIGHT;
-		static constexpr int plugMinWidth                   = PLUG_MIN_WIDTH;
-		static constexpr int plugMaxWidth                   = PLUG_MAX_WIDTH;
-		static constexpr int plugMinHeight                  = PLUG_MIN_HEIGHT;
-		static constexpr int plugMaxHeight                  = PLUG_MAX_HEIGHT;
-		static constexpr bool plugHostResize                = PLUG_HOST_RESIZE;
+		static constexpr         int vendorVersion          = PLUG_VERSION_HEX;
+		static constexpr         int uniqueID               = PLUG_UNIQUE_ID;
+		static constexpr         int mfrID                  = PLUG_MFR_ID;
+		static constexpr         int latency                = PLUG_LATENCY;
+		static constexpr        bool plugDoesMidiIn         = PLUG_DOES_MIDI_IN;
+		static constexpr        bool plugDoesMidiOut        = PLUG_DOES_MIDI_OUT;
+		static constexpr        bool plugDoesMPE            = PLUG_DOES_MPE;
+		static constexpr        bool plugDoesChunks         = PLUG_DOES_STATE_CHUNKS;
+		static constexpr        bool plugHasUI              = PLUG_HAS_UI;
+		static constexpr         int plugFPS                = PLUG_FPS;
+		static constexpr         int plugWidth              = PLUG_WIDTH;
+		static constexpr         int plugHeight             = PLUG_HEIGHT;
+		static constexpr         int plugMinWidth           = PLUG_MIN_WIDTH;
+		static constexpr         int plugMaxWidth           = PLUG_MAX_WIDTH;
+		static constexpr         int plugMinHeight          = PLUG_MIN_HEIGHT;
+		static constexpr         int plugMaxHeight          = PLUG_MAX_HEIGHT;
+		static constexpr        bool plugHostResize         = PLUG_HOST_RESIZE;
 		static constexpr const char* bundleID               = BUNDLE_ID;
 		static constexpr const char* sharedResourcesSubpath = SHARED_RESOURCES_SUBPATH;
 
-
-		// clang-format off
 		// TODO: add option to set values from cmake configuration
-
 		static constexpr bool   sortIMidiQueue          = true;   // SORT_IMIDIQUEUE (was DONT_SORT_IMIDIQUEUE)
 		static constexpr int    defaultBlockSize        = 1024;   // DEFAULT_BLOCK_SIZE
 		static constexpr double defaultTempo            = 120;    // DEFAULT_TEMPO
 		static constexpr double defaultSampleRate       = 44100;  // DEFAULT_SAMPLE_RATE
 		static constexpr size_t maxDumpPresetBlobLength = 2048;   // MAX_BLOB_LENGTH
-
-		// clang-format on
+		static constexpr bool   debugShowVBlankMessages = (EBuildType::Native == EBuildType::Debug);
 
 		explicit Config(int nParams, int nPresets) : nParams(nParams), nPresets(nPresets) {};
-	};
+	};  // clang-format on
 
 
 	/** In certain cases we need to queue parameter changes for transferral between threads */
