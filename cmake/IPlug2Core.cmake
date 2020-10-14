@@ -161,7 +161,7 @@ macro(iplug_configure_project)
     while(_len GREATER 0)
         list(POP_FRONT _arg_RESOURCE_DEFINITIONS _item_name)
         list(POP_FRONT _arg_RESOURCE_DEFINITIONS _item_val)
-        _iplug_add_config_variable(CONFIG "" ${_item_name} "\"${_item_val}\"")
+        _iplug_add_config_variable(CONFIG_RESOURCE RESOURCE ${_item_name} "\"${_item_val}\"")
         list(LENGTH _arg_RESOURCE_DEFINITIONS _len)
     endwhile()
 
@@ -212,22 +212,7 @@ macro(iplug_add_aax _target)
         "PLUG_CATEGORY_STR"
         "DOES_AUDIOSUITE"
     )
-    set(_multiValueArgs "OVERRIDE")
-    cmake_parse_arguments(_arg "" "${_oneValueArgs}" "${_multiValueArgs}" ${ARGN})
-    _iplug_warn_unparsed_arguments("" _arg_UNPARSED_ARGUMENTS)
-
-    foreach(_var IN LISTS _oneValueArgs)
-        _iplug_add_config_variable(CONFIG_AAX AAX ${_var} "${_arg_${_var}}")
-    endforeach()
-
-    cmake_parse_arguments(_override  "" "${_projectConfigArgs_overridable}" "" ${_arg_OVERRIDE})
-    _iplug_warn_unparsed_arguments("[OVERRIDE]" _override_UNPARSED_ARGUMENTS)
-    foreach(_var IN LISTS _projectConfigArgs_overridable)
-        if(DEFINED _override_${_var})
-            _iplug_add_config_variable(CONFIG_OVERRIDE OVERRIDE ${_var} "${_override_${_var}}")
-        endif()
-    endforeach()
-    _iplug_validate_config_variables(CONFIG_OVERRIDE DEFINED)
+    _iplug_parse_target_arguments(CONFIG_AAX AAX "" "${_oneValueArgs}" "" "${ARGN}")
 
     iplug_validate_string(TYPE_IDS             PREFIX CONFIG_AAX NOTEMPTY ALPHA NUMERIC SPACE APOSTROPHE COMMA)
     iplug_validate_string(TYPE_IDS_AUDIOSUITE  PREFIX CONFIG_AAX NOTEMPTY ALPHA NUMERIC SPACE APOSTROPHE COMMA)
@@ -240,39 +225,24 @@ endmacro()
 
 
 #------------------------------------------------------------------------------
-# iplug_add_au
+# iplug_add_auv2
 
-macro(iplug_add_au _target)
-    iplug_syntax_error("iplug_add_au() is not implemented.")
+macro(iplug_add_auv2 _target)
+    iplug_syntax_error("iplug_add_auv2() is not implemented.")
 
     set(_oneValueArgs
     )
-    set(_multiValueArgs "OVERRIDE")
-    cmake_parse_arguments(_arg "" "${_oneValueArgs}" "${_multiValueArgs}" ${ARGN})
-    _iplug_warn_unparsed_arguments("" _arg_UNPARSED_ARGUMENTS)
+    _iplug_parse_target_arguments(CONFIG_AUV2 AUV2 "" "${_oneValueArgs}" "" "${ARGN}")
 
-    foreach(_var IN LISTS _oneValueArgs)
-        _iplug_add_config_variable(CONFIG_AU AUV2 ${_var} "${_arg_${_var}}")
-    endforeach()
+    _iplug_add_config_variable(CONFIG AUV2 ENTRY           "${CONFIG_PLUG_CLASS_NAME}_Entry")
+    _iplug_add_config_variable(CONFIG AUV2 ENTRY_STR       "${CONFIG_AUV2_ENTRY}")
+    _iplug_add_config_variable(CONFIG AUV2 VIEW_CLASS      "${CONFIG_PLUG_CLASS_NAME}_View")
+    _iplug_add_config_variable(CONFIG AUV2 VIEW_CLASS_STR  "${CONFIG_AUV2_VIEW_CLASS}")
+    _iplug_add_config_variable(CONFIG AUV2 FACTORY         "${CONFIG_PLUG_CLASS_NAME}_Factory")
 
-    cmake_parse_arguments(_override  "" "${_projectConfigArgs_overridable}" "" ${_arg_OVERRIDE})
-    _iplug_warn_unparsed_arguments("[OVERRIDE]" _override_UNPARSED_ARGUMENTS)
-    foreach(_var IN LISTS _projectConfigArgs_overridable)
-        if(DEFINED _override_${_var})
-            _iplug_add_config_variable(CONFIG_OVERRIDE OVERRIDE ${_var} "${_override_${_var}}")
-        endif()
-    endforeach()
-    _iplug_validate_config_variables(CONFIG_OVERRIDE DEFINED)
-
-    _iplug_add_config_variable(CONFIG_AU AUV2 ENTRY           "${CONFIG_PLUG_CLASS_NAME}_Entry")
-    _iplug_add_config_variable(CONFIG_AU AUV2 ENTRY_STR       "${CONFIG_AU_AUV2_ENTRY}")
-    _iplug_add_config_variable(CONFIG_AU AUV2 VIEW_CLASS      "${CONFIG_PLUG_CLASS_NAME}_View")
-    _iplug_add_config_variable(CONFIG_AU AUV2 VIEW_CLASS_STR  "${CONFIG_AU_AUV2_VIEW_CLASS}")
-    _iplug_add_config_variable(CONFIG_AU AUV2 FACTORY         "${CONFIG_PLUG_CLASS_NAME}_Factory")
-
-    # iplug_validate_string(ENTRY      PREFIX CONFIG_AU_ ALPHAFIRST ALPHA NUMERIC UNDERSCORE)
-    # iplug_validate_string(VIEW_CLASS PREFIX CONFIG_AU_ ALPHAFIRST ALPHA NUMERIC UNDERSCORE)
-    # iplug_validate_string(FACTORY    PREFIX CONFIG_AU_ ALPHAFIRST ALPHA NUMERIC UNDERSCORE)
+    iplug_validate_string(ENTRY      PREFIX CONFIG_AUV2 ALPHAFIRST ALPHA NUMERIC UNDERSCORE)
+    iplug_validate_string(VIEW_CLASS PREFIX CONFIG_AUV2 ALPHAFIRST ALPHA NUMERIC UNDERSCORE)
+    iplug_validate_string(FACTORY    PREFIX CONFIG_AUV2 ALPHAFIRST ALPHA NUMERIC UNDERSCORE)
 endmacro()
 
 
@@ -281,6 +251,9 @@ endmacro()
 
 macro(iplug_add_auv3 _target)
     iplug_syntax_error("iplug_add_auv3() is not implemented.")
+    set(_oneValueArgs
+    )
+    _iplug_parse_target_arguments(CONFIG_AUV3 AUV3 "" "${_oneValueArgs}" "" "${ARGN}")
 endmacro()
 
 #------------------------------------------------------------------------------
@@ -288,6 +261,27 @@ endmacro()
 
 macro(iplug_add_web _target)
     iplug_syntax_error("iplug_add_web() is not implemented.")
+    set(_oneValueArgs
+    )
+    _iplug_parse_target_arguments(CONFIG_WEB WEB "" "${_oneValueArgs}" "" "${ARGN}")
+
+    _iplug_add_config_variable(CONFIG "" USE_WEBGL2 0)
+    _iplug_add_config_variable(CONFIG "" FULL_ES3   1)
+    _iplug_add_config_variable(CONFIG_OVERRIDE "" IPLUG_EDITOR 1)
+    _iplug_add_config_variable(CONFIG_OVERRIDE "" IPLUG_DSP    0)
+endmacro()
+
+#------------------------------------------------------------------------------
+# iplug_add_wam
+
+macro(iplug_add_wam _target)
+    iplug_syntax_error("iplug_add_wam() is not implemented.")
+    set(_oneValueArgs
+    )
+    _iplug_parse_target_arguments(CONFIG_WAM WAM "" "${_oneValueArgs}" "" "${ARGN}")
+
+    _iplug_add_config_variable(CONFIG_OVERRIDE "" IPLUG_EDITOR 0)
+    _iplug_add_config_variable(CONFIG_OVERRIDE "" IPLUG_DSP    1)
 endmacro()
 
 #------------------------------------------------------------------------------
@@ -295,6 +289,12 @@ endmacro()
 
 macro(iplug_add_vst3c _target)
     iplug_syntax_error("iplug_add_vst3c() is not implemented.")
+    set(_oneValueArgs
+    )
+    _iplug_parse_target_arguments(CONFIG_VST3C VST3 "" "${_oneValueArgs}" "" "${ARGN}")
+
+    _iplug_add_config_variable(CONFIG_OVERRIDE "" IPLUG_EDITOR 1)
+    _iplug_add_config_variable(CONFIG_OVERRIDE "" IPLUG_DSP    0)
 endmacro()
 
 #------------------------------------------------------------------------------
@@ -302,6 +302,12 @@ endmacro()
 
 macro(iplug_add_vst3p _target)
     iplug_syntax_error("iplug_add_vst3p() is not implemented.")
+    set(_oneValueArgs
+    )
+    _iplug_parse_target_arguments(CONFIG_VST3P VST3 "" "${_oneValueArgs}" "" "${ARGN}")
+
+    _iplug_add_config_variable(CONFIG_OVERRIDE "" IPLUG_EDITOR 0)
+    _iplug_add_config_variable(CONFIG_OVERRIDE "" IPLUG_DSP    1)
 endmacro()
 
 #------------------------------------------------------------------------------
@@ -309,6 +315,9 @@ endmacro()
 
 macro(iplug_add_vst2 _target)
     iplug_syntax_error("iplug_add_vst2() is not implemented.")
+    set(_oneValueArgs
+    )
+    _iplug_parse_target_arguments(CONFIG_VST2 VST2 "" "${_oneValueArgs}" "" "${ARGN}")
 endmacro()
 
 
@@ -316,8 +325,6 @@ endmacro()
 # iplug_add_application
 
 macro(iplug_add_application _target)
-    _iplug_check_initialized()
-
     set(_oneValueArgs
         "SUBSYSTEM"
         "NUM_CHANNELS"
@@ -325,22 +332,15 @@ macro(iplug_add_application _target)
         "COPY_AUV3"
         "SIGNAL_VECTOR_SIZE"
     )
-    set(_multiValueArgs "OVERRIDE")
-    cmake_parse_arguments(_arg "" "${_oneValueArgs}" "${_multiValueArgs}" ${ARGN})
-    _iplug_warn_unparsed_arguments("" _arg_UNPARSED_ARGUMENTS)
+    _iplug_parse_target_arguments(CONFIG_APP APP "" "${_oneValueArgs}" "" "${ARGN}")
 
-    foreach(_var IN LISTS _oneValueArgs)
-        _iplug_add_config_variable(CONFIG_APP APP ${_var} "${_arg_${_var}}")
-    endforeach()
+    _iplug_add_config_variable(CONFIG_APP APP API 1)
+    _iplug_add_config_variable(CONFIG_APP APP MULT 1)  # APP_MULT should probably be removed
 
-    cmake_parse_arguments(_override  "" "${_projectConfigArgs_overridable}" "" ${_arg_OVERRIDE})
-    _iplug_warn_unparsed_arguments("[OVERRIDE]" _override_UNPARSED_ARGUMENTS)
-    foreach(_var IN LISTS _projectConfigArgs_overridable)
-        if(DEFINED _override_${_var})
-            _iplug_add_config_variable(CONFIG_OVERRIDE OVERRIDE ${_var} "${_override_${_var}}")
-        endif()
-    endforeach()
-    _iplug_validate_config_variables(CONFIG_OVERRIDE DEFINED)
+    if(PLATFORM_MAC)
+        _iplug_add_config_variable(CONFIG "" __MACOSX_CORE__ 1)
+        _iplug_add_config_variable(CONFIG "" SWELL_COMPILED 1)
+    endif()
 
     string(TOUPPER "${CONFIG_APP_SUBSYSTEM}" CONFIG_APP_SUBSYSTEM)
 
@@ -350,11 +350,8 @@ macro(iplug_add_application _target)
     iplug_validate_string(COPY_AUV3            DEFAULT "0" PREFIX CONFIG_APP NOTEMPTY STREQUAL 0 1)
     iplug_validate_string(SIGNAL_VECTOR_SIZE   DEFAULT "64" PREFIX CONFIG_APP NOTEMPTY NUMERIC MAXLENGTH 6)
 
-    _iplug_add_config_variable(CONFIG_APP APP MULT 1)  # APP_MULT should probably be removed
-
     add_executable(${_target})
     _iplug_add_target_lib(${_target} IPlug_APP)
-    target_compile_definitions(${_target}-static PUBLIC ${APP_CONFIG_DEFINITIONS})
     target_link_libraries(${_target} PRIVATE ${_target}-static)
 
     if(PLATFORM_WINDOWS AND "${CONFIG_APP_SUBSYSTEM}" STREQUAL "GUI")
@@ -384,9 +381,6 @@ macro(iplug_add_vst3 _target)
         "NUM_MIDI_OUT_CHANS"
         "PRESET_LIST"
     )
-    set(_multiValueArgs "OVERRIDE")
-    cmake_parse_arguments(_arg "" "${_oneValueArgs}" "${_multiValueArgs}" ${ARGN})
-    _iplug_warn_unparsed_arguments("" _arg_UNPARSED_ARGUMENTS)
 
     add_library(${_target} MODULE)
 
@@ -396,18 +390,7 @@ macro(iplug_add_vst3 _target)
             EXCLUDE_FROM_ALL TRUE
             VS_CONFIGURATION_TYPE Utility) # does an equivalent option for the other generators exist?
     else()
-        foreach(_var IN LISTS _oneValueArgs)
-            _iplug_add_config_variable(CONFIG_VST3 VST3 ${_var} "${_arg_${_var}}")
-        endforeach()
-
-        cmake_parse_arguments(_override  "" "${_projectConfigArgs_overridable}" "" ${_arg_OVERRIDE})
-        _iplug_warn_unparsed_arguments("[OVERRIDE]" _override_UNPARSED_ARGUMENTS)
-        foreach(_var IN LISTS _projectConfigArgs_overridable)
-            if(DEFINED _override_${_var})
-                _iplug_add_config_variable(CONFIG_OVERRIDE OVERRIDE ${_var} "${_override_${_var}}")
-            endif()
-        endforeach()
-        _iplug_validate_config_variables(CONFIG_OVERRIDE DEFINED)
+        _iplug_parse_target_arguments(CONFIG_VST3 VST3 "" "${_oneValueArgs}" "" "${ARGN}")
 
         set(VST3_ICON "${CONFIG_BUNDLE_ICON}")
         if("${VST3_ICON}" STREQUAL "" AND EXISTS "${VST3_SDK_PATH}/doc/artwork/VST_Logo_Steinberg.ico")
@@ -423,7 +406,6 @@ macro(iplug_add_vst3 _target)
         iplug_validate_string(PRESET_LIST        DEFAULT "0" PREFIX CONFIG_VST3 STREQUAL 0 1)
 
         _iplug_add_target_lib(${_target} IPlug_VST3)
-        target_compile_definitions(${_target}-static PUBLIC ${VST3_CONFIG_DEFINITIONS})
         target_link_libraries(${_target} PRIVATE ${_target}-static)
 
         set(PLUGIN_NAME         "${CONFIG_PLUG_NAME}")

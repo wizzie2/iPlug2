@@ -119,16 +119,16 @@ target_compile_definitions(IPlug_SharedDefinitions
         # ${_NANOVG_DEF}
 
         # TODO: Add support for the other graphics libraries
-        $<$<BOOL:${GFXLIB_NANOVG}>:IGRAPHICS_NANOVG>
+        $<$<BOOL:${GFXLIB_NONE}>:NO_IGRAPHICS=1>
+        $<$<BOOL:${GFXLIB_NANOVG}>:
+            IGRAPHICS_NANOVG=1
+            $<IF:$<BOOL:${PLATFORM_IOS}>,IGRAPHICS_GLES3=1,IGRAPHICS_GL3=1>
+        >
 
         # OpenGL for now, not much choice at the moment
-        $<$<BOOL:${PLATFORM_WINDOWS}>:IGRAPHICS_GL3>
-        $<$<BOOL:${PLATFORM_MAC}>:IGRAPHICS_GL3>
-        $<$<BOOL:${PLATFORM_LINUX}>:IGRAPHICS_GL3>
-        $<$<BOOL:${PLATFORM_IOS}>:IGRAPHICS_GL3>
 
-        $<$<BOOL:${IPLUG2_ENABLE_METAL}>:IGRAPHICS_METAL>
-        $<$<BOOL:${PLATFORM_MAC}>:SWELL_CLEANUP_ON_UNLOAD>
+        $<$<BOOL:${IPLUG2_ENABLE_METAL}>:IGRAPHICS_METAL=1>
+        $<$<BOOL:${PLATFORM_MAC}>:SWELL_CLEANUP_ON_UNLOAD=1>
 
         $<$<BOOL:${PLATFORM_WINDOWS}>:
             WIN32
@@ -138,7 +138,7 @@ target_compile_definitions(IPlug_SharedDefinitions
 )
 
 # Target specific definitions
-target_compile_definitions(IPlug_APP   INTERFACE APP_API=1   IPLUG_EDITOR=1 IPLUG_DSP=1 $<$<BOOL:${PLATFORM_MAC}>:__MACOSX_CORE__ SWELL_COMPILED> )
+# target_compile_definitions(IPlug_APP   INTERFACE APP_API=1   IPLUG_EDITOR=1 IPLUG_DSP=1 $<$<BOOL:${PLATFORM_MAC}>:__MACOSX_CORE__ SWELL_COMPILED> )
 target_compile_definitions(IPlug_VST3  INTERFACE VST3_API=1  IPLUG_EDITOR=1 IPLUG_DSP=1                                                           )
 target_compile_definitions(IPlug_AAX   INTERFACE AAX_API=1   IPLUG_EDITOR=1 IPLUG_DSP=1                                                           )
 target_compile_definitions(IPlug_AU    INTERFACE AU_API=1    IPLUG_EDITOR=1 IPLUG_DSP=1                                                           )

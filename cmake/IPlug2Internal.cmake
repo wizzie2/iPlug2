@@ -1,6 +1,8 @@
 include_guard(GLOBAL)
 
 set(_projectConfigArgs
+    "IPLUG_EDITOR"
+    "IPLUG_DSP"
     "BUNDLE_NAME"
     "BUNDLE_DOMAIN"
     "BUNDLE_ICON"
@@ -284,28 +286,28 @@ macro(_iplug_post_project_setup)
 
     # TODO: Add support for the other graphics libraries
 
-    set(IPLUG2_GFXLIBRARY "GFXLIB_NANOVG" CACHE STRING "Select backend graphics library for rendering")
+    set(IPLUG2_GFXLIBRARY "NanoVG" CACHE STRING "Select backend graphics library for rendering")
     set_property(CACHE IPLUG2_GFXLIBRARY PROPERTY STRINGS
-        # GFXLIB_AGG
-        # GFXLIB_CAIRO
-        # GFXLIB_LICE
-        GFXLIB_NANOVG
-        # GFXLIB_SKIA
-        # GFXLIB_CANVAS
+        None
+        # AGG
+        # Cairo
+        # Lice
+        NanoVG
+        # Skia
+        # Canvas
     )
-
+    string(TOUPPER ${IPLUG2_GFXLIBRARY} IPLUG2_GFXLIBRARY)
+    unset(GFXLIB_NONE)
     unset(GFXLIB_AGG)
     unset(GFXLIB_CAIRO)
     unset(GFXLIB_LICE)
     unset(GFXLIB_NANOVG)
     unset(GFXLIB_SKIA)
     unset(GFXLIB_CANVAS)
-    set(${IPLUG2_GFXLIBRARY} TRUE)
-
+    set(GFXLIB_${IPLUG2_GFXLIBRARY} TRUE)
     if(PLATFORM_APPLE)
         option(IPLUG2_ENABLE_METAL "Use Metal for rendering" ON)
     endif()
-
 endmacro()
 
 #------------------------------------------------------------------------------
@@ -544,6 +546,26 @@ endfunction()
 
 
 #------------------------------------------------------------------------------
+# _iplug_parse_target_arguments
+
+macro(_iplug_parse_target_arguments _config_prefix _definition_prefix _optionsArgs _oneValueArgs _multiValueArgs)
+    set(_multiValue ${_multiValueArgs} "OVERRIDE")
+    cmake_parse_arguments(_arg "${_optionsArgs}" "${_oneValueArgs}" "${_multiValue}" ${ARGN})
+    _iplug_warn_unparsed_arguments("" _arg_UNPARSED_ARGUMENTS)
+    foreach(_var IN LISTS _oneValueArgs)
+        _iplug_add_config_variable(${_config_prefix} ${_definition_prefix} ${_var} "${_arg_${_var}}")
+    endforeach()
+    cmake_parse_arguments(_override  "" "${_projectConfigArgs_overridable}" "" ${_arg_OVERRIDE})
+    _iplug_warn_unparsed_arguments("[OVERRIDE]" _override_UNPARSED_ARGUMENTS)
+    foreach(_var IN LISTS _projectConfigArgs_overridable)
+        if(DEFINED _override_${_var})
+            _iplug_add_config_variable(CONFIG_OVERRIDE "" ${_var} "${_override_${_var}}")
+        endif()
+    endforeach()
+    _iplug_validate_config_variables(CONFIG_OVERRIDE DEFINED)
+endmacro()
+
+#------------------------------------------------------------------------------
 # _iplug_warn_unparsed_arguments
 
 function(_iplug_warn_unparsed_arguments _pre_str _list)
@@ -567,13 +589,12 @@ endfunction()
 #------------------------------------------------------------------------------
 # _iplug_add_config_variable
 
-function(_iplug_add_config_variable _config_prefix _name_prefix _name _value)
+function(_iplug_add_config_variable _config_prefix _definition_prefix _name _value)
     if(NOT _config_prefix STREQUAL "")
         string(APPEND _config_prefix "_")
     endif()
-
-    if(NOT _name_prefix STREQUAL "")
-        string(APPEND _name_prefix "_")
+    if(NOT _definition_prefix STREQUAL "")
+        string(APPEND _definition_prefix "_")
     endif()
 
     string(REPLACE "\n" "\\n" _str "${_value}")
@@ -581,8 +602,8 @@ function(_iplug_add_config_variable _config_prefix _name_prefix _name _value)
     string(REPLACE "\t" "\\t" _str "${_str}")
 
     set(${_config_prefix}${_name} "${_str}" PARENT_SCOPE)
-    if(NOT "${_name_prefix}${_name}" MATCHES "^OVERRIDE_.*")
-        set(CONFIG_VARIABLES ${CONFIG_VARIABLES} "${_name_prefix}${_name}" PARENT_SCOPE)
+    if(NOT "${_name}" MATCHES "^OVERRIDE_.*")
+        set(CONFIG_VARIABLES ${CONFIG_VARIABLES} "${_definition_prefix}${_name}" PARENT_SCOPE)
     endif()
 endfunction()
 
@@ -625,6 +646,8 @@ macro(_iplug_validate_config_variables _prefix)
     set(VALIDATION_BUNDLE_NAME              DEFAULT "${PROJECT_NAME}" NOTEMPTY ALPHAFIRST ALPHA NUMERIC HYPHEN)
     set(VALIDATION_SHARED_RESOURCES_SUBPATH DEFAULT "${PROJECT_NAME}")
     set(VALIDATION_OBJC_PREFIX              ALPHA NUMERIC UNDERSCORE MINLENGTH 3 MAXLENGTH 31)
+    set(VALIDATION_IPLUG_EDITOR             DEFAULT "1"  STREQUAL 0 1)
+    set(VALIDATION_IPLUG_DSP                DEFAULT "1"  STREQUAL 0 1)
 
     foreach(_cfg IN LISTS _projectConfigArgs)
         iplug_validate_string(${_cfg} PREFIX ${_prefix} ${_extraFlags} ${VALIDATION_${_cfg}})
@@ -704,6 +727,10 @@ function(_iplug_generate_source_groups)
     if(NOT PLATFORM_WEB)
         _iplug_disable_source_compile(${_src_list} REGEX "^.*Web.*\\.cpp$")
         _iplug_disable_source_compile(${_src_list} REGEX "^.*WEB.*\\.cpp$")
+    endif()
+
+    if(GFXLIB_NONE)
+        _iplug_disable_source_compile(${_src_list} REGEX "^${IPLUG2_ROOT_PATH}/IGraphics/.*\\.cpp$")
     endif()
 
     # Disable code for unused graphics libraries
@@ -843,26 +870,39 @@ function(_iplug_add_target_lib _target _pluginapi_lib)
     # Add remaining source files
     target_sources(${_libName} PRIVATE ${_src_list})
 
-
     # Build the config definition list
     set(CONFIG_DEFINITIONS "")
-    list(REMOVE_ITEM CONFIG_VARIABLES ${_iplug_config_definition_exclude})
-    foreach(_name IN LISTS CONFIG_VARIABLES)
+    set(_def ${CONFIG_VARIABLES})
+    list(REMOVE_ITEM _def ${_iplug_config_definition_exclude})
+    list(REMOVE_DUPLICATES _def)
+    foreach(_name IN LISTS _def)
         set(_value ${CONFIG_${_name}})
         if(DEFINED CONFIG_OVERRIDE_${_name})
             set(_value ${CONFIG_OVERRIDE_${_name}})
             unset(CONFIG_OVERRIDE_${_name} PARENT_SCOPE)
+        endif()
+        if(_name MATCHES "^RESOURCE_")
+            # cmake_print_variables(_name)
+            string(REPLACE "RESOURCE_" "" _name "${_name}")
+        else()
+            list(FIND _projectConfigArgs "${_name}" _result)
+            if(_result EQUAL -1)
+                unset(CONFIG_${_name} PARENT_SCOPE)
+            endif()
         endif()
         if(NOT DEFINED _value OR _value STREQUAL "")
             continue()
         endif()
         list(FIND _iplug_config_string_variables "${_name}" _result)
         if(_result EQUAL -1)
-            list(APPEND CONFIG_DEFINITIONS "${_name}=${_value}")
+            set(_result "${_name}=${_value}")
         else()
-            list(APPEND CONFIG_DEFINITIONS "${_name}=\"${_value}\"")
+            set(_result "${_name}=\"${_value}\"")
         endif()
+        list(APPEND CONFIG_DEFINITIONS "${_result}")
     endforeach()
+
+    # iplug_print_lists(CONFIG_DEFINITIONS)
 
 	# Add IPLUG2_STATIC definition when we're compiling the library
     target_compile_definitions(${_libName}
