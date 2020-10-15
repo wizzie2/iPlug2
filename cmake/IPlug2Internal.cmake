@@ -130,12 +130,12 @@ macro(_iplug_post_project_setup)
     set(PLATFORM_APPLE ${APPLE})  # set if target is macOS, iOS, tvOS or watchOS
 
     # Set build types
-    set(CONFIGURATION_TYPES "Debug" "Release" "Distributed")
+    set(CONFIGURATION_TYPES "Debug" "Release" "RelWithDebInfo" "Distributed")
     set(DEFAULT_BUILD_TYPE "Debug")
 
     get_property(bIsMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
     if(bIsMultiConfig)
-        set(CMAKE_CONFIGURATION_TYPES ${CONFIGURATION_TYPES} CACHE STRING "" FORCE)
+        set(CMAKE_CONFIGURATION_TYPES "${CONFIGURATION_TYPES}" CACHE STRING "" FORCE)
         mark_as_advanced(CMAKE_CONFIGURATION_TYPES)
     else()
         if(NOT CMAKE_BUILD_TYPE)
@@ -392,7 +392,6 @@ macro(_iplug_set_default_compiler_options)
                 /TP               # Treat all as C++ source files
                 /permissive-      # Set standard-conformance mode. "Should" be default since VC++ 2017 v15.5
                 /GF               # Eliminate Duplicate Strings (string pooling) (Enabled in debug as well to avoid behaviour differences)
-                /JMC              # Just My Code debugging
                 /wd5045           # Disable Spectre mitigation warnings
                 /wd4652           # Compiler option 'option' inconsistent with precompiled header; current command-line option will override that defined in the precompiled header
             )
@@ -400,6 +399,7 @@ macro(_iplug_set_default_compiler_options)
             # Debug
             set(CL_FLAGS_DEBUG
                 /D_DEBUG          # Specify debug versions of the C run-time library
+                /JMC              # Just My Code debugging
                 /GS               # Buffer Security Checks. Detects some buffer overruns that overwrite a function's return address, exception handler address, or certain types of parameters
                 /Zi               # Generates complete debugging information. /ZI (edit and continue) can cause issues in code size, performance, and compiler conformance
                 /Ob0              # Disables inline expansions
@@ -421,6 +421,12 @@ macro(_iplug_set_default_compiler_options)
                 /Ot               # Favor Fast Code (implied by the /O2, but just to be sure)
             )
 
+            # Release with debug information
+            set(CL_FLAGS_RELWITHDEBINFO
+                ${CL_FLAGS_RELEASE}
+                /Zi               # Generates complete debugging information. /ZI (edit and continue) can cause issues in code size, performance, and compiler conformance
+            )
+
             # Distributed (lean and mean version, ready for worldwide distribution)
             set(CL_FLAGS_DISTRIBUTED
                 /DNDEBUG          # Turn off assertion checks
@@ -435,26 +441,39 @@ macro(_iplug_set_default_compiler_options)
                 /Ot               # Favor Fast Code (implied by the /O2, but just to be sure)
             )
 
-            list(JOIN CL_FLAGS             " " CL_FLAGS            )
-            list(JOIN CL_FLAGS_DEBUG       " " CL_FLAGS_DEBUG      )
-            list(JOIN CL_FLAGS_RELEASE     " " CL_FLAGS_RELEASE    )
-            list(JOIN CL_FLAGS_DISTRIBUTED " " CL_FLAGS_DISTRIBUTED)
+            foreach(_type IN ITEMS "" _DEBUG _RELEASE _RELWITHDEBINFO _DISTRIBUTED)
+                list(JOIN CL_FLAGS${_type} " " CL_FLAGS${_type})
+                get_property(_helpString CACHE CMAKE_CXX_FLAGS${_type} PROPERTY HELPSTRING)
+                if(NOT _type STREQUAL "")
+                    get_property(_helpString CACHE CMAKE_CXX_FLAGS_DEBUG PROPERTY HELPSTRING)
+                    string(REPLACE "DEBUG" "${_type}" _helpString "${_helpString}")
+                    string(REPLACE "_" "" _helpString "${_helpString}")
+                endif()
+                set(CMAKE_CXX_FLAGS${_type} "${CL_FLAGS${_type}}" CACHE STRING "${_helpString}" FORCE)
+                mark_as_advanced(CMAKE_CXX_FLAGS${_type})
+            endforeach()
 
-            foreach(_lang IN ITEMS C CXX)
-                set(CMAKE_${_lang}_FLAGS             ${CL_FLAGS}            )
-                set(CMAKE_${_lang}_FLAGS_DEBUG       ${CL_FLAGS_DEBUG}      )
-                set(CMAKE_${_lang}_FLAGS_RELEASE     ${CL_FLAGS_RELEASE}    )
-                set(CMAKE_${_lang}_FLAGS_DISTRIBUTED ${CL_FLAGS_DISTRIBUTED})
+            set(DEFAULT_CMAKE_LINKER_FLAGS_RELEASE        "/INCREMENTAL:NO"     )
+            set(DEFAULT_CMAKE_LINKER_FLAGS_RELWITHDEBINFO "/debug /INCREMENTAL" )
+            set(DEFAULT_CMAKE_LINKER_FLAGS_DISTRIBUTED    ""                    )
+
+            set(LINKER_FLAGS_RELEASE        "/LTCG /INCREMENTAL:NO"                   )
+            set(LINKER_FLAGS_RELWITHDEBINFO "/debug /LTCG /INCREMENTAL:NO /OPT:REF /OPT:ICF" )
+            set(LINKER_FLAGS_DISTRIBUTED    "/LTCG /INCREMENTAL:NO"                   )
+
+            foreach(_type IN ITEMS EXE SHARED MODULE)
+                foreach(_cfg IN ITEMS RELEASE RELWITHDEBINFO DISTRIBUTED)
+                    if(CMAKE_${_type}_LINKER_FLAGS_${_cfg} STREQUAL DEFAULT_CMAKE_LINKER_FLAGS_${_cfg} OR NOT DEFINED CMAKE_${_type}_LINKER_FLAGS_${_cfg})
+                        get_property(_helpString CACHE CMAKE_${_type}_LINKER_FLAGS_DEBUG PROPERTY HELPSTRING)
+                        string(REPLACE "DEBUG" "${_cfg}" _helpString "${_helpString}")
+                        set(CMAKE_${_type}_LINKER_FLAGS_${_cfg} "${LINKER_FLAGS_${_cfg}}" CACHE STRING "${_helpString}" FORCE)
+                        mark_as_advanced(CMAKE_${_type}_LINKER_FLAGS_${_cfg})
+                    endif()
+                endforeach()
             endforeach()
 
             # Use multithreaded, static versions of the MSVC run-time library (LIBCMT.lib/LIBCMTD.lib)
             _iplug_set_ifndef(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-
-            foreach(_type IN ITEMS EXE SHARED MODULE)
-                foreach(_cfg RELEASE DISTRIBUTED)
-                    set(CMAKE_${_type}_LINKER_FLAGS_${_cfg} "/LTCG /INCREMENTAL:NO")
-                endforeach()
-            endforeach()
 
         elseif(GNU OR Clang OR AppleClang)
 
@@ -487,27 +506,18 @@ macro(_iplug_set_default_compiler_options)
                 -O3
             )
 
-            list(JOIN CL_FLAGS             " " CL_FLAGS            )
-            list(JOIN CL_FLAGS_DEBUG       " " CL_FLAGS_DEBUG      )
-            list(JOIN CL_FLAGS_RELEASE     " " CL_FLAGS_RELEASE    )
-            list(JOIN CL_FLAGS_DISTRIBUTED " " CL_FLAGS_DISTRIBUTED)
-
             # Appending settings since I don't know what cmake defaults are for these compilers.
-            foreach(_lang IN ITEMS C CXX)
-                string(APPEND CMAKE_${_lang}_FLAGS             " ${CL_FLAGS}"            )
-                string(APPEND CMAKE_${_lang}_FLAGS_DEBUG       " ${CL_FLAGS_DEBUG}"      )
-                string(APPEND CMAKE_${_lang}_FLAGS_RELEASE     " ${CL_FLAGS_RELEASE}"    )
-                string(APPEND CMAKE_${_lang}_FLAGS_DISTRIBUTED " ${CL_FLAGS_DISTRIBUTED}")
-                # set(CMAKE_${_lang}_FLAGS             ${CL_FLAGS}            )
-                # set(CMAKE_${_lang}_FLAGS_DEBUG       ${CL_FLAGS_DEBUG}      )
-                # set(CMAKE_${_lang}_FLAGS_RELEASE     ${CL_FLAGS_RELEASE}    )
-                # set(CMAKE_${_lang}_FLAGS_DISTRIBUTED ${CL_FLAGS_DISTRIBUTED})
+            set(CMAKE_CXX_FLAGS_DISTRIBUTED "${CMAKE_CXX_FLAGS_RELEASE}")
+            foreach(_type IN ITEMS "" _DEBUG _RELEASE _DISTRIBUTED)
+                list(JOIN CL_FLAGS${_type} " " CL_FLAGS${_type})
+                set(CMAKE_CXX_FLAGS${_type} "${CMAKE_CXX_FLAGS${_type}} ${CL_FLAGS${_type}}")
             endforeach()
 
             foreach(_type IN ITEMS EXE SHARED MODULE)
                 foreach(_cfg RELEASE DISTRIBUTED)
-                    string(APPEND CMAKE_${_type}_LINKER_FLAGS_${_cfg} " $<$<CXX_COMPILER_ID:AppleClang>:-dead_strip>")
-                    # set(CMAKE_${_type}_LINKER_FLAGS_${_cfg} "$<$<CXX_COMPILER_ID:AppleClang>:-dead_strip>")
+                    if(PLATFORM_APPLE)
+                        set(CMAKE_${_type}_LINKER_FLAGS_${_cfg} "${CMAKE_${_type}_LINKER_FLAGS_${_cfg}} -dead_strip")
+                    endif()
                 endforeach()
             endforeach()
         endif()
@@ -638,7 +648,7 @@ macro(_iplug_validate_config_variables _prefix)
     set(VALIDATION_PLUG_MIN_WIDTH           DEFAULT "256" MINVALUE 100)
     set(VALIDATION_PLUG_MIN_HEIGHT          DEFAULT "256" MINVALUE 100)
     set(VALIDATION_PLUG_HOST_RESIZE         DEFAULT "0" NOTEMPTY STREQUAL 0 1)
-    set(VALIDATION_PLUG_FPS                 DEFAULT "60" MINVALUE 10 MAXVALUE 1000)
+    set(VALIDATION_PLUG_FPS                 DEFAULT "0" MINVALUE 0 MAXVALUE 1000)  # 0 = auto to monitor hz
     set(VALIDATION_PLUG_SHARED_RESOURCES    DEFAULT "0" STREQUAL 0 1)
     set(VALIDATION_PLUG_TYPE                DEFAULT "Effect" NOTEMPTY STREQUAL Effect Instrument MIDIEffect)
     set(VALIDATION_BUNDLE_ICON              DEFAULT "${DEFAULT_ICON}" FILE_EXISTS ABSOLUTE)
