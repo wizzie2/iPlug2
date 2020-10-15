@@ -30,7 +30,6 @@ iplug_configure_project(
     PLUG_DOES_MPE               1
     PLUG_WIDTH                  1024
     PLUG_HEIGHT                 669
-    PLUG_FPS                    60
     PLUG_HOST_RESIZE            0
 
     RESOURCE_DEFINITIONS
