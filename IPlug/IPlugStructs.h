@@ -30,6 +30,7 @@ namespace iplug
 		static constexpr EPluginType plugType               = EPluginType::PLUG_TYPE;
 		static constexpr const char* channelIOStr           = PLUG_CHANNEL_IO;
 		static constexpr const char* pluginName             = PLUG_NAME;
+		static constexpr const char* pluginCopyrightString  = PLUG_COPYRIGHT_STR;
 		static constexpr const char* productName            = "";
 		static constexpr const char* mfrName                = PLUG_MFR;
 		static constexpr         int vendorVersion          = PLUG_VERSION_HEX;
@@ -53,12 +54,14 @@ namespace iplug
 		static constexpr const char* sharedResourcesSubpath = SHARED_RESOURCES_SUBPATH;
 
 		// TODO: add option to set values from cmake configuration
-		static constexpr bool   sortIMidiQueue          = true;   // SORT_IMIDIQUEUE (was DONT_SORT_IMIDIQUEUE)
-		static constexpr int    defaultBlockSize        = 1024;   // DEFAULT_BLOCK_SIZE
+		static constexpr   bool sortIMidiQueue          = true;   // SORT_IMIDIQUEUE (was DONT_SORT_IMIDIQUEUE)
+		static constexpr    int defaultBlockSize        = 1024;   // DEFAULT_BLOCK_SIZE
 		static constexpr double defaultTempo            = 120;    // DEFAULT_TEMPO
 		static constexpr double defaultSampleRate       = 44100;  // DEFAULT_SAMPLE_RATE
 		static constexpr size_t maxDumpPresetBlobLength = 2048;   // MAX_BLOB_LENGTH
-		static constexpr bool   debugShowVBlankMessages = (EBuildType::Native == EBuildType::Debug);
+		static constexpr   bool debugShowVBlankMessages = (EBuildType::Native == EBuildType::Debug);
+		static constexpr    int defaultFPS              = plugFPS > 0 ? math::Clamp(plugFPS, 1, 1000) : 60;
+		static constexpr double defaultFrameTimeMs      = 1000.0 / defaultFPS;
 
 		explicit Config(int nParams, int nPresets) : nParams(nParams), nPresets(nPresets) {};
 	};  // clang-format on

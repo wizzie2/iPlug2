@@ -280,31 +280,40 @@ void IGraphicsWin::OnDisplayTimer(uint32 vBlankCount)
 // static
 LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+	// IGraphicsWin* pGraphics = reinterpret_cast<IGraphicsWin*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+	IGraphicsWin* pGraphics = type::bit_cast<IGraphicsWin*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+
+	// TODO: Make custom event system. Using windows event queue to tell when VBlank occurs is a really really bad idea.
+	// Trying to handle WM_VBLANK as fast as possible here
+	// Also, there is something wrong with message handling. if this miss, it never shows less than 15ms atm...
+	if (msg == WM_VBLANK)
+	{
+		DEBUG_ASSERT(pGraphics);
+		auto c = ::GetTickCount64() - lParam;
+		if (c > 7)
+			// Being delayed by more than 7ms only because of slow message queue
+			DBGMSG("PostMessage delay > %i ms.", c);
+
+
+		pGraphics->OnDisplayTimer(wParam);
+		return 0;
+	}
+
 	if (msg == WM_CREATE)
 	{
 		LPCREATESTRUCT lpcs = (LPCREATESTRUCT) lParam;
 		SetWindowLongPtr(hWnd, GWLP_USERDATA, (LPARAM)(lpcs->lpCreateParams));
-		IGraphicsWin* pGraphics = (IGraphicsWin*) GetWindowLongPtr(hWnd, GWLP_USERDATA);
+		pGraphics = (IGraphicsWin*) GetWindowLongPtr(hWnd, GWLP_USERDATA);
 
 		if (pGraphics->mVSYNCEnabled)  // use VBLANK thread
-		{
-			assert((pGraphics->GetFPS() == 60) && "If you want to run at frame rates other than 60FPS");
 			pGraphics->StartVBlankThread(hWnd);
-		}
 		else  // use WM_TIMER -- its best to get below 16ms because the windows time quanta is slightly above 15ms.
-		{
-			int mSec = static_cast<int>(std::floorf(1000.0f / (pGraphics->GetFPS())));
-			if (mSec < 20)
-				mSec = 15;
-			SetTimer(hWnd, IPLUG_TIMER_ID, mSec, NULL);
-		}
+			SetTimer(hWnd, IPLUG_TIMER_ID, Config::defaultFrameTimeMs, NULL);
 
 		SetFocus(hWnd);  // gets scroll wheel working straight away
 		DragAcceptFiles(hWnd, true);
 		return 0;
 	}
-
-	IGraphicsWin* pGraphics = (IGraphicsWin*) GetWindowLongPtr(hWnd, GWLP_USERDATA);
 
 	if (!pGraphics || hWnd != pGraphics->mPlugWnd)
 	{
@@ -332,14 +341,9 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 
 	switch (msg)
 	{
-		case WM_VBLANK:
-			pGraphics->OnDisplayTimer(wParam);
-			return 0;
-
 		case WM_TIMER:
 			if (wParam == IPLUG_TIMER_ID)
 				pGraphics->OnDisplayTimer(0);
-
 			return 0;
 
 		case WM_ERASEBKGND:
@@ -820,11 +824,6 @@ IGraphicsWin::IGraphicsWin(IGEditorDelegate& dlg, int w, int h, int fps, float s
 	StaticStorage<HFontHolder>::Accessor hfontStorage(sHFontCache);
 	fontStorage.Retain();
 	hfontStorage.Retain();
-
-	// TODO: IGRAPHICS_DISABLE_VSYNC should not be a compile-time option
-#ifndef IGRAPHICS_DISABLE_VSYNC
-	mVSYNCEnabled = IsWindows8OrGreater();
-#endif
 }
 
 IGraphicsWin::~IGraphicsWin()
@@ -2161,9 +2160,12 @@ DWORD IGraphicsWin::OnVBlankRun()
 
 	// ::SetThreadPriority(::GetCurrentThread(), THREAD_PRIORITY_ABOVE_NORMAL);
 
-	static constexpr auto RetryTime      = 1000;       // milliseconds to sleep between retries
-	static constexpr auto RetryTimeOut   = 1000 * 10;  // milliseconds until timeout
-	static constexpr auto fallbackRateMS = Config::plugFPS <= 1000 ? 1000 / Config::plugFPS : 1;
+	static constexpr auto RetryTime    = 1000;       // milliseconds to sleep between retries
+	static constexpr auto RetryTimeOut = 1000 * 10;  // milliseconds until timeout
+
+	// const auto monitorFallbackRateMS = getMonitorHz();  // TODO: getMonitorHz
+	const auto fallbackRateMS =
+		math::FloorToInt(/* monitorFallbackRateMS > 0 ? monitorFallbackRateMS : */ Config::defaultFrameTimeMs);
 
 	auto adapterIsOpen         = false;
 	auto adapterRetryCounter   = 0;
@@ -2179,9 +2181,12 @@ DWORD IGraphicsWin::OnVBlankRun()
 	D3DKMT_CLOSEADAPTER ca                    = {};
 
 	auto SetState = [&currentState, &previousState](
-						EState newState, bool condition = true, EState newFalseState = EState::Retry) {
-		previousState = currentState;
-		currentState  = condition ? newState : newFalseState;
+						EState state, bool condition = true, EState falseState = EState::Retry) {
+		if (auto newState = condition ? state : falseState; newState != currentState)
+		{
+			previousState = currentState;
+			currentState  = newState;
+		}
 	};
 
 	auto EnterStateMsg = [&currentState, &msgState]() {
@@ -2216,7 +2221,6 @@ DWORD IGraphicsWin::OnVBlankRun()
 				VBlankNotify();
 				break;
 			case EState::FallbackTimer:
-				previousState = currentState;
 				::Sleep(fallbackRateMS);
 				VBlankNotify();
 				break;
@@ -2292,7 +2296,7 @@ DWORD IGraphicsWin::OnVBlankRun()
 void IGraphicsWin::VBlankNotify()
 {
 	mVBlankCount++;
-	::PostMessage(mVBlankWindow, WM_VBLANK, mVBlankCount, 0);
+	::PostMessage(mVBlankWindow, WM_VBLANK, mVBlankCount, ::GetTickCount64());
 }
 
 //#ifndef NO_IGRAPHICS
