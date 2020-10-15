@@ -141,6 +141,7 @@ using PNTSTATUS = NTSTATUS*;
 #include <time.h>
 #include <sys/stat.h>
 
+#include <wingdi.h>
 #include <WindowsX.h>
 #include <shellapi.h>
 #include <shlobj.h>

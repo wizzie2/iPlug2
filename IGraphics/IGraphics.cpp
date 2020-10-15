@@ -36,7 +36,8 @@ IGraphics::IGraphics(IGEditorDelegate& dlg, int w, int h, int fps, float scale)
 	, mMinScale(scale / 2)
 	, mMaxScale(scale * 2)
 {
-	mFPS = (fps > 0 ? fps : DEFAULT_FPS);
+	// TODO: fps 0 should be same as the currently active monitor hz
+	mFPS = (fps > 0 ? fps : Config::defaultFPS);
 
 	StaticStorage<APIBitmap>::Accessor bitmapStorage(sBitmapCache);
 	bitmapStorage.Retain();

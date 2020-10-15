@@ -61,8 +61,6 @@ END_INCLUDE_DEPENDENCIES
   #include "lice.h"
   #define BITMAP_DATA_TYPE LICE_IBitmap*
 #elif defined IGRAPHICS_CANVAS
-  #include <emscripten.h>
-  #include <emscripten/val.h>
   #define BITMAP_DATA_TYPE emscripten::val*
 #else // NO_IGRAPHICS
   #define BITMAP_DATA_TYPE void*;
@@ -72,7 +70,6 @@ END_INCLUDE_DEPENDENCIES
   #include <CoreText/CoreText.h>
   #define FONT_DESCRIPTOR_TYPE CTFontDescriptorRef
 #elif PLATFORM_WINDOWS
-  #include "wingdi.h"
   #define FONT_DESCRIPTOR_TYPE HFONT
 #elif PLATFORM_WEB
   #define FONT_DESCRIPTOR_TYPE std::pair<WDL_String, WDL_String>*

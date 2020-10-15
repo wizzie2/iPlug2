@@ -18,7 +18,6 @@
 #ifndef NDEBUG
 
 #include "IControl.h"
-#include <fstream>
 
 BEGIN_IPLUG_NAMESPACE
 BEGIN_IGRAPHICS_NAMESPACE
