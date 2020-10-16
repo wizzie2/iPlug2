@@ -214,13 +214,15 @@ macro(iplug_add_aax _target)
     )
     _iplug_parse_target_arguments(CONFIG_AAX AAX "" "${_oneValueArgs}" "" "${ARGN}")
 
-    iplug_validate_string(TYPE_IDS             PREFIX CONFIG_AAX NOTEMPTY ALPHA NUMERIC SPACE APOSTROPHE COMMA)
-    iplug_validate_string(TYPE_IDS_AUDIOSUITE  PREFIX CONFIG_AAX NOTEMPTY ALPHA NUMERIC SPACE APOSTROPHE COMMA)
+    _iplug_add_config_variable(CONFIG_AAX TARGET_AAX API 1)
+
+    iplug_validate_string(TYPE_IDS             NOTEMPTY PREFIX CONFIG_AAX ALPHA NUMERIC SPACE APOSTROPHE COMMA)
+    iplug_validate_string(TYPE_IDS_AUDIOSUITE  NOTEMPTY PREFIX CONFIG_AAX ALPHA NUMERIC SPACE APOSTROPHE COMMA)
     iplug_validate_string(DOES_AUDIOSUITE      DEFAULT "0" PREFIX CONFIG_AAX NOTEMPTY STREQUAL 0 1)
     iplug_validate_string(PLUG_CATEGORY_STR    DEFAULT "None" PREFIX CONFIG_AAX NOTEMPTY STREQUAL None EQ Dynamics PitchShift Reverb Delay Modulation Harmonic NoiseReduction Dither SoundField Effect)
 
-    _iplug_add_config_variable(CONFIG_AAX AAX PLUG_MFR_STR  "${CONFIG_PLUG_MFR}")
-    _iplug_add_config_variable(CONFIG_AAX AAX PLUG_NAME_STR "${CONFIG_PLUG_CLASS_NAME}\\n${CONFIG_PLUG_NAME_SHORT}")
+    _iplug_add_config_variable(CONFIG_AAX TARGET_AAX PLUG_MFR_STR  "${CONFIG_PLUG_MFR}")
+    _iplug_add_config_variable(CONFIG_AAX TARGET_AAX PLUG_NAME_STR "${CONFIG_PLUG_CLASS_NAME}\\n${CONFIG_PLUG_NAME_SHORT}")
 endmacro()
 
 
@@ -234,11 +236,12 @@ macro(iplug_add_auv2 _target)
     )
     _iplug_parse_target_arguments(CONFIG_AUV2 AUV2 "" "${_oneValueArgs}" "" "${ARGN}")
 
-    _iplug_add_config_variable(CONFIG AUV2 ENTRY           "${CONFIG_PLUG_CLASS_NAME}_Entry")
-    _iplug_add_config_variable(CONFIG AUV2 ENTRY_STR       "${CONFIG_AUV2_ENTRY}")
-    _iplug_add_config_variable(CONFIG AUV2 VIEW_CLASS      "${CONFIG_PLUG_CLASS_NAME}_View")
-    _iplug_add_config_variable(CONFIG AUV2 VIEW_CLASS_STR  "${CONFIG_AUV2_VIEW_CLASS}")
-    _iplug_add_config_variable(CONFIG AUV2 FACTORY         "${CONFIG_PLUG_CLASS_NAME}_Factory")
+    _iplug_add_config_variable(CONFIG_AUV2 TARGET_AUV2 API 1)
+    _iplug_add_config_variable(CONFIG_AUV2 TARGET_AUV2 ENTRY           "${CONFIG_PLUG_CLASS_NAME}_Entry")
+    _iplug_add_config_variable(CONFIG_AUV2 TARGET_AUV2 ENTRY_STR       "${CONFIG_AUV2_ENTRY}")
+    _iplug_add_config_variable(CONFIG_AUV2 TARGET_AUV2 VIEW_CLASS      "${CONFIG_PLUG_CLASS_NAME}_View")
+    _iplug_add_config_variable(CONFIG_AUV2 TARGET_AUV2 VIEW_CLASS_STR  "${CONFIG_AUV2_VIEW_CLASS}")
+    _iplug_add_config_variable(CONFIG_AUV2 TARGET_AUV2 FACTORY         "${CONFIG_PLUG_CLASS_NAME}_Factory")
 
     iplug_validate_string(ENTRY      PREFIX CONFIG_AUV2 ALPHAFIRST ALPHA NUMERIC UNDERSCORE)
     iplug_validate_string(VIEW_CLASS PREFIX CONFIG_AUV2 ALPHAFIRST ALPHA NUMERIC UNDERSCORE)
@@ -254,6 +257,7 @@ macro(iplug_add_auv3 _target)
     set(_oneValueArgs
     )
     _iplug_parse_target_arguments(CONFIG_AUV3 AUV3 "" "${_oneValueArgs}" "" "${ARGN}")
+    _iplug_add_config_variable(CONFIG_AUV3 TARGET_AUV3 API 1)
 endmacro()
 
 #------------------------------------------------------------------------------
@@ -265,10 +269,11 @@ macro(iplug_add_web _target)
     )
     _iplug_parse_target_arguments(CONFIG_WEB WEB "" "${_oneValueArgs}" "" "${ARGN}")
 
-    _iplug_add_config_variable(CONFIG "" USE_WEBGL2 0)
-    _iplug_add_config_variable(CONFIG "" FULL_ES3   1)
-    _iplug_add_config_variable(CONFIG_OVERRIDE "" IPLUG_EDITOR 1)
-    _iplug_add_config_variable(CONFIG_OVERRIDE "" IPLUG_DSP    0)
+    _iplug_add_config_variable(CONFIG_WEB TARGET_WEB API 1)
+    _iplug_add_config_variable(CONFIG TARGET USE_WEBGL2 0)
+    _iplug_add_config_variable(CONFIG TARGET FULL_ES3 1)
+    _iplug_add_config_variable(CONFIG_OVERRIDE OVERRIDE IPLUG_EDITOR 1)
+    _iplug_add_config_variable(CONFIG_OVERRIDE OVERRIDE IPLUG_DSP    0)
 endmacro()
 
 #------------------------------------------------------------------------------
@@ -280,8 +285,9 @@ macro(iplug_add_wam _target)
     )
     _iplug_parse_target_arguments(CONFIG_WAM WAM "" "${_oneValueArgs}" "" "${ARGN}")
 
-    _iplug_add_config_variable(CONFIG_OVERRIDE "" IPLUG_EDITOR 0)
-    _iplug_add_config_variable(CONFIG_OVERRIDE "" IPLUG_DSP    1)
+    _iplug_add_config_variable(CONFIG_WAM TARGET_WAM API 1)
+    _iplug_add_config_variable(CONFIG_OVERRIDE OVERRIDE IPLUG_EDITOR 0)
+    _iplug_add_config_variable(CONFIG_OVERRIDE OVERRIDE IPLUG_DSP    1)
 endmacro()
 
 #------------------------------------------------------------------------------
@@ -293,8 +299,9 @@ macro(iplug_add_vst3c _target)
     )
     _iplug_parse_target_arguments(CONFIG_VST3C VST3 "" "${_oneValueArgs}" "" "${ARGN}")
 
-    _iplug_add_config_variable(CONFIG_OVERRIDE "" IPLUG_EDITOR 1)
-    _iplug_add_config_variable(CONFIG_OVERRIDE "" IPLUG_DSP    0)
+    _iplug_add_config_variable(CONFIG_VST3C TARGET_VST3C API 1)
+    _iplug_add_config_variable(CONFIG_OVERRIDE OVERRIDE IPLUG_EDITOR 1)
+    _iplug_add_config_variable(CONFIG_OVERRIDE OVERRIDE IPLUG_DSP    0)
 endmacro()
 
 #------------------------------------------------------------------------------
@@ -306,8 +313,9 @@ macro(iplug_add_vst3p _target)
     )
     _iplug_parse_target_arguments(CONFIG_VST3P VST3 "" "${_oneValueArgs}" "" "${ARGN}")
 
-    _iplug_add_config_variable(CONFIG_OVERRIDE "" IPLUG_EDITOR 0)
-    _iplug_add_config_variable(CONFIG_OVERRIDE "" IPLUG_DSP    1)
+    _iplug_add_config_variable(CONFIG_VST3P TARGET_VST3P API 1)
+    _iplug_add_config_variable(CONFIG_OVERRIDE OVERRIDE IPLUG_EDITOR 0)
+    _iplug_add_config_variable(CONFIG_OVERRIDE OVERRIDE IPLUG_DSP    1)
 endmacro()
 
 #------------------------------------------------------------------------------
@@ -318,6 +326,7 @@ macro(iplug_add_vst2 _target)
     set(_oneValueArgs
     )
     _iplug_parse_target_arguments(CONFIG_VST2 VST2 "" "${_oneValueArgs}" "" "${ARGN}")
+    _iplug_add_config_variable(CONFIG_VST2 TARGET_VST2 API 1)
 endmacro()
 
 
@@ -332,14 +341,14 @@ macro(iplug_add_application _target)
         "COPY_AUV3"
         "SIGNAL_VECTOR_SIZE"
     )
-    _iplug_parse_target_arguments(CONFIG_APP APP "" "${_oneValueArgs}" "" "${ARGN}")
+    _iplug_parse_target_arguments(CONFIG_APP TARGET_APP "" "${_oneValueArgs}" "" "${ARGN}")
 
-    _iplug_add_config_variable(CONFIG_APP APP API 1)
-    _iplug_add_config_variable(CONFIG_APP APP MULT 1)  # APP_MULT should probably be removed
+    _iplug_add_config_variable(CONFIG_APP TARGET_APP API 1)
+    _iplug_add_config_variable(CONFIG_APP TARGET_APP MULT 1)  # APP_MULT should probably be removed
 
     if(PLATFORM_MAC)
-        _iplug_add_config_variable(CONFIG "" __MACOSX_CORE__ 1)
-        _iplug_add_config_variable(CONFIG "" SWELL_COMPILED 1)
+        _iplug_add_config_variable(CONFIG TARGET __MACOSX_CORE__ 1)
+        _iplug_add_config_variable(CONFIG TARGET SWELL_COMPILED 1)
     endif()
 
     string(TOUPPER "${CONFIG_APP_SUBSYSTEM}" CONFIG_APP_SUBSYSTEM)
@@ -351,15 +360,15 @@ macro(iplug_add_application _target)
     iplug_validate_string(SIGNAL_VECTOR_SIZE   DEFAULT "64" PREFIX CONFIG_APP NOTEMPTY NUMERIC MAXLENGTH 6)
 
     add_executable(${_target})
-    _iplug_add_target_lib(${_target} IPlug_APP)
-    target_link_libraries(${_target} PRIVATE ${_target}-static)
-
     if(PLATFORM_WINDOWS AND "${CONFIG_APP_SUBSYSTEM}" STREQUAL "GUI")
         set_target_properties(${_target} PROPERTIES WIN32_EXECUTABLE TRUE)
     endif()
 
     set_target_properties(${_target}
         PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin/$<$<CONFIG:$<CONFIG>>:APP-$<CONFIG>>")
+
+    _iplug_add_target_lib(${_target} IPlug_APP)                  # Add last since it clears the CONFIG_<target>_* variables
+    target_link_libraries(${_target} PRIVATE ${_target}-static)  #
 
     if(NOT IPLUG2_EXTERNAL_PROJECT)
         set_target_properties(${_target} PROPERTIES FOLDER "Examples/${PROJECT_NAME}")
@@ -390,13 +399,14 @@ macro(iplug_add_vst3 _target)
             EXCLUDE_FROM_ALL TRUE
             VS_CONFIGURATION_TYPE Utility) # does an equivalent option for the other generators exist?
     else()
-        _iplug_parse_target_arguments(CONFIG_VST3 VST3 "" "${_oneValueArgs}" "" "${ARGN}")
+        _iplug_parse_target_arguments(CONFIG_VST3 TARGET_VST3 "" "${_oneValueArgs}" "" "${ARGN}")
+
+        _iplug_add_config_variable(CONFIG_VST3 TARGET_VST3 API 1)
 
         set(VST3_ICON "${CONFIG_BUNDLE_ICON}")
         if("${VST3_ICON}" STREQUAL "" AND EXISTS "${VST3_SDK_PATH}/doc/artwork/VST_Logo_Steinberg.ico")
             set(VST3_ICON "${VST3_SDK_PATH}/doc/artwork/VST_Logo_Steinberg.ico")
         endif()
-
         iplug_validate_string(EXTENSION          DEFAULT "vst3" PREFIX CONFIG_VST3 ALPHA NUMERIC HYPHEN UNDERSCORE)
         iplug_validate_string(SUBCATEGORY        DEFAULT "Other" PREFIX CONFIG_VST3 ALPHA DELIMITER MAXLENGTH 127)
         iplug_validate_string(CC_UNITNAME        DEFAULT "MIDI CCs" PREFIX CONFIG_VST3 MAXLENGTH 127)
@@ -404,9 +414,6 @@ macro(iplug_add_vst3 _target)
         iplug_validate_string(NUM_MIDI_OUT_CHANS DEFAULT "1" PREFIX CONFIG_VST3 MINVALUE 1 MAXVALUE 16)
         iplug_validate_string(NUM_CC_CHANS       DEFAULT "1" PREFIX CONFIG_VST3 MINVALUE 0 MAXVALUE ${CONFIG_VST3_NUM_MIDI_IN_CHANS})
         iplug_validate_string(PRESET_LIST        DEFAULT "0" PREFIX CONFIG_VST3 STREQUAL 0 1)
-
-        _iplug_add_target_lib(${_target} IPlug_VST3)
-        target_link_libraries(${_target} PRIVATE ${_target}-static)
 
         set(PLUGIN_NAME         "${CONFIG_PLUG_NAME}")
         set(PLUGIN_EXT          "${CONFIG_VST3_EXTENSION}")
@@ -514,6 +521,8 @@ macro(iplug_add_vst3 _target)
             endif()
         endif()
 
+        _iplug_add_target_lib(${_target} IPlug_VST3)                # Add last since it clears the CONFIG_<target>_* variables
+        target_link_libraries(${_target} PRIVATE ${_target}-static) #
     endif()
 
     if(NOT IPLUG2_EXTERNAL_PROJECT)

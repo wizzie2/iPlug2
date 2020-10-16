@@ -137,18 +137,6 @@ target_compile_definitions(IPlug_SharedDefinitions
         >
 )
 
-# Target specific definitions
-# target_compile_definitions(IPlug_APP   INTERFACE APP_API=1   IPLUG_EDITOR=1 IPLUG_DSP=1 $<$<BOOL:${PLATFORM_MAC}>:__MACOSX_CORE__ SWELL_COMPILED> )
-target_compile_definitions(IPlug_VST3  INTERFACE VST3_API=1  IPLUG_EDITOR=1 IPLUG_DSP=1                                                           )
-target_compile_definitions(IPlug_AAX   INTERFACE AAX_API=1   IPLUG_EDITOR=1 IPLUG_DSP=1                                                           )
-target_compile_definitions(IPlug_AU    INTERFACE AU_API=1    IPLUG_EDITOR=1 IPLUG_DSP=1                                                           )
-target_compile_definitions(IPlug_AUv3  INTERFACE AUv3_API=1  IPLUG_EDITOR=1 IPLUG_DSP=1                                                           )
-target_compile_definitions(IPlug_VST2  INTERFACE VST2_API=1  IPLUG_EDITOR=1 IPLUG_DSP=1                                                           )
-target_compile_definitions(IPlug_VST3C INTERFACE VST3C_API=1 IPLUG_EDITOR=1 IPLUG_DSP=0                                                           )
-target_compile_definitions(IPlug_VST3P INTERFACE VST3P_API=1 IPLUG_EDITOR=0 IPLUG_DSP=1                                                           )
-target_compile_definitions(IPlug_WAM   INTERFACE WAM_API=1   IPLUG_EDITOR=0 IPLUG_DSP=1                                                           )
-target_compile_definitions(IPlug_WEB   INTERFACE WEB_API=1   IPLUG_EDITOR=1 IPLUG_DSP=0 USE_WEBGL2=0 FULL_ES3=1                                   )
-
 #------------------------------------------------------------------------------
 # Shared includes for all IPlug2 related libraries and consumers
 
@@ -313,7 +301,6 @@ list(APPEND _deplibs
 
 target_link_libraries(IPlug_SharedLinkLibraries INTERFACE ${_deplibs})
 
-# Target specific linker settings
 target_link_libraries(IPlug_AAX   INTERFACE $<$<BOOL:${PLATFORM_WINDOWS}>:AAXLibrary_x64$<$<CONFIG:Debug>:_D>.lib> )  # Only 64bit (32bit needs to finally go away)
 target_link_libraries(IPlug_APP   INTERFACE ${_deplibsAPP} RTAudio RTMidi                                          )
 target_link_libraries(IPlug_AU    INTERFACE ${_deplibsAU}                                                          )

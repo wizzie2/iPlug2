@@ -569,7 +569,7 @@ macro(_iplug_parse_target_arguments _config_prefix _definition_prefix _optionsAr
     _iplug_warn_unparsed_arguments("[OVERRIDE]" _override_UNPARSED_ARGUMENTS)
     foreach(_var IN LISTS _projectConfigArgs_overridable)
         if(DEFINED _override_${_var})
-            _iplug_add_config_variable(CONFIG_OVERRIDE "" ${_var} "${_override_${_var}}")
+            _iplug_add_config_variable(CONFIG_OVERRIDE OVERRIDE ${_var} "${_override_${_var}}")
         endif()
     endforeach()
     _iplug_validate_config_variables(CONFIG_OVERRIDE DEFINED)
@@ -611,8 +611,10 @@ function(_iplug_add_config_variable _config_prefix _definition_prefix _name _val
     string(REPLACE "\r" "\\r" _str "${_str}")
     string(REPLACE "\t" "\\t" _str "${_str}")
 
-    set(${_config_prefix}${_name} "${_str}" PARENT_SCOPE)
-    if(NOT "${_name}" MATCHES "^OVERRIDE_.*")
+    if(DEFINED ${_config_prefix}${_name} AND NOT ${_config_prefix}${_name} STREQUAL "")
+        iplug_info("${_config_prefix}${_name} already set. Ignoring.")
+    else()
+        set(${_config_prefix}${_name} "${_str}" PARENT_SCOPE)
         set(CONFIG_VARIABLES ${CONFIG_VARIABLES} "${_definition_prefix}${_name}" PARENT_SCOPE)
     endif()
 endfunction()
@@ -839,38 +841,38 @@ function(_iplug_add_target_lib _target _pluginapi_lib)
 
     list(FILTER _src_list EXCLUDE REGEX "\\.pch$")
 
+    # APP
+    if(NOT _pluginapi_lib STREQUAL "IPlug_APP")
+        list(FILTER _src_list EXCLUDE REGEX "^${IPLUG2_ROOT_PATH}/IPlug/APP/.*\\.cpp$")
+    endif()
+
     # AAX
     if(HAVE_AAX AND NOT _pluginapi_lib STREQUAL "IPlug_AAX")
         list(FILTER _src_list EXCLUDE REGEX "^${IPLUG2_ROOT_PATH}/IPlug/AAX/.*\\.cpp$")
     endif()
 
-    # APP
-    if(NOT ${_pluginapi_lib} STREQUAL "IPlug_APP")
-        list(FILTER _src_list EXCLUDE REGEX "^${IPLUG2_ROOT_PATH}/IPlug/APP/.*\\.cpp$")
-    endif()
-
     # AUv2
-    if(HAVESDK_AU AND NOT ${_pluginapi_lib} STREQUAL "IPlug_AU")
+    if(HAVESDK_AU AND NOT _pluginapi_lib STREQUAL "IPlug_AU")
         list(FILTER _src_list EXCLUDE REGEX "^${IPLUG2_ROOT_PATH}/IPlug/AUv2/.*\\.(mm|c|cpp)$")
     endif()
 
     # AUv3
-    if(HAVESDK_AUv3 AND NOT ${_pluginapi_lib} STREQUAL "IPlug_AUv3")
+    if(HAVESDK_AUv3 AND NOT _pluginapi_lib STREQUAL "IPlug_AUv3")
         list(FILTER _src_list EXCLUDE REGEX "^${IPLUG2_ROOT_PATH}/IPlug/AUv3/.*\\.(m|mm|cpp)$")
     endif()
 
     # VST2
-    if(HAVESDK_VST2 AND NOT ${_pluginapi_lib} STREQUAL "IPlug_VST2")
+    if(HAVESDK_VST2 AND NOT _pluginapi_lib STREQUAL "IPlug_VST2")
         list(FILTER _src_list EXCLUDE REGEX "^${IPLUG2_ROOT_PATH}/IPlug/VST2/.*\\.cpp$")
     endif()
 
     # VST3
-    if(HAVESDK_VST3 AND NOT ${_pluginapi_lib} STREQUAL "IPlug_VST3")
+    if(HAVESDK_VST3 AND NOT _pluginapi_lib STREQUAL "IPlug_VST3")
         list(FILTER _src_list EXCLUDE REGEX "^${IPLUG2_ROOT_PATH}/IPlug/VST3/.*\\.cpp$")
     endif()
 
     # WEB
-    # if(NOT ${_pluginapi_lib} STREQUAL "IPlug_WEB")
+    # if(NOT _pluginapi_lib STREQUAL "IPlug_WEB")
     #     list(REMOVE_ITEM _src_list
     #         "${IPLUG2_ROOT_PATH}/IPlug/WEB/IPlugWAM.cpp"
     #         "${IPLUG2_ROOT_PATH}/IPlug/WEB/IPlugWeb.cpp"
@@ -880,29 +882,42 @@ function(_iplug_add_target_lib _target _pluginapi_lib)
     # Add remaining source files
     target_sources(${_libName} PRIVATE ${_src_list})
 
-    # Build the config definition list
+    # Build the config definition list (which is an absolute mess, but too lazy to change now)
     set(CONFIG_DEFINITIONS "")
-    set(_def ${CONFIG_VARIABLES})
-    list(REMOVE_ITEM _def ${_iplug_config_definition_exclude})
-    list(REMOVE_DUPLICATES _def)
-    foreach(_name IN LISTS _def)
+    list(REMOVE_ITEM CONFIG_VARIABLES ${_iplug_config_definition_exclude})
+    foreach(_name IN LISTS CONFIG_VARIABLES)
+        if(DEFINED CONFIG_OVERRIDE_${_name} AND NOT _name MATCHES "^OVERRIDE_")
+            continue()
+        endif()
+
         set(_value ${CONFIG_${_name}})
-        if(DEFINED CONFIG_OVERRIDE_${_name})
+
+        if(_name MATCHES "^TARGET_")
+            list(REMOVE_ITEM CONFIG_VARIABLES "${_name}")
+            set(CONFIG_VARIABLES ${CONFIG_VARIABLES} PARENT_SCOPE)
+            string(REPLACE "TARGET_" "" _name "${_name}")
+            set(_value ${CONFIG_${_name}})
+            unset(CONFIG_${_name})
+            unset(CONFIG_${_name} PARENT_SCOPE)
+        endif()
+
+        if(_name MATCHES "^OVERRIDE_" AND DEFINED CONFIG_${_name})
+            list(REMOVE_ITEM CONFIG_VARIABLES "${_name}")
+            set(CONFIG_VARIABLES ${CONFIG_VARIABLES} PARENT_SCOPE)
+            string(REPLACE "OVERRIDE_" "" _name "${_name}")
             set(_value ${CONFIG_OVERRIDE_${_name}})
+            unset(CONFIG_OVERRIDE_${_name})
             unset(CONFIG_OVERRIDE_${_name} PARENT_SCOPE)
         endif()
-        if(_name MATCHES "^RESOURCE_")
-            # cmake_print_variables(_name)
-            string(REPLACE "RESOURCE_" "" _name "${_name}")
-        else()
-            list(FIND _projectConfigArgs "${_name}" _result)
-            if(_result EQUAL -1)
-                unset(CONFIG_${_name} PARENT_SCOPE)
-            endif()
-        endif()
+
         if(NOT DEFINED _value OR _value STREQUAL "")
             continue()
         endif()
+
+        if(_name MATCHES "^RESOURCE_")
+            string(REPLACE "RESOURCE_" "" _name "${_name}")
+        endif()
+
         list(FIND _iplug_config_string_variables "${_name}" _result)
         if(_result EQUAL -1)
             set(_result "${_name}=${_value}")
