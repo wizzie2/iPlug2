@@ -14,7 +14,7 @@ namespace iplug::math
 {
 	// Degrees to radians
 	template <class T>
-	NODISCARD inline constexpr auto DegToRad(const T Degrees)
+	NODISCARD constexpr auto ToRadians(const T Degrees)
 	{
 		static_assert(type::IsArithmetic<T>);
 		return Degrees * constants::inv_rad_v<T>;
@@ -23,7 +23,7 @@ namespace iplug::math
 
 	// Radians to degrees
 	template <class T>
-	NODISCARD inline constexpr auto RadToDeg(const T Radians)
+	NODISCARD constexpr auto ToDegrees(const T Radians)
 	{
 		static_assert(type::IsArithmetic<T>);
 		return Radians * constants::rad_v<T>;
@@ -31,33 +31,37 @@ namespace iplug::math
 
 
 	/**
-	 * @brief Calculates amplitude from a given dB value
-	 * @param dB Value
-	 * @return Gain calculated as an approximation of e^(inv_Np*dB)
+	 * @brief Calculates amplitude from a given decibel value
+	 * @param Decibel Value
+	 * @return Amplitude calculated as an approximation of e^(inv_Np*dB)
 	 */
 	template <class T>
-	NODISCARD inline constexpr auto DBToAmp(const T dB)
+	NODISCARD constexpr auto ToAmplitude(const T Decibel)
 	{
 		static_assert(type::IsFloatingPoint<T>);
-		return exp(constants::inv_Np_v<T> * dB);
+		return exp(constants::inv_Np_v<T> * Decibel);
 	}
 
 
 	/**
-	 * @brief Calculates dB from a given amplitude value
+	 * @brief Calculates decibel from a given amplitude value
 	 * @param Amplitude Value
-	 * @return dB calculated as an approximation of Np*log(Amplitude)
+	 * @return Decibel calculated as an approximation of Np*log(Amplitude)
 	 */
 	template <class T>
-	NODISCARD inline constexpr auto AmpToDB(const T Amplitude)
+	NODISCARD constexpr auto ToDecibel(const T Amplitude)
 	{
 		static_assert(type::IsFloatingPoint<T>);
 		return constants::Np_v<T> * log(Abs(Amplitude));
 	}
 
 
-	// AmpToDB using fast approximation
-	NODISCARD inline const auto AmpToDBf(const float Amplitude)
+	/**
+	 * @brief Calculates decibel from a given amplitude value using fast approximation
+	 * @param Amplitude Value
+	 * @return Decibel calculated as an approximation of Np*log(Amplitude)
+	 */
+	NODISCARD inline const auto ToDecibelf(const float Amplitude)
 	{
 		int e;
 		float f = frexpf(Abs(Amplitude), &e);

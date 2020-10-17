@@ -2240,7 +2240,7 @@ struct IMatrix
 	 * @return IMatrix& /todo */
 	IMatrix& Rotate(float a)
 	{
-		const double rad = math::DegToRad(a);
+		const double rad = math::ToRadians(a);
 		const double c   = std::cos(rad);
 		const double s   = std::sin(rad);
 
@@ -2253,7 +2253,7 @@ struct IMatrix
 	 * @return IMatrix& /todo */
 	IMatrix& Skew(float xa, float ya)
 	{
-		return Transform(IMatrix(1.0, math::Tan(math::DegToRad(ya)), math::Tan(math::DegToRad(xa)), 1.0, 0.0, 0.0));
+		return Transform(IMatrix(1.0, math::Tan(math::ToRadians(ya)), math::Tan(math::ToRadians(xa)), 1.0, 0.0, 0.0));
 	}
 
 	/** /todo
@@ -2471,7 +2471,7 @@ struct IPattern
 		angleEnd -= 90;
 #endif
 
-		float rad = math::DegToRad(angleStart);
+		float rad = math::ToRadians(angleStart);
 		float c   = std::cos(rad);
 		float s   = std::sin(rad);
 

@@ -63,7 +63,7 @@ class IVMeterControl : public IVTrackControlBase
 			double rangeDB     = fabs(mHighRangeDB - mLowRangeDB);
 			for (auto c = d.chanOffset; c < (d.chanOffset + d.nChans); c++)
 			{
-				double ampValue  = math::AmpToDB(d.vals[c]);
+				double ampValue  = math::ToDecibel(d.vals[c]);
 				double linearPos = (ampValue + lowPointAbs) / rangeDB;
 				SetValue(math::Clamp(linearPos, 0., 1.), c);
 			}

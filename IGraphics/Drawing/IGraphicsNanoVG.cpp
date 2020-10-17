@@ -620,8 +620,8 @@ void IGraphicsNanoVG::PathArc(float cx, float cy, float r, float a1, float a2, E
 		   cx,
 		   cy,
 		   r,
-		   math::DegToRad(a1 - 90.f),
-		   math::DegToRad(a2 - 90.f),
+		   math::ToRadians(a1 - 90.f),
+		   math::ToRadians(a2 - 90.f),
 		   winding == EWinding::CW ? NVG_CW : NVG_CCW);
 }
 

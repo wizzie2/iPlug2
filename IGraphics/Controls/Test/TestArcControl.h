@@ -41,7 +41,7 @@ public:
     g.FillCircle(COLOR_WHITE, mRECT.MW(), mRECT.MH(), mRECT.W() * 0.1f);
     g.DrawCircle(COLOR_BLACK, mRECT.MW(), mRECT.MH(), mRECT.W() * 0.1f);
 
-    angle = DegToRad(angle-90.f);
+    angle = math::ToRadians(angle-90.f);
 
     float x1 = mRECT.MW() + cosf(angle - 0.3f) * mRECT.W() * 0.3f;
     float y1 = mRECT.MH() + sinf(angle - 0.3f) * mRECT.W() * 0.3f;

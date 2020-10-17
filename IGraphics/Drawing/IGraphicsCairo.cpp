@@ -369,9 +369,9 @@ void IGraphicsCairo::PathClose()
 void IGraphicsCairo::PathArc(float cx, float cy, float r, float a1, float a2, EWinding winding)
 {
   if (winding == EWinding::CW)
-    cairo_arc(mContext, cx, cy, r, DegToRad(a1 - 90.f), DegToRad(a2 - 90.f));
+    cairo_arc(mContext, cx, cy, r, math::ToRadians(a1 - 90.f), math::ToRadians(a2 - 90.f));
   else
-    cairo_arc_negative(mContext, cx, cy, r, DegToRad(a1 - 90.f), DegToRad(a2 - 90.f));
+    cairo_arc_negative(mContext, cx, cy, r, math::ToRadians(a1 - 90.f),math::ToRadians(a2 - 90.f));
 }
 
 void IGraphicsCairo::PathMoveTo(float x, float y)

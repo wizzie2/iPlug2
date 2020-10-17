@@ -266,7 +266,7 @@ void IGraphicsLice::DrawRotatedBitmap(const IBitmap& bitmap, float destCtrX, flo
   int destX = TransformX(destCtrX) - W / 2;
   int destY = TransformY(destCtrY) - H / 2;
   
-  LICE_RotatedBlit(mRenderBitmap, pLB, destX, destY, W, H, 0.0f, 0.0f, (float) W, (float) H, (float) DegToRad(angle), false, BlendWeight(pBlend), LiceBlendMode(pBlend) | LICE_BLIT_FILTER_BILINEAR, 0.0f, (float) yOffsetZeroDeg);
+  LICE_RotatedBlit(mRenderBitmap, pLB, destX, destY, W, H, 0.0f, 0.0f, (float) W, (float) H, (float) math::ToRadians(angle), false, BlendWeight(pBlend), LiceBlendMode(pBlend) | LICE_BLIT_FILTER_BILINEAR, 0.0f, (float) yOffsetZeroDeg);
 }
 
 void IGraphicsLice::DrawFittedBitmap(const IBitmap& bitmap, const IRECT& bounds, const IBlend* pBlend)
@@ -364,7 +364,7 @@ void IGraphicsLice::DrawConvexPolygon(const IColor& color, float* x, float* y, i
 void IGraphicsLice::DrawArc(const IColor& color, float cx, float cy, float r, float a1, float a2, const IBlend* pBlend, float thickness)
 {
   NeedsClipping();
-  LICE_Arc(mRenderBitmap, TransformX(cx), TransformY(cy), r * GetScreenScale(), DegToRad(a1), DegToRad(a2), LiceColor(color), BlendWeight(pBlend), LiceBlendMode(pBlend), true);
+  LICE_Arc(mRenderBitmap, TransformX(cx), TransformY(cy), r * GetScreenScale(), math::ToRadians(a1), math::ToRadians(a2), LiceColor(color), BlendWeight(pBlend), LiceBlendMode(pBlend), true);
 }
 
 //TODO: review floating point input support
@@ -508,8 +508,8 @@ void IGraphicsLice::FillArc(const IColor& color, float cx, float cy, float r, fl
     a2 = a1 + 180.f;
   }
   
-  a1 = DegToRad(a1-90.f);
-  a2 = DegToRad(a2-90.f);
+  a1 = math::ToRadians(a1-90.f);
+  a2 = math::ToRadians(a2-90.f);
 
   int arcpoints = 180.0 * std::min(1., (a2 - a1) / PI);
   double arcincrement = (a2 - a1) / arcpoints;
@@ -608,7 +608,7 @@ void IGraphicsLice::DoDrawText(const IText& text, const char* str, const IRECT& 
   
     DoMeasureTextRotation(text, bounds, measured);
     
-    float radians = DegToRad(text.mAngle);
+    float radians = math::ToRadians(text.mAngle);
     
     IRECT r2 = measured;
     r2.Translate(-mDrawOffsetX, -mDrawOffsetY);
