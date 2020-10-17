@@ -794,7 +794,7 @@ class IBitmapBase
 		int i = 1;
 		if (mBitmap.N() > 1)
 		{
-			i = 1 + int(0.5 + mControl->GetValue() * (double) (mBitmap.N() - 1));
+			i = 1 + static_cast<int>(0.5 + mControl->GetValue() * static_cast<double>(mBitmap.N()) - 1);
 			i = math::Clamp(i, 1, mBitmap.N());
 		}
 		IBlend blend = mControl->GetBlend();
@@ -1176,7 +1176,7 @@ class IVectorBase
 	{
 		float x1, x2, x3, y1, y2, y3;
 
-		float theta = math::DegToRad(angle);
+		float theta = math::ToRadians(angle);
 
 		IRECT handleBounds = GetAdjustedHandleBounds(bounds);
 
@@ -1454,10 +1454,10 @@ class IKnobControlBase : public IControl
 	}
 
 	bool mHideCursorOnDrag = true;
-	EDirection mDirection;
-	double mGearing;
-	bool mMouseDown = false;
-	double mMouseDragValue;
+	EDirection mDirection  = EDirection::Vertical;
+	double mGearing        = 0;
+	bool mMouseDown        = false;
+	double mMouseDragValue = 0;
 };
 
 /** A base class for slider/fader controls, to handle mouse action and Sender. */
@@ -1489,12 +1489,12 @@ class ISliderControlBase : public IControl
 
  protected:
 	bool mHideCursorOnDrag = true;
-	EDirection mDirection;
-	IRECT mTrackBounds;
-	float mHandleSize;
-	double mGearing;
-	bool mMouseDown = false;
-	double mMouseDragValue;
+	EDirection mDirection  = EDirection::Vertical;
+	IRECT mTrackBounds     = {};
+	float mHandleSize      = 0;
+	double mGearing        = 0;
+	bool mMouseDown        = false;
+	double mMouseDragValue = 0;
 };
 
 /** A base class for mult-strip/track controls, such as multi-sliders, meters

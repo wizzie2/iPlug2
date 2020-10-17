@@ -137,6 +137,18 @@ target_compile_definitions(IPlug_SharedDefinitions
         >
 )
 
+# Target specific definitions
+target_compile_definitions(IPlug_APP   INTERFACE APP_API=1   IPLUG2_PLUGIN=IPlugAPP            IPLUG2_API_HEADER="APP/IPlugAPP.h"              )
+target_compile_definitions(IPlug_AAX   INTERFACE AAX_API=1   IPLUG2_PLUGIN=IPlugAAX            IPLUG2_API_HEADER="AAX/IPlugAAX.h"              )
+target_compile_definitions(IPlug_AU    INTERFACE AU_API=1    IPLUG2_PLUGIN=IPlugAU             IPLUG2_API_HEADER="AUv2/IPlugAU.h"              )
+target_compile_definitions(IPlug_AUv3  INTERFACE AUv3_API=1  IPLUG2_PLUGIN=IPlugAUv3           IPLUG2_API_HEADER="AUv3/IPlugAUv3.h"            )
+target_compile_definitions(IPlug_VST2  INTERFACE VST2_API=1  IPLUG2_PLUGIN=IPlugVST2           IPLUG2_API_HEADER="VST2/IPlugVST2.h"            )
+target_compile_definitions(IPlug_VST3  INTERFACE VST3_API=1  IPLUG2_PLUGIN=IPlugVST3           IPLUG2_API_HEADER="VST3/IPlugVST3.h"            )
+target_compile_definitions(IPlug_VST3C INTERFACE VST3C_API=1 IPLUG2_PLUGIN=IPlugVST3Controller IPLUG2_API_HEADER="VST3/IPlugVST3_Controller.h" )
+target_compile_definitions(IPlug_VST3P INTERFACE VST3P_API=1 IPLUG2_PLUGIN=IPlugVST3Processor  IPLUG2_API_HEADER="VST3/IPlugVST3_Processor.h"  )
+target_compile_definitions(IPlug_WEB   INTERFACE WEB_API=1   IPLUG2_PLUGIN=IPlugWeb            IPLUG2_API_HEADER="WEB/IPlugWeb.h"              )
+target_compile_definitions(IPlug_WAM   INTERFACE WAM_API=1   IPLUG2_PLUGIN=IPlugWAM            IPLUG2_API_HEADER="WEB/IPlugWAM.h"              )
+
 #------------------------------------------------------------------------------
 # Shared includes for all IPlug2 related libraries and consumers
 

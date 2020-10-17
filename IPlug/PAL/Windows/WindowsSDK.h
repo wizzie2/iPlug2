@@ -67,7 +67,6 @@
 	#pragma pack(push, 8)
 #endif
 
-#include <SDKDDKVer.h>
 
 // clang-format off
 
@@ -111,6 +110,14 @@
 	#define NOPROFILER        // Profiler interface.
 	#define NODEFERWINDOWPOS  // DeferWindowPos routines
 	#define NOMCX             // Modem Configuration Extensions
+	#define NOCRYPT
+
+	#define WINAPI_PARTITION_DESKTOP   1
+//	#define WINAPI_PARTITION_APP       1
+//	#define WINAPI_PARTITION_PC_APP    1
+//	#define WINAPI_PARTITION_PHONE_APP 1
+//	#define WINAPI_PARTITION_SYSTEM    1
+//	#define WINAPI_PARTITION_GAMES     1
 
 // clang-format on
 
@@ -118,6 +125,11 @@
 #define WIN32_NO_STATUS
 #define WIN32_LEAN_AND_MEAN  // Exclude alot of stuff
 #define STRICT               // Should be default when using WIN32_LEAN_AND_MEAN. but just to be sure
+
+
+#if _DEBUG
+	#include <crtdbg.h>
+#endif
 
 #include <windows.h>
 
@@ -128,35 +140,30 @@
 using NTSTATUS  = _Return_type_success_(return >= 0) long;
 using PNTSTATUS = NTSTATUS*;
 
-// Additional windows headers
-#include <VersionHelpers.h>
+//#include <intsafe.h>  // Helper functions to prevent integer overflow bugs
+//#include <strsafe.h>  // Safer C library string routine replacements
+//#include <stdarg.h>
+//#include <stdio.h>
+//#include <ctype.h>
+//#include <time.h>
+//#include <sys/stat.h>
+//#include <VersionHelpers.h>
 #include <ntstatus.h>
-
-#include <intsafe.h>         // Helper functions to prevent integer overflow bugs
-#include <strsafe.h>         // Safer C library string routine replacements
-
-#include <stdarg.h>
-#include <stdio.h>
-#include <ctype.h>
-#include <time.h>
-#include <sys/stat.h>
-
-#include <wingdi.h>
 #include <WindowsX.h>
-#include <shellapi.h>
 #include <shlobj.h>
-#include <commdlg.h>
 #include <Shlwapi.h>
-#include <wininet.h>
 #include <winsock.h>
-
+#include <shellapi.h>
+#include <commdlg.h>
+#include <wininet.h>
 
 BEGIN_INCLUDE_DEPENDENCIES
+#if APP_API
+	//#include <wingdi.h>
+	#include <asio.h>
+#endif
 #if !NO_IGRAPHICS
 	#include <d3dkmthk.h>
 	#include <glad.h>
-#endif
-#if APP_API
-	#include <asio.h>
 #endif
 END_INCLUDE_DEPENDENCIES

@@ -247,24 +247,24 @@ void IControl::SetDisabled(bool disable)
 
 void IControl::OnMouseDown(float x, float y, const IMouseMod& mod)
 {
-#ifdef PROTOOLS
-	if (mod.A)
+	if constexpr (EPlugApi::Native == EPlugApi::AAX)
 	{
-		SetValueToDefault(GetValIdxForPos(x, y));
+		if (mod.A)
+			SetValueToDefault(GetValIdxForPos(x, y));
 	}
-#endif
-
-	if (mod.R)
-		PromptUserInput(GetValIdxForPos(x, y));
+	else
+	{
+		if (mod.R)
+			PromptUserInput(GetValIdxForPos(x, y));
+	}
 }
 
 void IControl::OnMouseDblClick(float x, float y, const IMouseMod& mod)
 {
-#ifdef PROTOOLS
-	PromptUserInput(GetValIdxForPos(x, y));
-#else
-	SetValueToDefault(GetValIdxForPos(x, y));
-#endif
+	if constexpr (EPlugApi::Native == EPlugApi::AAX)
+		PromptUserInput(GetValIdxForPos(x, y));
+	else
+		SetValueToDefault(GetValIdxForPos(x, y));
 }
 
 void IControl::OnMouseOver(float x, float y, const IMouseMod& mod)
@@ -786,15 +786,13 @@ void ISwitchControlBase::OnMouseUp(float x, float y, const IMouseMod& mod)
 
 bool IKnobControlBase::IsFineControl(const IMouseMod& mod, bool wheel) const
 {
-#ifdef PROTOOLS
-	#if PLATFORM_WINDOWS
-	return mod.C;
-	#else
-	return wheel ? mod.C : mod.R;
-	#endif
-#else
-	return (mod.C || mod.S);
-#endif
+	if constexpr (EPlugApi::Native == EPlugApi::AAX)
+		if constexpr (EPlatform::Native == EPlatform::Windows)
+			return mod.C;
+		else
+			return wheel ? mod.C : mod.R;
+	else
+		return (mod.C || mod.S);
 }
 
 void IKnobControlBase::OnMouseDown(float x, float y, const IMouseMod& mod)
@@ -1020,15 +1018,13 @@ void ISliderControlBase::OnMouseWheel(float x, float y, const IMouseMod& mod, fl
 
 bool ISliderControlBase::IsFineControl(const IMouseMod& mod, bool wheel) const
 {
-#ifdef PROTOOLS
-	#if PLATFORM_WINDOWS
-	return mod.C;
-	#else
-	return wheel ? mod.C : mod.R;
-	#endif
-#else
-	return (mod.C || mod.S);
-#endif
+	if constexpr (EPlugApi::Native == EPlugApi::AAX)
+		if constexpr (EPlatform::Native == EPlatform::Windows)
+			return mod.C;
+		else
+			return wheel ? mod.C : mod.R;
+	else
+		return (mod.C || mod.S);
 }
 
 

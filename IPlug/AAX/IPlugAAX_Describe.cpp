@@ -18,9 +18,6 @@
 #include "AAX_Errors.h"
 #include "AAX_Assert.h"
 
-#ifndef BUNDLE_ID
-#define BUNDLE_ID BUNDLE_DOMAIN "." BUNDLE_MFR ".aax." BUNDLE_NAME
-#endif
 
 using namespace iplug;
 
@@ -129,7 +126,7 @@ AAX_Result GetEffectDescriptions(AAX_ICollection* pC)
   const int NIOConfigs = IPlugProcessor::ParseChannelIOStr(PLUG_CHANNEL_IO, channelIO, totalNInChans, totalNOutChans, totalNInBuses, totalNOutBuses);
 
   auto PopulateSetupInfo = [](int configIdx, const IOConfig* pConfig, int typeId, int audioSuiteId, AAX_SIPlugSetupInfo& setupInfo){
-    if(EPluginType::PLUG_TYPE == EPluginType::Instrument && pConfig->GetTotalNChannels(kInput) == 0) {
+    if(Config::plugType == EPluginType::Instrument && pConfig->GetTotalNChannels(kInput) == 0) {
       // For some reason in protools instruments need to have input buses if not defined set input chan count the same as output
       setupInfo.mInputStemFormat = (AAX_EStemFormat) GetAPIBusTypeForChannelIOConfig(configIdx, ERoute::kOutput, 0 /* first bus */, pConfig);
     }
@@ -154,14 +151,14 @@ AAX_Result GetEffectDescriptions(AAX_ICollection* pC)
 #endif
     }
 
-    setupInfo.mManufacturerID = PLUG_MFR_ID;
-    setupInfo.mProductID = PLUG_UNIQUE_ID;
+    setupInfo.mManufacturerID = Config::mfrID;
+    setupInfo.mProductID = Config::uniqueID;
     setupInfo.mPluginID = typeId;
     #if AAX_DOES_AUDIOSUITE
     setupInfo.mAudiosuiteID = audioSuiteId;
     #endif
     setupInfo.mCanBypass = true;
-    setupInfo.mNeedsInputMIDI = PLUG_DOES_MIDI_IN;
+    setupInfo.mNeedsInputMIDI = Config::plugDoesMidiIn;
     setupInfo.mInputMIDINodeName = PLUG_NAME" Midi";
     setupInfo.mInputMIDIChannelMask = 0x0001;
 
@@ -170,10 +167,10 @@ AAX_Result GetEffectDescriptions(AAX_ICollection* pC)
     setupInfo.mOutputMIDIChannelMask = 0x0001;
 
     setupInfo.mNeedsTransport = true;
-    setupInfo.mLatency = PLUG_LATENCY;
+    setupInfo.mLatency = Config::latency;
   };
 
-  if((EPluginType::PLUG_TYPE != EPluginType::Instrument) && (totalNInBuses > 1)) // Effect with sidechain input
+  if((Config::plugType != EPluginType::Instrument) && (totalNInBuses > 1)) // Effect with sidechain input
   {
     int aaxTypeIdIdx = 0;
     for (int configIdx = 0; configIdx < NIOConfigs; configIdx++) // loop through all configs
@@ -200,7 +197,7 @@ AAX_Result GetEffectDescriptions(AAX_ICollection* pC)
       }
     }
   }
-  else if((EPluginType::PLUG_TYPE == EPluginType::Instrument) && (totalNOutBuses > 1)) // Instrument with multi-bus outputs
+  else if((Config::plugType == EPluginType::Instrument) && (totalNOutBuses > 1)) // Instrument with multi-bus outputs
   {
     int configIdx = NIOConfigs-1; // Take the last IOConfig, assuming it contains all the busses
 
@@ -251,7 +248,7 @@ AAX_Result GetEffectDescriptions(AAX_ICollection* pC)
 
   pC->SetManufacturerName(AAX_PLUG_MFR_STR);
 
-  pC->SetPackageVersion(PLUG_VERSION_HEX);
+  pC->SetPackageVersion(Config::vendorVersion);
 
   return err;
 }

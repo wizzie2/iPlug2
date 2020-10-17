@@ -176,15 +176,13 @@ class IVNumberBoxControl : public IControl, public IVectorBase
 
 	bool IsFineControl(const IMouseMod& mod, bool wheel) const
 	{
-#ifdef PROTOOLS
-	#if PLATFORM_WINDOWS
-		return mod.C;
-	#else
-		return wheel ? mod.C : mod.R;
-	#endif
-#else
-		return (mod.C || mod.S);
-#endif
+		if constexpr (EPlugApi::Native == EPlugApi::AAX)
+			if constexpr (EPlatform::Native == EPlatform::Windows)
+				return mod.C;
+			else
+				return wheel ? mod.C : mod.R;
+		else
+			return (mod.C || mod.S);
 	}
 
 	void OnValueChanged(bool preventAction = false)

@@ -15,6 +15,40 @@
 
 #pragma once
 
+#if VST3C_API
+#elif VST3P_API
+#else
+#endif
+
+BEGIN_INCLUDE_DEPENDENCIES
+#include <pluginterfaces/base/ibstream.h>
+#include <pluginterfaces/base/keycodes.h>
+#include <pluginterfaces/base/ustring.h>
+#include "pluginterfaces/vst/ivstcomponent.h"
+#include "pluginterfaces/vst/ivsteditcontroller.h"
+#include "pluginterfaces/vst/ivstmidicontrollers.h"
+#include <pluginterfaces/vst/ivstchannelcontextinfo.h>
+#include <pluginterfaces/vst/ivstcontextmenu.h>
+#include <pluginterfaces/vst/ivstevents.h>
+#include <pluginterfaces/vst/ivstparameterchanges.h>
+#include <pluginterfaces/vst/ivstprocesscontext.h>
+#include <pluginterfaces/vst/vstspeaker.h>
+#include <pluginterfaces/vst/vsttypes.h>
+#include <pluginterfaces/gui/iplugviewcontentscalesupport.h>
+#include <public.sdk/source/vst/vstaudioeffect.h>
+#include <public.sdk/source/vst/vstbus.h>
+#include <public.sdk/source/vst/vsteditcontroller.h>
+#include <public.sdk/source/vst/vsteventshelper.h>
+#include <public.sdk/source/vst/vstparameters.h>
+#include <public.sdk/source/vst/vstsinglecomponenteffect.h>
+#include <public.sdk/source/vst/hosting/parameterchanges.h>
+#include "public.sdk/source/main/pluginfactory.h"
+END_INCLUDE_DEPENDENCIES
+
+#undef stricmp
+#undef strnicmp
+
+
 #include "IPlugVST3_Common.h"
 #include "IPlugVST3_ProcessorBase.h"
 #include "IPlugVST3_View.h"

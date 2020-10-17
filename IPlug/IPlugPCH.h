@@ -15,8 +15,8 @@
  * @brief IPlug2 Precompiled headers
  */
 
-#include "PAL/Platform.h"  // Needs to be first
 
+// std headers
 #include <algorithm>
 #include <array>
 #include <atomic>
@@ -53,56 +53,8 @@
 	#include <bit>
 #endif
 
-BEGIN_INCLUDE_DEPENDENCIES
-#include <WDL/wdlendian.h>
-#include <WDL/wdlstring.h>
-#include <WDL/queue.h>
-#include <WDL/mutex.h>
-#include <WDL/ptrlist.h>
-
-#if VST2_API
-#elif AU_API
-#elif AUv3_API
-#elif AAX_API
-#elif APP_API
-	#include <RtAudio.h>
-	#include <RtMidi.h>
-#elif WAM_API
-#elif WEB_API
-#elif VST3_API
-	#if VST3C_API
-	#elif VST3P_API
-	#else
-	#endif
-	#include <pluginterfaces/base/ibstream.h>
-	#include <pluginterfaces/base/keycodes.h>
-	#include <pluginterfaces/base/ustring.h>
-	#include "pluginterfaces/vst/ivstcomponent.h"
-	#include "pluginterfaces/vst/ivsteditcontroller.h"
-	#include "pluginterfaces/vst/ivstmidicontrollers.h"
-	#include <pluginterfaces/vst/ivstchannelcontextinfo.h>
-	#include <pluginterfaces/vst/ivstcontextmenu.h>
-	#include <pluginterfaces/vst/ivstevents.h>
-	#include <pluginterfaces/vst/ivstparameterchanges.h>
-	#include <pluginterfaces/vst/ivstprocesscontext.h>
-	#include <pluginterfaces/vst/vstspeaker.h>
-	#include <pluginterfaces/vst/vsttypes.h>
-	#include <pluginterfaces/gui/iplugviewcontentscalesupport.h>
-	#include <public.sdk/source/vst/vstaudioeffect.h>
-	#include <public.sdk/source/vst/vstbus.h>
-	#include <public.sdk/source/vst/vsteditcontroller.h>
-	#include <public.sdk/source/vst/vsteventshelper.h>
-	#include <public.sdk/source/vst/vstparameters.h>
-	#include <public.sdk/source/vst/vstsinglecomponenteffect.h>
-	#include <public.sdk/source/vst/hosting/parameterchanges.h>
-	#include "public.sdk/source/main/pluginfactory.h"
-	#undef stricmp
-	#undef strnicmp
-#endif
-END_INCLUDE_DEPENDENCIES
-
-#include "PAL/Type.h"
-#include "PAL/System.h"
+// IPlug
+#include "IPlug.h"
 #include "IPlugConstants.h"
 #include "IPlugLogger.h"
 #include "IPlugMath.h"
@@ -119,6 +71,11 @@ END_INCLUDE_DEPENDENCIES
 #include "IPlugAPIBase.h"
 #include "IPlugProcessor.h"
 #include "ISender.h"
+#if __has_include(IPLUG2_API_HEADER)
+	#include IPLUG2_API_HEADER
+#endif
+
+// IGraphics
 #ifndef NO_IGRAPHICS
 	#include "IGraphicsConstants.h"
 	#include "IGraphicsStructs.h"
@@ -143,47 +100,3 @@ END_INCLUDE_DEPENDENCIES
 	#include "IVMultiSliderControl.h"
 	#include "IVScopeControl.h"
 #endif
-
-#if VST2_API
-	#define IPLUG2_PLUGIN IPlugVST2
-	#ifdef REAPER_PLUGIN
-		#include "VST2/IPlugReaperVST2.h"
-	#else
-		#include "VST2/IPlugVST2.h"
-	#endif
-#elif AU_API
-	#include "AUv2/IPlugAU.h"
-	#define IPLUG2_PLUGIN IPlugAU;
-#elif AUv3_API
-	#include "AUv3/IPlugAUv3.h"
-	#define IPLUG2_PLUGIN IPlugAUv3;
-#elif AAX_API
-	#include "AAX/IPlugAAX.h"
-	#define IPLUG2_PLUGIN IPlugAAX;
-#elif APP_API
-	#include "APP/IPlugAPP.h"
-	#define IPLUG2_PLUGIN IPlugAPP;
-#elif WAM_API
-	#include "WEB/IPlugWAM.h"
-	#define IPLUG2_PLUGIN IPlugWAM;
-#elif WEB_API
-	#include "WEB/IPlugWeb.h"
-	#define IPLUG2_PLUGIN IPlugWeb;
-#elif VST3C_API
-	#include "VST3/IPlugVST3_Controller.h"
-	#define IPLUG2_PLUGIN IPlugVST3Controller;
-#elif VST3P_API
-	#include "VST3/IPlugVST3_Processor.h"
-	#define IPLUG2_PLUGIN IPlugVST3Processor;
-#elif VST3_API
-	#include "VST3/IPlugVST3.h"
-	#define IPLUG2_PLUGIN IPlugVST3;
-#else
-	#error "No API defined!"
-#endif
-
-#ifndef IPLUG2_STATIC
-using Plugin = iplug::IPLUG2_PLUGIN;
-#endif
-
-#undef IPLUG2_PLUGIN

@@ -129,7 +129,7 @@ StaticStorage<IGraphicsWin::HFontHolder> IGraphicsWin::sHFontCache;
 
 #pragma mark - Mouse and tablet helpers
 
-extern const int GetScaleForHWND(const HWND hWnd, const bool useCachedResult = true);
+//extern const int GetScaleForHWND(const HWND hWnd, const bool useCachedResult = true);
 
 inline IMouseInfo IGraphicsWin::GetMouseInfo(LPARAM lParam, WPARAM wParam)
 {

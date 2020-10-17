@@ -15,13 +15,7 @@ using namespace iplug;
 using namespace igraphics;
 
 #if PLATFORM_WINDOWS
-const int GetScaleForHWND(const HWND hWnd, const bool useCachedResult = true)
-{
-	static int CachedScale = 0;
-	if (useCachedResult == false || CachedScale == 0)
-		CachedScale = math::IntegralDivide(GetDpiForWindow(hWnd), USER_DEFAULT_SCREEN_DPI);
-	return CachedScale;
-}
+//extern const int GetScaleForHWND(const HWND hWnd, const bool useCachedResult = true);
 	#define GET_MENU() GetMenu(gHWND)
 #elif PLATFORM_MAC
 	#define GET_MENU() SWELL_GetCurrentMenu()
@@ -602,37 +596,19 @@ WDL_DLGRET IPlugAPPHost::MainDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
 				}
 				case ID_ABOUT:
 				{
-					IPlugAPP* pPlug = pAppHost->GetPlug();
-
-					bool pluginOpensAboutBox = pPlug->OnHostRequestingAboutBox();
-
-					if (pluginOpensAboutBox == false)
+					if (!pAppHost->GetPlug()->OnHostRequestingAboutBox())
 					{
 						WDL_String info;
-						info.Append(
-							PLUG_COPYRIGHT_STR
-							"\nBuilt on " __DATE__);  // TODO: Move PLUG_COPYRIGHT_STR to a plugin info class string
-						MessageBox(hwndDlg,
-								   info.Get(),
-								   PLUG_NAME,
-								   MB_OK);  // TODO: Move PLUG_NAME to a plugin info class string
+						info.Append(Config::pluginCopyrightString);
+						info.Append("\nBuilt on " __DATE__);
+						MessageBox(hwndDlg, info.Get(), Config::pluginName, MB_OK);
 					}
-
 					return 0;
 				}
 				case ID_HELP:
 				{
-					IPlugAPP* pPlug = pAppHost->GetPlug();
-
-					bool pluginOpensHelp = pPlug->OnHostRequestingProductHelp();
-
-					if (pluginOpensHelp == false)
-					{
-						MessageBox(hwndDlg,
-								   "See the manual",
-								   PLUG_NAME,
-								   MB_OK);  // TODO: Move PLUG_NAME to a plugin info class string
-					}
+					if (!pAppHost->GetPlug()->OnHostRequestingProductHelp())
+						MessageBox(hwndDlg, "See the manual", Config::pluginName, MB_OK);  // "See the manual"??
 					return 0;
 				}
 				case ID_PREFERENCES:
@@ -647,7 +623,7 @@ WDL_DLGRET IPlugAPPHost::MainDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
 
 					return 0;
 				}
-#if defined _DEBUG && !defined NO_IGRAPHICS
+#if !defined NO_IGRAPHICS
 				case ID_LIVE_EDIT:
 				{
 					IGEditorDelegate* pPlug = dynamic_cast<IGEditorDelegate*>(pAppHost->GetPlug());
@@ -729,25 +705,21 @@ WDL_DLGRET IPlugAPPHost::MainDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
 			return 0;
 		case WM_GETMINMAXINFO:
 		{
+			static constexpr int titleBarOffset = (EPlatform::Native == EPlatform::MacOS) ? 22 : 0;
+
 			if (!pAppHost)
 				return 1;
 
 			IPlugAPP* pPlug = pAppHost->GetPlug();
 
 			MINMAXINFO* mmi       = (MINMAXINFO*) lParam;
-			mmi->ptMinTrackSize.x = pPlug->GetMinWidth();
-			mmi->ptMinTrackSize.y = pPlug->GetMinHeight();
+			mmi->ptMinTrackSize.x = pPlug->GetMinWidth() + titleBarOffset;
+			mmi->ptMinTrackSize.y = pPlug->GetMinHeight() + titleBarOffset;
 			mmi->ptMaxTrackSize.x = pPlug->GetMaxWidth();
 			mmi->ptMaxTrackSize.y = pPlug->GetMaxHeight();
 
-#if PLATFORM_MAC
-			const int titleBarOffset = 22;
-			mmi->ptMinTrackSize.y += titleBarOffset;
-			mmi->ptMaxTrackSize.y += titleBarOffset;
-#endif
-
 #if PLATFORM_WINDOWS
-			int scale = GetScaleForHWND(hwndDlg);
+			int scale = iplug::GetScaleForHWND(hwndDlg);
 			mmi->ptMinTrackSize.x *= scale;
 			mmi->ptMinTrackSize.y *= scale;
 			mmi->ptMaxTrackSize.x *= scale;
@@ -769,7 +741,7 @@ WDL_DLGRET IPlugAPPHost::MainDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
 					GetClientRect(hwndDlg, &r);
 					int scale = 1;
 #if PLATFORM_WINDOWS
-					scale = GetScaleForHWND(hwndDlg);
+					scale = iplug::GetScaleForHWND(hwndDlg);
 #endif
 					pPlug->OnParentWindowResize(r.right / scale, r.bottom / scale);
 					return 1;

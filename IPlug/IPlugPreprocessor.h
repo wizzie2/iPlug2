@@ -124,11 +124,6 @@
 	#define PLUG_MAX_HEIGHT (PLUG_HEIGHT * 2)
 #endif
 
-// TODO: FPS should be read from client hardware and then have a FPS limit option client side
-#ifndef PLUG_FPS
-	#define PLUG_FPS 60
-#endif
-
 #if AAX_API
 	#ifndef AAX_TYPE_IDS
 		#error AAX_TYPE_IDS not defined - list of comma separated four char IDs, that correspond to the different possible channel layouts of your plug-in, e.g. 'EFN1', 'EFN2'
@@ -163,41 +158,31 @@
 	#define PLUG_CLASS_NAME VST3Controller
 #endif
 
-#define API_EXT2
-#if VST2_API
-	#define API_EXT "vst"
+// clang-format off
+#if PLATFORM_IOS
+	#define BUNDLE_ID BUNDLE_DOMAIN "." BUNDLE_MFR "." BUNDLE_NAME
+#elif VST2_API
 	#if REAPER_PLUGIN
+		#undef IPLUG2_API_HEADER
+		#define IPLUG2_API_HEADER "VST2/IPlugReaperVST2.h"
 		#define LICE_PROVIDED_BY_APP
-		#define PLUGIN_API_BASE IPlugReaperVST2
 		#undef FillRect
 		#undef DrawText
 		#undef Polygon
 	#endif
-#elif AU_API
-	#define API_EXT "audiounit"
-#elif AUv3_API
-	#undef API_EXT2
-	#define API_EXT  "app"
-	#define API_EXT2 ".AUv3"
+	#define BUNDLE_ID BUNDLE_DOMAIN "." BUNDLE_MFR "." "vst" "." BUNDLE_NAME
+#elif AU_API  // FIXME: cmake defines this as AUV2_API
+	#define BUNDLE_ID BUNDLE_DOMAIN "." BUNDLE_MFR "." "audiounit" "." BUNDLE_NAME
+#elif AUv3_API  // FIXME: cmake defines this as AUV3_API
+	#define BUNDLE_ID BUNDLE_DOMAIN "." BUNDLE_MFR "." "app" "." BUNDLE_NAME ".AUv3"
 #elif AAX_API
-	#define API_EXT "aax"
-	#define PROTOOLS
+	#define BUNDLE_ID BUNDLE_DOMAIN "." BUNDLE_MFR "." "aax" "." BUNDLE_NAME
 #elif APP_API
-	#define API_EXT "app"
+	#define BUNDLE_ID BUNDLE_DOMAIN "." BUNDLE_MFR "." "app" "." BUNDLE_NAME
 #elif VST3_API
-	#define API_EXT "vst3"
+	#define BUNDLE_ID BUNDLE_DOMAIN "." BUNDLE_MFR "." "vst3" "." BUNDLE_NAME
 #endif
-
-#if PLATFORM_WINDOWS || PLATFORM_WEB
-	#define BUNDLE_ID ""
-#elif PLATFORM_MAC
-	#define BUNDLE_ID BUNDLE_DOMAIN "." BUNDLE_MFR "." API_EXT "." BUNDLE_NAME API_EXT2
-#elif PLATFORM_IOS
-	#define BUNDLE_ID BUNDLE_DOMAIN "." BUNDLE_MFR "." BUNDLE_NAME API_EXT2
-#elif PLATFORM_LINUX
-// TODO:
-#endif
-#undef API_EXT2
+// clang-format on
 
 #ifdef __OBJC__
 	#ifndef OBJC_PREFIX

@@ -53,51 +53,39 @@ namespace iplug
 
 		double scale = 1.;
 
-		//SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-
 		// TODO: Create window should be used since dialog boxes don't support maximize window
 		CreateDialog(
 			(HINSTANCE) gHINSTANCE, MAKEINTRESOURCE(IDD_DIALOG_MAIN), GetDesktopWindow(), IPlugAPPHost::MainDlgProc);
 
-	#ifndef _DEBUG
-		HMENU menu = GetMenu(gHWND);
-		RemoveMenu(menu, 1, MF_BYPOSITION);
-		DrawMenuBar(gHWND);
-	#endif
+		//#ifndef _DEBUG
+		//	HMENU menu = GetMenu(gHWND);
+		//	RemoveMenu(menu, 1, MF_BYPOSITION);
+		//	DrawMenuBar(gHWND);
+		//#endif
 
 		MSG msg;
-		int result;
-
-		while ((result = GetMessage(&msg, NULL, 0, 0)) != 0)
+		while (GetMessage(&msg, NULL, 0, 0))
 		{
-			if (result == -1)
-				break;
-
-			if (!msg.hwnd)
-			{
-				DispatchMessage(&msg);
-				continue;
-			}
 
 			if (gHWND && (TranslateAccelerator(gHWND, hAccel, &msg) || IsDialogMessage(gHWND, &msg)))
 				continue;
 
+			// What the..?
+
 			// default processing for other dialogs
-			HWND hWndParent = NULL;
-			HWND temphwnd   = msg.hwnd;
-
-			do
-			{
-				if (GetClassLong(temphwnd, GCW_ATOM) == (INT) 32770)
-				{
-					hWndParent = temphwnd;
-					if (!(GetWindowLong(temphwnd, GWL_STYLE) & WS_CHILD))
-						break;  // not a child, exit
-				}
-			} while ((temphwnd = GetParent(temphwnd)) != NULL);
-
-			if (hWndParent && IsDialogMessage(hWndParent, &msg))
-				continue;
+			// HWND hWndParent = NULL;
+			// HWND temphwnd   = msg.hwnd;
+			// do
+			//{
+			//	if (GetClassLong(temphwnd, GCW_ATOM) == (INT) 32770)
+			//	{
+			//		hWndParent = temphwnd;
+			//		if (!(GetWindowLong(temphwnd, GWL_STYLE) & WS_CHILD))
+			//			break;  // not a child, exit
+			//	}
+			//} while ((temphwnd = GetParent(temphwnd)) != NULL);
+			// if (hWndParent && IsDialogMessage(hWndParent, &msg))
+			//	continue;
 
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);

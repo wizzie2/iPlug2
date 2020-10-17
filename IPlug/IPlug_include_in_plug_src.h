@@ -136,7 +136,7 @@ void* gHINSTANCE = nullptr;
 		END_FACTORY
 	#endif
 
-#elif defined AU_API
+#elif AU_API
 	extern "C"
 	{
 		#ifndef AU_NO_COMPONENT_ENTRY
@@ -154,7 +154,7 @@ void* gHINSTANCE = nullptr;
 		}
 	};
 
-#elif defined WAM_API
+#elif WAM_API
 	extern "C"
 	{
 		EMSCRIPTEN_KEEPALIVE void* createModule()
@@ -164,7 +164,7 @@ void* gHINSTANCE = nullptr;
 		}
 	}
 
-#elif defined WEB_API
+#elif WEB_API
 	std::unique_ptr<iplug::IPlugWeb> gPlug;
 	extern void StartMainLoopTimer();
 
@@ -219,7 +219,7 @@ void* gHINSTANCE = nullptr;
 		return 0;
 	}
 
-#elif defined AUv3_API || defined AAX_API || defined APP_API
+#elif AUv3_API || AAX_API || APP_API
 	// Nothing to do here
 #else
 	#error "No API defined!"
