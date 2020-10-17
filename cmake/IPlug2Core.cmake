@@ -214,12 +214,12 @@ macro(iplug_add_aax _target)
     )
     _iplug_parse_target_arguments(CONFIG_AAX AAX "" "${_oneValueArgs}" "" "${ARGN}")
 
-    _iplug_add_config_variable(CONFIG_AAX TARGET_AAX API 1)
-
     iplug_validate_string(TYPE_IDS             NOTEMPTY PREFIX CONFIG_AAX ALPHA NUMERIC SPACE APOSTROPHE COMMA)
     iplug_validate_string(TYPE_IDS_AUDIOSUITE  NOTEMPTY PREFIX CONFIG_AAX ALPHA NUMERIC SPACE APOSTROPHE COMMA)
     iplug_validate_string(DOES_AUDIOSUITE      DEFAULT "0" PREFIX CONFIG_AAX NOTEMPTY STREQUAL 0 1)
     iplug_validate_string(PLUG_CATEGORY_STR    DEFAULT "None" PREFIX CONFIG_AAX NOTEMPTY STREQUAL None EQ Dynamics PitchShift Reverb Delay Modulation Harmonic NoiseReduction Dither SoundField Effect)
+
+    _iplug_add_config_variable(CONFIG TARGET PROTOOLS 1)
 
     _iplug_add_config_variable(CONFIG_AAX TARGET_AAX PLUG_MFR_STR  "${CONFIG_PLUG_MFR}")
     _iplug_add_config_variable(CONFIG_AAX TARGET_AAX PLUG_NAME_STR "${CONFIG_PLUG_CLASS_NAME}\\n${CONFIG_PLUG_NAME_SHORT}")
@@ -236,7 +236,6 @@ macro(iplug_add_auv2 _target)
     )
     _iplug_parse_target_arguments(CONFIG_AUV2 AUV2 "" "${_oneValueArgs}" "" "${ARGN}")
 
-    _iplug_add_config_variable(CONFIG_AUV2 TARGET_AUV2 API 1)
     _iplug_add_config_variable(CONFIG_AUV2 TARGET_AUV2 ENTRY           "${CONFIG_PLUG_CLASS_NAME}_Entry")
     _iplug_add_config_variable(CONFIG_AUV2 TARGET_AUV2 ENTRY_STR       "${CONFIG_AUV2_ENTRY}")
     _iplug_add_config_variable(CONFIG_AUV2 TARGET_AUV2 VIEW_CLASS      "${CONFIG_PLUG_CLASS_NAME}_View")
@@ -257,7 +256,6 @@ macro(iplug_add_auv3 _target)
     set(_oneValueArgs
     )
     _iplug_parse_target_arguments(CONFIG_AUV3 AUV3 "" "${_oneValueArgs}" "" "${ARGN}")
-    _iplug_add_config_variable(CONFIG_AUV3 TARGET_AUV3 API 1)
 endmacro()
 
 #------------------------------------------------------------------------------
@@ -269,7 +267,6 @@ macro(iplug_add_web _target)
     )
     _iplug_parse_target_arguments(CONFIG_WEB WEB "" "${_oneValueArgs}" "" "${ARGN}")
 
-    _iplug_add_config_variable(CONFIG_WEB TARGET_WEB API 1)
     _iplug_add_config_variable(CONFIG TARGET USE_WEBGL2 0)
     _iplug_add_config_variable(CONFIG TARGET FULL_ES3 1)
     _iplug_add_config_variable(CONFIG_OVERRIDE OVERRIDE IPLUG_EDITOR 1)
@@ -285,7 +282,6 @@ macro(iplug_add_wam _target)
     )
     _iplug_parse_target_arguments(CONFIG_WAM WAM "" "${_oneValueArgs}" "" "${ARGN}")
 
-    _iplug_add_config_variable(CONFIG_WAM TARGET_WAM API 1)
     _iplug_add_config_variable(CONFIG_OVERRIDE OVERRIDE IPLUG_EDITOR 0)
     _iplug_add_config_variable(CONFIG_OVERRIDE OVERRIDE IPLUG_DSP    1)
 endmacro()
@@ -299,7 +295,6 @@ macro(iplug_add_vst3c _target)
     )
     _iplug_parse_target_arguments(CONFIG_VST3C VST3 "" "${_oneValueArgs}" "" "${ARGN}")
 
-    _iplug_add_config_variable(CONFIG_VST3C TARGET_VST3C API 1)
     _iplug_add_config_variable(CONFIG_OVERRIDE OVERRIDE IPLUG_EDITOR 1)
     _iplug_add_config_variable(CONFIG_OVERRIDE OVERRIDE IPLUG_DSP    0)
 endmacro()
@@ -313,7 +308,6 @@ macro(iplug_add_vst3p _target)
     )
     _iplug_parse_target_arguments(CONFIG_VST3P VST3 "" "${_oneValueArgs}" "" "${ARGN}")
 
-    _iplug_add_config_variable(CONFIG_VST3P TARGET_VST3P API 1)
     _iplug_add_config_variable(CONFIG_OVERRIDE OVERRIDE IPLUG_EDITOR 0)
     _iplug_add_config_variable(CONFIG_OVERRIDE OVERRIDE IPLUG_DSP    1)
 endmacro()
@@ -326,7 +320,6 @@ macro(iplug_add_vst2 _target)
     set(_oneValueArgs
     )
     _iplug_parse_target_arguments(CONFIG_VST2 VST2 "" "${_oneValueArgs}" "" "${ARGN}")
-    _iplug_add_config_variable(CONFIG_VST2 TARGET_VST2 API 1)
 endmacro()
 
 
@@ -343,7 +336,6 @@ macro(iplug_add_application _target)
     )
     _iplug_parse_target_arguments(CONFIG_APP TARGET_APP "" "${_oneValueArgs}" "" "${ARGN}")
 
-    _iplug_add_config_variable(CONFIG_APP TARGET_APP API 1)
     _iplug_add_config_variable(CONFIG_APP TARGET_APP MULT 1)  # APP_MULT should probably be removed
 
     if(PLATFORM_MAC)
@@ -400,8 +392,6 @@ macro(iplug_add_vst3 _target)
             VS_CONFIGURATION_TYPE Utility) # does an equivalent option for the other generators exist?
     else()
         _iplug_parse_target_arguments(CONFIG_VST3 TARGET_VST3 "" "${_oneValueArgs}" "" "${ARGN}")
-
-        _iplug_add_config_variable(CONFIG_VST3 TARGET_VST3 API 1)
 
         set(VST3_ICON "${CONFIG_BUNDLE_ICON}")
         if("${VST3_ICON}" STREQUAL "" AND EXISTS "${VST3_SDK_PATH}/doc/artwork/VST_Logo_Steinberg.ico")
