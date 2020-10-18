@@ -37,13 +37,6 @@ namespace iplug
 	};
 
 
-	enum class EVST3ParamIDs : uint32
-	{
-		kBypassParam = 0x10000,
-		kPresetParam,  // not used unless baked in presets declared
-		kMIDICCParamStartIdx
-	};
-
 	/** @enum EParamSource
 	 * Used to identify the source of a parameter change
 	 */

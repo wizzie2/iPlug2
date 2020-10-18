@@ -10,11 +10,16 @@
 
 #pragma once
 
-#include "IPlugVST3_Parameter.h"
-#include "IPlugVST3_ControllerBase.h"
-
 
 BEGIN_IPLUG_NAMESPACE
+
+enum class EVST3ParamIDs : uint32
+{
+	kBypassParam = 0x10000,
+	kPresetParam,  // not used unless baked in presets declared
+	kMIDICCParamStartIdx
+};
+
 
 /** Shared VST3 State management code */
 struct IPlugVST3State
@@ -27,7 +32,8 @@ struct IPlugVST3State
 		// TODO: IPlugVer should be in chunk!
 		//  IByteChunk::GetIPlugVerFromChunk(chunk)
 
-		return false;  // TODO: pPlug->SerializeState is a nullptr for some reason and crashes reaper (not studio one though)
+		return false;  // TODO: pPlug->SerializeState is a nullptr for some reason and crashes reaper (not studio one
+					   // though)
 
 		if (pPlug->SerializeState(chunk))
 		{
@@ -41,7 +47,7 @@ struct IPlugVST3State
 			return false;
 
 		Steinberg::int32 toSaveBypass = pPlug->GetBypassed() ? 1 : 0;
-		pState->write(&toSaveBypass, sizeof (Steinberg::int32));
+		pState->write(&toSaveBypass, sizeof(Steinberg::int32));
 
 		return true;
 	};
@@ -51,7 +57,7 @@ struct IPlugVST3State
 	{
 		TRACE
 
-			IByteChunk chunk;
+		IByteChunk chunk;
 
 		const int bytesPerBlock = 128;
 		char buffer[bytesPerBlock];
@@ -59,7 +65,7 @@ struct IPlugVST3State
 		while (true)
 		{
 			Steinberg::int32 bytesRead = 0;
-			auto status = pState->read(buffer, (Steinberg::int32) bytesPerBlock, &bytesRead);
+			auto status                = pState->read(buffer, (Steinberg::int32) bytesPerBlock, &bytesRead);
 
 			if (bytesRead <= 0 || (status != Steinberg::kResultTrue && pPlug->GetHost() != EHost::kHostWaveLab))
 				break;
@@ -71,7 +77,7 @@ struct IPlugVST3State
 		Steinberg::int32 savedBypass = 0;
 
 		pState->seek(pos, Steinberg::IBStream::IStreamSeekMode::kIBSeekSet);
-		if (pState->read (&savedBypass, sizeof (Steinberg::int32)) != Steinberg::kResultOk)
+		if (pState->read(&savedBypass, sizeof(Steinberg::int32)) != Steinberg::kResultOk)
 		{
 			return false;
 		}

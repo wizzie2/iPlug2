@@ -9,9 +9,6 @@
 */
 
 
-#include "IPlugVST3_Controller.h"
-#include "IPlugVST3_Parameter.h"
-
 using namespace iplug;
 using namespace Steinberg;
 using namespace Vst;

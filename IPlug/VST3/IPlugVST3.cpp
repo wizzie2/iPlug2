@@ -8,13 +8,9 @@
  ==============================================================================
 */
 
-#include "IPlugVST3.h"
-
 using namespace iplug;
 using namespace Steinberg;
 using namespace Vst;
-
-#include "IPlugVST3_Parameter.h"
 
 #pragma mark - IPlugVST3 Constructor/Destructor
 
@@ -164,7 +160,7 @@ tresult PLUGIN_API IPlugVST3::getMidiControllerAssignment(Steinberg::int32 busIn
 														  CtrlNumber midiCCNumber,
 														  ParamID& tag)
 {
-	if (busIndex == 0 && midiChannel < VST3_NUM_CC_CHANS)
+	if (busIndex == 0 && midiChannel < Config::Midi::NumberOfCCChannels)
 	{
 		tag = +EVST3ParamIDs::kMIDICCParamStartIdx + (midiChannel * kCountCtrlNumber) + midiCCNumber;
 		return kResultTrue;

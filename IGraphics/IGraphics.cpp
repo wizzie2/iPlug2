@@ -13,15 +13,6 @@ BEGIN_INCLUDE_DEPENDENCIES
 #include <nanosvg.h>
 END_INCLUDE_DEPENDENCIES
 
-#if VST3C_API
-	#include "VST3/IPlugVST3_Controller.h"
-	#include "VST3/IPlugVST3_View.h"
-	using VST3_API_BASE = iplug::IPlugVST3Controller;
-#elif VST3_API
-	#include "VST3/IPlugVST3.h"
-	using VST3_API_BASE = iplug::IPlugVST3;
-#endif
-
 using namespace iplug;
 using namespace igraphics;
 
@@ -1492,7 +1483,7 @@ void IGraphics::PopupHostContextMenuForParam(IControl* pControl, int paramIdx, f
 
 #if VST3_API
 	#if !VST3P_API
-		VST3_API_BASE* pVST3 = dynamic_cast<VST3_API_BASE*>(GetDelegate());
+		Plugin* pVST3 = dynamic_cast<Plugin*>(GetDelegate());
 
 		if (!pVST3->GetComponentHandler() || !pVST3->GetView())
 			return;
@@ -2364,7 +2355,7 @@ void IGraphics::SetQwertyMidiKeyHandlerFunc(std::function<void(const IMidiMsg& m
 			{
 				if (keysDown[i])
 				{
-					msg.MakeNoteOffMsg(i, 0);
+					msg.SetNoteOff(i, 0);
 					GetDelegate()->SendMidiMsgFromUI(msg);
 					if (func)
 						func(msg);
@@ -2437,7 +2428,7 @@ void IGraphics::SetQwertyMidiKeyHandlerFunc(std::function<void(const IMidiMsg& m
 		{
 			if (keysDown[pitch] == false)
 			{
-				msg.MakeNoteOnMsg(pitch, 127, 0);
+				msg.SetNoteOn(pitch, 127, 0);
 				keysDown[pitch] = true;
 				GetDelegate()->SendMidiMsgFromUI(msg);
 				if (func)
@@ -2448,7 +2439,7 @@ void IGraphics::SetQwertyMidiKeyHandlerFunc(std::function<void(const IMidiMsg& m
 		{
 			if (keysDown[pitch] == true)
 			{
-				msg.MakeNoteOffMsg(pitch, 127, 0);
+				msg.SetNoteOff(pitch, 127, 0);
 				keysDown[pitch] = false;
 				GetDelegate()->SendMidiMsgFromUI(msg);
 				if (func)

@@ -8,18 +8,12 @@
  ==============================================================================
 */
 
-#include "IGraphicsWin.h"
-#include "IPlugParameter.h"
-#include "IPopupMenuControl.h"
-#include "IPlugPaths.h"
-
 
 using namespace iplug;
 using namespace igraphics;
 
-static int nWndClassReg         = 0;
-static const char* wndClassName = "IPlugWndClass";
-static double sFPS              = 0.0;
+static int nWndClassReg                   = 0;
+static constexpr const char* wndClassName = "IPlugWndClass";
 
 #define PARAM_EDIT_ID  99
 #define IPLUG_TIMER_ID 2
@@ -129,7 +123,7 @@ StaticStorage<IGraphicsWin::HFontHolder> IGraphicsWin::sHFontCache;
 
 #pragma mark - Mouse and tablet helpers
 
-//extern const int GetScaleForHWND(const HWND hWnd, const bool useCachedResult = true);
+// extern const int GetScaleForHWND(const HWND hWnd, const bool useCachedResult = true);
 
 inline IMouseInfo IGraphicsWin::GetMouseInfo(LPARAM lParam, WPARAM wParam)
 {
@@ -258,7 +252,7 @@ void IGraphicsWin::OnDisplayTimer(uint32 vBlankCount)
 			// Force a redraw right now
 			UpdateWindow(mPlugWnd);
 
-			if constexpr (Config::debugShowVBlankMessages)
+			if constexpr (Config::Debug::ShowVBlankMessages)
 			{
 				if (mVSYNCEnabled)
 				{
@@ -289,12 +283,11 @@ LRESULT CALLBACK IGraphicsWin::WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARA
 	if (msg == WM_VBLANK)
 	{
 		DEBUG_ASSERT(pGraphics);
-		auto c = ::GetTickCount64() - lParam;
-		if (c > 7)
-			// Being delayed by more than 7ms only because of slow message queue
-			DBGMSG("PostMessage delay > %i ms.", c);
-
-
+		if constexpr (Config::Debug::ShowVBlankDelayedQueueMessages)
+		{
+			if (auto c = ::GetTickCount64() - lParam; c > 8)
+				DBGMSG("PostMessage delay > %i ms.", c);  // delayed by more than 8ms due to slow msg queue
+		}
 		pGraphics->OnDisplayTimer(wParam);
 		return 0;
 	}
@@ -1188,7 +1181,8 @@ void* IGraphicsWin::OpenWindow(void* pParent)
 
 	if (mPlugWnd && TooltipsEnabled())
 	{
-		bool ok                                 = false;
+		bool ok = false;
+
 		static const INITCOMMONCONTROLSEX iccex = {sizeof(INITCOMMONCONTROLSEX), ICC_TAB_CLASSES};
 
 		if (InitCommonControlsEx(&iccex))
