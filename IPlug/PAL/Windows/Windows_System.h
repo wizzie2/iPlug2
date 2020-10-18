@@ -11,8 +11,6 @@
 */
 
 
-#include "PAL/Generic/Generic_System.h"
-
 namespace iplug
 {
 	class System : public generic::System

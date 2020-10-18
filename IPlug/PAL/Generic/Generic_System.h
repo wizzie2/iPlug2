@@ -12,6 +12,7 @@
 
 namespace iplug::generic
 {
+	// In Generic_System.h for now
 	struct MXCSRScope
 	{
 		MXCSRScope(uint32 MXCSR_Flags = 0) {}
@@ -24,7 +25,7 @@ namespace iplug::generic
 	struct System
 	{
 		// Pre-defined cache line size
-		static inline constexpr int CacheLineSize()
+		static constexpr int CacheLineSize()
 		{
 			return +ECacheLineSize::Native;
 		}

@@ -10,7 +10,9 @@
  ==============================================================================
 */
 
+//-----------------------------------------------------------------------------
 // Documentation for system.h
+
 #ifdef DOXYGEN_GENERATING_OUTPUT
 namespace iplug
 {
@@ -23,14 +25,19 @@ namespace iplug
 		static inline const EEndian GetEndianness();
 	};
 }  // namespace iplug
-#endif
+#endif  // DOXYGEN_GENERATING_OUTPUT
 
+
+//-----------------------------------------------------------------------------
+
+#include "Generic/Generic_System.h"
 
 #if __has_include(PLATFORM_HEADER(System.h))
 	#include PLATFORM_HEADER(System.h)
 #endif
 
 
+//-----------------------------------------------------------------------------
 // In System.h for now
 namespace iplug
 {
