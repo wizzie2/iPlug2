@@ -136,6 +136,8 @@ namespace iplug::type  // move everything to iplug namespace?
 
 namespace iplug
 {
+	// enum class operators
+
 	/**
 	 * Shortcut to cast enum class members to their underlying type. Prefix "+" to do an automatic
 	 * "static_cast<underlying_type>(Enum)". Default underlying type for 'enum class' is int if not specified.
@@ -173,6 +175,23 @@ namespace iplug
 	{
 		return !(lhs == rhs);
 	}
+
+
+	// Bitwise NOT for EnumClass
+	template <class Ta>
+	inline constexpr auto operator~(const Ta& e) -> std::enable_if_t<type::IsEnumClass<Ta>, Ta>
+	{
+		return static_cast<Ta>(~+e);
+	}
+
+
+	// Logical NOT for EnumClass
+	template <class Ta>
+	inline constexpr auto operator!(const Ta& e) -> std::enable_if_t<type::IsEnumClass<Ta>, bool>
+	{
+		return 0 == e;
+	}
+
 
 	// Bitwise AND for EnumClass/EnumClass, EnumClass/Integer and Integer/EnumClass
 	template <class Ta, class Tb>
@@ -239,6 +258,28 @@ namespace iplug
 			return static_cast<Ta>(+lhs >> rhs);
 		else
 			return lhs >> +rhs;
+	}
+
+	// Bitwise OR assignment for EnumClass/EnumClass, EnumClass/Integer and Integer/EnumClass
+	template <class Ta, class Tb>
+	inline constexpr auto operator|=(Ta& lhs, const Tb rhs)
+		-> std::enable_if_t<((std::is_integral_v<Ta> && type::IsEnumClass<Tb>) ||
+							 type::IsEnumClass<Ta> && std::is_integral_v<Tb>) ||
+								(type::IsEnumClass<Ta> && type::IsEnumClass<Tb>),
+							Ta>
+	{
+		return lhs = lhs | rhs;
+	}
+
+	// Bitwise AND assignment for EnumClass/EnumClass, EnumClass/Integer and Integer/EnumClass
+	template <class Ta, class Tb>
+	inline constexpr auto operator&=(Ta& lhs, const Tb rhs)
+		-> std::enable_if_t<(std::is_integral_v<Ta> && type::IsEnumClass<Tb>) ||
+								(type::IsEnumClass<Ta> && std::is_integral_v<Tb>) ||
+								(type::IsEnumClass<Ta> && type::IsEnumClass<Tb>),
+							Ta>
+	{
+		return lhs = lhs & rhs;
 	}
 
 }  // namespace iplug
