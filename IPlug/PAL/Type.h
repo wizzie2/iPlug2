@@ -144,9 +144,99 @@ namespace iplug
 	 * @return value of Enum members casted to an underlying type.
 	 */
 	template <class T>
-	inline constexpr auto operator+(const T& value) -> std::enable_if_t<type::IsEnumClass<T>, std::underlying_type_t<T>>
+	inline constexpr auto operator+(const T& e) -> std::enable_if_t<type::IsEnumClass<T>, std::underlying_type_t<T>>
 	{
-		return static_cast<std::underlying_type_t<T>>(value);
+		return static_cast<std::underlying_type_t<T>>(e);
+	}
+
+
+	template <class Ta, class Tb>
+	inline constexpr auto operator==(const Ta& lhs, const Tb& rhs)
+		-> std::enable_if_t<(std::is_integral_v<Ta> && type::IsEnumClass<Tb>) ||
+								(type::IsEnumClass<Ta> && std::is_integral_v<Tb>),
+							bool>
+	{
+		if constexpr (type::IsEnumClass<Ta>)
+			return +lhs == rhs;
+		else
+			return lhs == +rhs;
+	}
+
+
+	template <class Ta, class Tb>
+	inline constexpr auto operator!=(const Ta& lhs, const Tb& rhs)
+		-> std::enable_if_t<(type::IsEnumClass<Ta> && std::is_integral_v<Tb>) ||
+								(std::is_integral_v<Ta> && type::IsEnumClass<Tb>),
+							bool>
+	{
+		return !(lhs == rhs);
+	}
+
+	// Bitwise AND for EnumClass/EnumClass, EnumClass/Integer and Integer/EnumClass
+	template <class Ta, class Tb>
+	inline constexpr auto operator&(const Ta& lhs, const Tb& rhs)
+		-> std::enable_if_t<(std::is_integral_v<Ta> && type::IsEnumClass<Tb>) ||
+								(type::IsEnumClass<Ta> && std::is_integral_v<Tb>) ||
+								(type::IsEnumClass<Ta> && type::IsEnumClass<Tb>),
+							Ta>
+	{
+		if constexpr (type::IsEnumClass<Ta> && type::IsEnumClass<Tb>)
+			return static_cast<Ta>(+lhs & +rhs);
+		else if constexpr (type::IsEnumClass<Ta>)
+			return static_cast<Ta>(+lhs & rhs);
+		else
+			return lhs & +rhs;
+	}
+
+
+	// Bitwise OR for EnumClass/EnumClass, EnumClass/Integer and Integer/EnumClass
+	template <class Ta, class Tb>
+	inline constexpr auto operator|(const Ta& lhs, const Tb& rhs)
+		-> std::enable_if_t<(std::is_integral_v<Ta> && type::IsEnumClass<Tb>) ||
+								(type::IsEnumClass<Ta> && std::is_integral_v<Tb>) ||
+								(type::IsEnumClass<Ta> && type::IsEnumClass<Tb>),
+							Ta>
+	{
+		if constexpr (type::IsEnumClass<Ta> && type::IsEnumClass<Tb>)
+			return static_cast<Ta>(+lhs | +rhs);
+		else if constexpr (type::IsEnumClass<Ta>)
+			return static_cast<Ta>(+lhs | rhs);
+		else
+			return lhs | +rhs;
+	}
+
+
+	// Bitwise shift left for EnumClass/EnumClass, EnumClass/Integer and Integer/EnumClass
+	template <class Ta, class Tb>
+	inline constexpr auto operator<<(const Ta& lhs, const Tb& rhs)
+		-> std::enable_if_t<(std::is_integral_v<Ta> && type::IsEnumClass<Tb>) ||
+								(type::IsEnumClass<Ta> && std::is_integral_v<Tb>) ||
+								(type::IsEnumClass<Ta> && type::IsEnumClass<Tb>),
+							Ta>
+	{
+		if constexpr (type::IsEnumClass<Ta> && type::IsEnumClass<Tb>)
+			return static_cast<Ta>(+lhs << +rhs);
+		else if constexpr (type::IsEnumClass<Ta>)
+			return static_cast<Ta>(+lhs << rhs);
+		else
+			return lhs << +rhs;
+	}
+
+
+	// Bitwise shift right for EnumClass/EnumClass, EnumClass/Integer and Integer/EnumClass
+	template <class Ta, class Tb>
+	inline constexpr auto operator>>(const Ta& lhs, const Tb& rhs)
+		-> std::enable_if_t<(std::is_integral_v<Ta> && type::IsEnumClass<Tb>) ||
+								(type::IsEnumClass<Ta> && std::is_integral_v<Tb>) ||
+								(type::IsEnumClass<Ta> && type::IsEnumClass<Tb>),
+							std::conditional_t<type::IsEnumClass<Ta>, Ta, Tb>>
+	{
+		if constexpr (type::IsEnumClass<Ta> && type::IsEnumClass<Tb>)
+			return static_cast<Ta>(+lhs >> +rhs);
+		else if constexpr (type::IsEnumClass<Ta>)
+			return static_cast<Ta>(+lhs >> rhs);
+		else
+			return lhs >> +rhs;
 	}
 
 }  // namespace iplug
