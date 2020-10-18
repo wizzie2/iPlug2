@@ -41,7 +41,7 @@ IPlugInstrument::IPlugInstrument(const InstanceInfo& info) : Plugin(info, Config
 		pGraphics->AttachControl(new IVKeyboardControl(keyboardBounds), kCtrlTagKeyboard);
 		pGraphics->AttachControl(new IWheelControl(wheelsBounds.FracRectHorizontal(0.5)), kCtrlTagBender);
 		pGraphics->AttachControl(
-			new IWheelControl(wheelsBounds.FracRectHorizontal(0.5, true), EMidiControlChangeMsg::kModWheel));
+			new IWheelControl(wheelsBounds.FracRectHorizontal(0.5, true), EMidiControlChangeMsg::ModulationWheel));
 		//    pGraphics->AttachControl(new IVMultiSliderControl<4>(b.GetGridCell(0, 2, 2).GetPadded(-30), "",
 		//    DEFAULT_STYLE, kParamAttack, EDirection::Vertical, 0.f, 1.f));
 		const IRECT controls = b.GetGridCell(1, 2, 2);
@@ -142,7 +142,7 @@ IPlugInstrument::IPlugInstrument(const InstanceInfo& info) : Plugin(info, Config
 
 		pGraphics->SetQwertyMidiKeyHandlerFunc([pGraphics](const IMidiMsg& msg) {
 			dynamic_cast<IVKeyboardControl*>(pGraphics->GetControlWithTag(kCtrlTagKeyboard))
-				->SetNoteFromMidi(msg.NoteNumber(), msg.StatusMsg() == EMidiStatusMsg::kNoteOn);
+				->SetNoteFromMidi(msg.GetNoteNumber(), msg.GetStatus() == EMidiStatusMsg::NoteOn);
 		});
 	};
 #endif
@@ -165,7 +165,8 @@ bool IPlugInstrument::OnMessage(int msgTag, int ctrlTag, int dataSize, const voi
 #if IPLUG_DSP
 void IPlugInstrument::ProcessBlock(sample** inputs, sample** outputs, int nFrames)
 {
-	mDSP.ProcessBlock(nullptr, outputs, 2, nFrames, static_cast<sample>(mTimeInfo.mPPQPos), mTimeInfo.mTransportIsRunning);
+	mDSP.ProcessBlock(
+		nullptr, outputs, 2, nFrames, static_cast<sample>(mTimeInfo.mPPQPos), mTimeInfo.mTransportIsRunning);
 	mMeterSender.ProcessBlock(outputs, nFrames, kCtrlTagMeter);
 	mLFOVisSender.PushData({kCtrlTagLFOVis, {float(mDSP.mLFO.GetLastOutput())}});
 }
@@ -183,29 +184,20 @@ void IPlugInstrument::OnReset()
 
 void IPlugInstrument::ProcessMidiMsg(const IMidiMsg& msg)
 {
-	TRACE;
-
-	EMidiStatusMsg status = msg.StatusMsg();
-
+	EMidiStatusMsg status = msg.GetStatus();
 	switch (status)
 	{
-		case EMidiStatusMsg::kNoteOn:
-		case EMidiStatusMsg::kNoteOff:
-		case EMidiStatusMsg::kPolyAftertouch:
-		case EMidiStatusMsg::kControlChange:
-		case EMidiStatusMsg::kProgramChange:
-		case EMidiStatusMsg::kChannelAftertouch:
-		case EMidiStatusMsg::kPitchWheel:
-		{
-			goto handle;
-		}
-		default:
-			return;
+		case EMidiStatusMsg::NoteOn:
+		case EMidiStatusMsg::NoteOff:
+		case EMidiStatusMsg::PolyphonicAftertouch:
+		case EMidiStatusMsg::ControlChange:
+		case EMidiStatusMsg::ProgramChange:
+		case EMidiStatusMsg::ChannelAftertouch:
+		case EMidiStatusMsg::PitchBendChange:
+			mDSP.ProcessMidiMsg(msg);
+			SendMidiMsg(msg);
+			break;
 	}
-
-handle:
-	mDSP.ProcessMidiMsg(msg);
-	SendMidiMsg(msg);
 }
 
 void IPlugInstrument::OnParamChange(int paramIdx)

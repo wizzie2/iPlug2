@@ -27,9 +27,9 @@ IPlugMidiEffect::IPlugMidiEffect(const InstanceInfo& info)
       for (int i = 0; i<3; i++)
       {
         if(onoff)
-          msg.MakeNoteOnMsg(pitches[i], 60, 0);
+          msg.SetNoteOn(pitches[i], 60, 0);
         else
-          msg.MakeNoteOffMsg(pitches[i], 0);
+          msg.SetNoteOff(pitches[i], 0);
       
         SendMidiMsgFromUI(msg);
       }

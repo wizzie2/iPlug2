@@ -94,7 +94,7 @@ void IPlugVST3ProcessorBase::ProcessMidiIn(Steinberg::Vst::IEventList* pEventLis
 				{
 					case Steinberg::Vst::Event::kNoteOnEvent:
 					{
-						msg.MakeNoteOnMsg(
+						msg.SetNoteOn(
 							event.noteOn.pitch, event.noteOn.velocity, event.sampleOffset, event.noteOn.channel);
 						ProcessMidiMsg(msg);
 						processorQueue.Push(msg);
@@ -103,14 +103,14 @@ void IPlugVST3ProcessorBase::ProcessMidiIn(Steinberg::Vst::IEventList* pEventLis
 
 					case Steinberg::Vst::Event::kNoteOffEvent:
 					{
-						msg.MakeNoteOffMsg(event.noteOff.pitch, event.sampleOffset, event.noteOff.channel);
+						msg.SetNoteOff(event.noteOff.pitch, event.sampleOffset, event.noteOff.channel);
 						ProcessMidiMsg(msg);
 						processorQueue.Push(msg);
 						break;
 					}
 					case Steinberg::Vst::Event::kPolyPressureEvent:
 					{
-						msg.MakePolyATMsg(event.polyPressure.pitch,
+						msg.SetPolyphonicAftertouch(event.polyPressure.pitch,
 										  event.polyPressure.pressure * 127.,
 										  event.sampleOffset,
 										  event.polyPressure.channel);
@@ -149,63 +149,63 @@ void IPlugVST3ProcessorBase::ProcessMidiOut(IPlugQueue<SysExData>& sysExQueue,
 		{
 			IMidiMsg& msg = mMidiOutputQueue.Peek();
 
-			if (msg.StatusMsg() == EMidiStatusMsg::kNoteOn)
+			if (msg.GetStatus() == EMidiStatusMsg::NoteOn)
 			{
 				Steinberg::Vst::Helpers::init(toAdd, Steinberg::Vst::Event::kNoteOnEvent, 0 /*bus id*/, msg.mOffset);
 
-				toAdd.noteOn.channel  = msg.Channel();
-				toAdd.noteOn.pitch    = msg.NoteNumber();
+				toAdd.noteOn.channel  = msg.GetChannel();
+				toAdd.noteOn.pitch    = msg.GetNoteNumber();
 				toAdd.noteOn.tuning   = 0.;
-				toAdd.noteOn.velocity = (float) msg.Velocity() * (1.f / 127.f);
+				toAdd.noteOn.velocity = (float) msg.GetVelocity() * (1.f / 127.f);
 				pOutputEvents->addEvent(toAdd);
 			}
-			else if (msg.StatusMsg() == EMidiStatusMsg::kNoteOff)
+			else if (msg.GetStatus() == EMidiStatusMsg::NoteOff)
 			{
 				Steinberg::Vst::Helpers::init(toAdd, Steinberg::Vst::Event::kNoteOffEvent, 0 /*bus id*/, msg.mOffset);
 
-				toAdd.noteOff.channel  = msg.Channel();
-				toAdd.noteOff.pitch    = msg.NoteNumber();
-				toAdd.noteOff.velocity = (float) msg.Velocity() * (1.f / 127.f);
+				toAdd.noteOff.channel  = msg.GetChannel();
+				toAdd.noteOff.pitch    = msg.GetNoteNumber();
+				toAdd.noteOff.velocity = (float) msg.GetVelocity() * (1.f / 127.f);
 				pOutputEvents->addEvent(toAdd);
 			}
-			else if (msg.StatusMsg() == EMidiStatusMsg::kPolyAftertouch)
+			else if (msg.GetStatus() == EMidiStatusMsg::PolyphonicAftertouch)
 			{
 				Steinberg::Vst::Helpers::initLegacyMIDICCOutEvent(
-					toAdd, Steinberg::Vst::ControllerNumbers::kCtrlPolyPressure, msg.Channel(), msg.mData1, msg.mData2);
+					toAdd, Steinberg::Vst::ControllerNumbers::kCtrlPolyPressure, msg.GetChannel(), msg.mData1, msg.mData2);
 				toAdd.sampleOffset = msg.mOffset;
 				pOutputEvents->addEvent(toAdd);
 			}
-			else if (msg.StatusMsg() == EMidiStatusMsg::kChannelAftertouch)
+			else if (msg.GetStatus() == EMidiStatusMsg::ChannelAftertouch)
 			{
 				Steinberg::Vst::Helpers::initLegacyMIDICCOutEvent(
-					toAdd, Steinberg::Vst::ControllerNumbers::kAfterTouch, msg.Channel(), msg.mData1, msg.mData2);
+					toAdd, Steinberg::Vst::ControllerNumbers::kAfterTouch, msg.GetChannel(), msg.mData1, msg.mData2);
 				toAdd.sampleOffset = msg.mOffset;
 				pOutputEvents->addEvent(toAdd);
 			}
-			else if (msg.StatusMsg() == EMidiStatusMsg::kProgramChange)
+			else if (msg.GetStatus() == EMidiStatusMsg::ProgramChange)
 			{
 				Steinberg::Vst::Helpers::initLegacyMIDICCOutEvent(
-					toAdd, Steinberg::Vst::ControllerNumbers::kCtrlProgramChange, msg.Channel(), msg.Program(), 0);
+					toAdd, Steinberg::Vst::ControllerNumbers::kCtrlProgramChange, msg.GetChannel(), msg.GetProgram(), 0);
 				toAdd.sampleOffset = msg.mOffset;
 				pOutputEvents->addEvent(toAdd);
 			}
-			else if (msg.StatusMsg() == EMidiStatusMsg::kControlChange)
+			else if (msg.GetStatus() == EMidiStatusMsg::ControlChange)
 			{
 				Steinberg::Vst::Helpers::initLegacyMIDICCOutEvent(
-					toAdd, msg.mData1, msg.Channel(), msg.mData2, 0 /* value2?*/);
+					toAdd, msg.mData1, msg.GetChannel(), msg.mData2, 0 /* value2?*/);
 				toAdd.sampleOffset = msg.mOffset;
 				pOutputEvents->addEvent(toAdd);
 			}
-			else if (msg.StatusMsg() == EMidiStatusMsg::kPitchWheel)
+			else if (msg.GetStatus() == EMidiStatusMsg::PitchBendChange)
 			{
 				toAdd.type                    = Steinberg::Vst::Event::kLegacyMIDICCOutEvent;
-				toAdd.midiCCOut.channel       = msg.Channel();
+				toAdd.midiCCOut.channel       = msg.GetChannel();
 				toAdd.sampleOffset            = msg.mOffset;
 				toAdd.midiCCOut.controlNumber = Steinberg::Vst::ControllerNumbers::kPitchBend;
 
-				// int16 tmp             = static_cast<int16>(msg.PitchWheel() * 0x3FFF);
-				// toAdd.midiCCOut.value  = tmp & 0x7F;
-				// toAdd.midiCCOut.value2 = (tmp >> 7) & 0x7F;
+				 //int16 tmp             = static_cast<int16>(msg.GetPitchWheel() * 0x3FFF);
+				 //toAdd.midiCCOut.value  = tmp & 0x7F;
+				 //toAdd.midiCCOut.value2 = (tmp >> 7) & 0x7F;
 				toAdd.midiCCOut.value  = msg.mData1;
 				toAdd.midiCCOut.value2 = msg.mData2;
 
@@ -372,11 +372,11 @@ void IPlugVST3ProcessorBase::ProcessParameterChanges(Steinberg::Vst::ProcessData
 						IMidiMsg msg;
 
 						if (+ctrlr == Steinberg::Vst::ControllerNumbers::kAfterTouch)
-							msg.MakeChannelATMsg(static_cast<uint8>(value * 127), offsetSamples, channel);
+							msg.SetChannelAftertouch(static_cast<float>(value), offsetSamples, channel);
 						else if (+ctrlr == Steinberg::Vst::ControllerNumbers::kPitchBend)
-							msg.MakePitchWheelMsg((value * 2) - 1, channel, offsetSamples);
+							msg.SetPitchWheel((value * 2) - 1, channel, offsetSamples);
 						else
-							msg.MakeControlChangeMsg(ctrlr, value, channel, offsetSamples);
+							msg.SetControlChange(ctrlr, value, channel, offsetSamples);
 
 						fromProcessor.Push(msg);
 						ProcessMidiMsg(msg);

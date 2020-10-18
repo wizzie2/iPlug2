@@ -352,7 +352,7 @@ class IPlugProcessor
 	{
 		mSampleRate = sampleRate;
 	}
-	void SetBlockSize(int blockSize);
+	void SetBlockSize(int blockSize = Config::defaultChannelBlockSize);
 	void SetBypassed(bool bypassed)
 	{
 		mBypassed = bypassed;

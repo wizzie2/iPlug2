@@ -16,114 +16,172 @@
  * @ingroup IPlugStructs
  */
 
-#include "IPlugLogger.h"
 
 BEGIN_IPLUG_NAMESPACE
 
 /** /todo */
-enum class EMidiStatusMsg : uint32
+enum class EMidiStatusMsg : uint8
 {
-	kNone              = 0,
-	kNoteOff           = 8,
-	kNoteOn            = 9,
-	kPolyAftertouch    = 10,
-	kControlChange     = 11,
-	kProgramChange     = 12,
-	kChannelAftertouch = 13,
-	kPitchWheel        = 14
+	None                 = 0x0,
+	NoteOff              = 0x8,
+	NoteOn               = 0x9,
+	PolyphonicAftertouch = 0xA,
+	ControlChange        = 0xB,
+	ProgramChange        = 0xC,
+	ChannelAftertouch    = 0xD,
+	PitchBendChange      = 0xE,
+	// SystemExclusive      = 0xF0,  // System Common
+	// MIDITimeCodeQtrFrame = 0xF1,
+	// SongPositionPointer  = 0xF2,
+	// SongSelect           = 0xF3,
+	// Reserved244          = 0xF4,
+	// Reserved245          = 0xF5,
+	// TuneRequest          = 0xF6,
+	// EndOfSysEx           = 0xF7,
+	// TimingClock          = 0xF8,  // System Realtime
+	// Reserved249          = 0xF9,
+	// Start                = 0xFA,
+	// Continue             = 0xFB,
+	// Stop                 = 0xFC,
+	// Reserved253          = 0xFD,
+	// ActiveSensing        = 0xFE,
+	// SystemReset          = 0xFF
+
 };
 
 
 /** /todo */
-enum class EMidiControlChangeMsg : uint32
+enum class EMidiControlChangeMsg : uint8
 {
-	// Custom
-	kNoCC = 0xFF,
-
-	// Control Changes and Mode Changes
-	kModWheel                  = 1,
-	kBreathController          = 2,
-	kUndefined003              = 3,
-	kFootController            = 4,
-	kPortamentoTime            = 5,
-	kChannelVolume             = 7,
-	kBalance                   = 8,
-	kUndefined009              = 9,
-	kPan                       = 10,
-	kExpressionController      = 11,
-	kEffectControl1            = 12,
-	kEffectControl2            = 13,
-	kUndefined014              = 14,
-	kUndefined015              = 15,
-	kGeneralPurposeController1 = 16,
-	kGeneralPurposeController2 = 17,
-	kGeneralPurposeController3 = 18,
-	kGeneralPurposeController4 = 19,
-	kUndefined020              = 20,
-	kUndefined021              = 21,
-	kUndefined022              = 22,
-	kUndefined023              = 23,
-	kUndefined024              = 24,
-	kUndefined025              = 25,
-	kUndefined026              = 26,
-	kUndefined027              = 27,
-	kUndefined028              = 28,
-	kUndefined029              = 29,
-	kUndefined030              = 30,
-	kUndefined031              = 31,
-	kSustainOnOff              = 64,
-	kPortamentoOnOff           = 65,
-	kSustenutoOnOff            = 66,
-	kSoftPedalOnOff            = 67,
-	kLegatoOnOff               = 68,
-	kHold2OnOff                = 69,
-	kSoundVariation            = 70,
-	kResonance                 = 71,
-	kReleaseTime               = 72,
-	kAttackTime                = 73,
-	kCutoffFrequency           = 74,
-	kDecayTime                 = 75,
-	kVibratoRate               = 76,
-	kVibratoDepth              = 77,
-	kVibratoDelay              = 78,
-	kSoundControllerUndefined  = 79,
-	kUndefined085              = 85,
-	kUndefined086              = 86,
-	kUndefined087              = 87,
-	kUndefined088              = 88,
-	kUndefined089              = 89,
-	kUndefined090              = 90,
-	kTremoloDepth              = 92,
-	kChorusDepth               = 93,
-	kPhaserDepth               = 95,
-	kUndefined102              = 102,
-	kUndefined103              = 103,
-	kUndefined104              = 104,
-	kUndefined105              = 105,
-	kUndefined106              = 106,
-	kUndefined107              = 107,
-	kUndefined108              = 108,
-	kUndefined109              = 109,
-	kUndefined110              = 110,
-	kUndefined111              = 111,
-	kUndefined112              = 112,
-	kUndefined113              = 113,
-	kUndefined114              = 114,
-	kUndefined115              = 115,
-	kUndefined116              = 116,
-	kUndefined117              = 117,
-	kUndefined118              = 118,
-	kUndefined119              = 119,
-
-	// Channel Mode Messages
-	kAllSoundOff        = 120,  // All Sound Off
-	kResetAllControlers = 121,  // Reset All Controllers
-	kLocalOnOff         = 122,  // Local Control On/Off
-	kAllNotesOff        = 123,  // All Notes Off
-	kOmniModeOff        = 124,  // Omni Mode Off (+ all notes off)
-	kOmniModeOn         = 125,  // Omni Mode On (+ all notes off)
-	kMonoMode           = 126,  // Mono Mode On (+ poly off, + all notes off)
-	kPolyMode           = 127   // Poly Mode On (+ mono off, +all notes off)
+	NoCC                            = 0xFF,  //! | --- |
+	BankSelect                      = 0,     //! | MSB |
+	ModulationWheel                 = 1,     //! | MSB |
+	BreathController                = 2,     //! | MSB |
+	Undefined03                     = 3,     //! | MSB |
+	FootController                  = 4,     //! | MSB |
+	PortamentoTime                  = 5,     //! | MSB |
+	DataEntry                       = 6,     //! | MSB |
+	ChannelVolume                   = 7,     //! | MSB |
+	Balance                         = 8,     //! | MSB |
+	Undefined09                     = 9,     //! | MSB |
+	Pan                             = 10,    //! | MSB |
+	ExpressionController            = 11,    //! | MSB |
+	EffectControl1                  = 12,    //! | MSB |
+	EffectControl2                  = 13,    //! | MSB |
+	Undefined014                    = 14,    //! | MSB |
+	Undefined015                    = 15,    //! | MSB |
+	GeneralPurposeController1       = 16,    //! | MSB |
+	GeneralPurposeController2       = 17,    //! | MSB |
+	GeneralPurposeController3       = 18,    //! | MSB |
+	GeneralPurposeController4       = 19,    //! | MSB |
+	Undefined20                     = 20,    //! | MSB |
+	Undefined21                     = 21,    //! | MSB |
+	Undefined22                     = 22,    //! | MSB |
+	Undefined23                     = 23,    //! | MSB |
+	Undefined24                     = 24,    //! | MSB |
+	Undefined25                     = 25,    //! | MSB |
+	Undefined26                     = 26,    //! | MSB |
+	Undefined27                     = 27,    //! | MSB |
+	Undefined28                     = 28,    //! | MSB |
+	Undefined29                     = 29,    //! | MSB |
+	Undefined30                     = 30,    //! | MSB |
+	Undefined31                     = 31,    //! | MSB |
+	LSBBankSelect                   = 32,    //! | LSB |
+	LSBModulationWheel              = 33,    //! | LSB |
+	LSBBreathController             = 34,    //! | LSB |
+	LSBUndefined                    = 35,    //! | LSB |
+	LSBFootController               = 36,    //! | LSB |
+	LSBPortamentoTime               = 37,    //! | LSB |
+	LSBDataEntry                    = 38,    //! | LSB |
+	LSBChannelVolume                = 39,    //! | LSB |
+	LSBBalance                      = 40,    //! | LSB |
+	LSBUndefined09                  = 41,    //! | LSB |
+	LSBPan                          = 42,    //! | LSB |
+	LSBExpressionController         = 43,    //! | LSB |
+	LSBEffectcontrol1               = 44,    //! | LSB |
+	LSBEffectcontrol2               = 45,    //! | LSB |
+	LSBUndefined14                  = 46,    //! | LSB |
+	LSBUndefined15                  = 47,    //! | LSB |
+	LSBGeneralPurposeController1    = 48,    //! | LSB |
+	LSBGeneralPurposeController2    = 49,    //! | LSB |
+	LSBGeneralPurposeController3    = 50,    //! | LSB |
+	LSBGeneralPurposeController4    = 51,    //! | LSB |
+	LSBUndefined20                  = 52,    //! | LSB |
+	LSBUndefined21                  = 53,    //! | LSB |
+	LSBUndefined22                  = 54,    //! | LSB |
+	LSBUndefined23                  = 55,    //! | LSB |
+	LSBUndefined24                  = 56,    //! | LSB |
+	LSBUndefined25                  = 57,    //! | LSB |
+	LSBUndefined26                  = 58,    //! | LSB |
+	LSBUndefined27                  = 59,    //! | LSB |
+	LSBUndefined28                  = 60,    //! | LSB |
+	LSBUndefined29                  = 61,    //! | LSB |
+	LSBUndefined30                  = 62,    //! | LSB |
+	LSBUndefined31                  = 63,    //! | LSB |
+	DamperPedalState                = 64,    //! | --- | ≤63 off, ≥64 on
+	PortamentoState                 = 65,    //! | --- | ≤63 off, ≥64 on
+	SostenutoState                  = 66,    //! | --- | ≤63 off, ≥64 on
+	SoftPedalState                  = 67,    //! | --- | ≤63 off, ≥64 on
+	LegatoState                     = 68,    //! | --- | ≤63 Normal, ≥64 Legato
+	Hold2State                      = 69,    //! | --- | ≤63 off, ≥64 on
+	SoundControllerSoundVariation   = 70,    //! | LSB | Sound Variation
+	SoundControllerTimbre           = 71,    //! | LSB | Resonance
+	SoundControllerReleaseTime      = 72,    //! | LSB | Release Time
+	SoundControllerAttackTime       = 73,    //! | LSB | Attack Time
+	SoundControllerBrightness       = 74,    //! | LSB | Cutoff Frequency
+	SoundControllerDecayTime        = 75,    //! | LSB | Decay Time
+	SoundControllerVibratoRate      = 76,    //! | LSB | Vibrato Rate
+	SoundControllerVibratoDepth     = 77,    //! | LSB | Vibrato Depth
+	SoundControllerVibratoDelay     = 78,    //! | LSB | Vibrato Delay
+	SoundControllerUndefined10      = 79,    //! | LSB |
+	GeneralPurposeController5       = 80,    //! | LSB |
+	GeneralPurposeController6       = 81,    //! | LSB |
+	GeneralPurposeController7       = 82,    //! | LSB |
+	GeneralPurposeController8       = 83,    //! | LSB |
+	PortamentoControl               = 84,    //! | LSB |
+	Undefined85                     = 85,    //! | --- |
+	Undefined86                     = 86,    //! | --- |
+	Undefined87                     = 87,    //! | --- |
+	HighResolutionVelocityPrefix    = 88,    //! | LSB |
+	Undefined89                     = 89,    //! | --- |
+	Undefined90                     = 90,    //! | --- |
+	Effects1Depth                   = 91,    //! | --- | External Effects Depth
+	Effects2Depth                   = 92,    //! | --- | Tremolo Depth
+	Effects3Depth                   = 93,    //! | --- | Chorus Depth
+	Effects4Depth                   = 94,    //! | --- | Celeste [Detune] Depth
+	Effects5Depth                   = 95,    //! | --- | Phaser Depth
+	DataIncrement                   = 96,    //! | --- | Data Entry +1
+	DataDecrement                   = 97,    //! | --- | Data Entry -1
+	NonRegisteredParameterNumberLSB = 98,    //! | LSB | NRPN LSB
+	NonRegisteredParameterNumberMSB = 99,    //! | MSB | NRPN MSB
+	RegisteredParameterNumberLSB    = 100,   //! | LSB | RPN LSB
+	RegisteredParameterNumberMSB    = 101,   //! | MSB | RPN MSB
+	Undefined102                    = 102,   //! | --- |
+	Undefined103                    = 103,   //! | --- |
+	Undefined104                    = 104,   //! | --- |
+	Undefined105                    = 105,   //! | --- |
+	Undefined106                    = 106,   //! | --- |
+	Undefined107                    = 107,   //! | --- |
+	Undefined108                    = 108,   //! | --- |
+	Undefined109                    = 109,   //! | --- |
+	Undefined110                    = 110,   //! | --- |
+	Undefined111                    = 111,   //! | --- |
+	Undefined112                    = 112,   //! | --- |
+	Undefined113                    = 113,   //! | --- |
+	Undefined114                    = 114,   //! | --- |
+	Undefined115                    = 115,   //! | --- |
+	Undefined116                    = 116,   //! | --- |
+	Undefined117                    = 117,   //! | --- |
+	Undefined118                    = 118,   //! | --- |
+	Undefined119                    = 119,   //! | --- |
+	AllSoundOff                     = 120,   //! | --- | All Sound Off
+	ResetAllControlers              = 121,   //! | --- | Reset All Controllers
+	LocalOnOff                      = 122,   //! | --- | Local Control 0 off, 127 on
+	AllNotesOff                     = 123,   //! | --- | All Notes Off
+	OmniModeOff                     = 124,   //! | --- | Omni Mode Off (+ all notes off)
+	OmniModeOn                      = 125,   //! | --- | Omni Mode On (+ all notes off)
+	MonoMode                        = 126,   //! | --- | Mono Mode On (+ poly off, + all notes off)
+	PolyMode                        = 127    //! | --- | Poly Mode On (+ mono off, +all notes off)
 };
 
 
@@ -132,9 +190,15 @@ enum class EMidiControlChangeMsg : uint32
 struct IMidiMsg
 {
 	int32 mOffset;
+	// uint8 mData1;
+	// uint8 mData2;
+	union
+	{  // clang-format off
+		struct {                 uint8 mData1;                 uint8 mData2; };
+		struct { EMidiControlChangeMsg mLSB;   EMidiControlChangeMsg mMSB;   };
+		uint8 mData[2];
+	};  // clang-format on
 	uint8 mStatus;
-	uint8 mData1;
-	uint8 mData2;
 
 
 	/** /todo
@@ -142,11 +206,11 @@ struct IMidiMsg
 	 * @param s /todo
 	 * @param d1 /todo
 	 * @param d2 /todo */
-	IMidiMsg(int32 offset = 0, uint8 status = 0, uint8 data1 = 0, uint8 data2 = 0)
+	IMidiMsg(int32 offset = 0, uint8 status = 0, uint8 LSB = 0, uint8 MSB = 0)
 		: mOffset(offset)
+		, mData1(LSB)
+		, mData2(MSB)
 		, mStatus(status)
-		, mData1(data1)
-		, mData2(data2)
 	{
 	}
 
@@ -155,12 +219,11 @@ struct IMidiMsg
 	 * @param velocity /todo
 	 * @param offset /todo
 	 * @param channel /todo */
-	constexpr void MakeNoteOnMsg(int16 noteNumber, float velocity, int32 offset, uint8 channel = 0)
+	constexpr void SetNoteOn(int noteNumber, float velocity, int offset, int channel = 0)
 	{
 		assert(velocity <= 1.0f);  // velocity input range 0.0-1.0. please fix.
-
 		Clear();
-		mStatus = channel | +EMidiStatusMsg::kNoteOn << 4;
+		mStatus = static_cast<uint8>(channel & 0x0F | EMidiStatusMsg::NoteOn << 4);
 		mData1  = static_cast<uint8>(noteNumber);
 		mData2  = static_cast<uint8>(velocity * 127);
 		mOffset = offset;
@@ -170,10 +233,10 @@ struct IMidiMsg
 	 * @param noteNumber /todo
 	 * @param offset /todo
 	 * @param channel /todo */
-	constexpr void MakeNoteOffMsg(int16 noteNumber, int32 offset, uint8 channel = 0)
+	constexpr void SetNoteOff(int noteNumber, int offset, int channel = 0)
 	{
 		Clear();
-		mStatus = channel | +EMidiStatusMsg::kNoteOff << 4;
+		mStatus = static_cast<uint8>(channel & 0x0F | EMidiStatusMsg::NoteOff << 4);
 		mData1  = static_cast<uint8>(noteNumber);
 		mOffset = offset;
 	}
@@ -182,10 +245,10 @@ struct IMidiMsg
 	 * @param value range [-1, 1], converts to [0, 16383) where 8192 = no pitch change.
 	 * @param channel /todo
 	 * @param offset /todo */
-	constexpr void MakePitchWheelMsg(float value, uint8 channel = 0, int32 offset = 0)
+	constexpr void SetPitchWheel(float value, int channel = 0, int offset = 0)
 	{
 		Clear();
-		mStatus = channel | +EMidiStatusMsg::kPitchWheel << 4;
+		mStatus = static_cast<uint8>(channel & 0x0F | EMidiStatusMsg::PitchBendChange << 4);
 		int32 i = static_cast<int32>(value * 8191.5f + 8192);
 		DEBUG_ASSERT(math::ClampEval(i, 0, 16383));
 		mData2  = static_cast<uint8>(i) >> 7;
@@ -198,21 +261,21 @@ struct IMidiMsg
 	 * @param value range [0, 1] /todo
 	 * @param channel /todo
 	 * @param offset /todo */
-	constexpr void MakeControlChangeMsg(EMidiControlChangeMsg idx, float value, uint8 channel = 0, int32 offset = 0)
+	constexpr void SetControlChange(EMidiControlChangeMsg idx, float value, int channel = 0, int offset = 0)
 	{
 		Clear();
-		mStatus = channel | +EMidiStatusMsg::kControlChange << 4;
+		mStatus = static_cast<uint8>(channel & 0x0F | EMidiStatusMsg::ControlChange << 4);
 		mData1  = static_cast<uint8>(idx);
 		mData2  = static_cast<uint8>(value * 127.0);
 		mOffset = offset;
 	}
 
 	/** /todo */
-	constexpr void MakeProgramChange(uint8 program, uint8 channel = 0, int32 offset = 0)
+	constexpr void SetProgramChange(int program, int channel = 0, int offset = 0)
 	{
 		Clear();
-		mStatus = channel | +EMidiStatusMsg::kProgramChange << 4;
-		mData1  = program;
+		mStatus = static_cast<uint8>(channel & 0x0F | EMidiStatusMsg::ProgramChange << 4);
+		mData1  = static_cast<uint8>(program);
 		mOffset = offset;
 	}
 
@@ -220,11 +283,13 @@ struct IMidiMsg
 	 * @param pressure /todo
 	 * @param offset /todo
 	 * @param channel /todo */
-	constexpr void MakeChannelATMsg(uint8 pressure, int32 offset, uint8 channel)
+	constexpr void SetChannelAftertouch(float pressure, int offset, int channel)
 	{
+		assert(pressure <= 1.0f);
+
 		Clear();
-		mStatus = channel | +EMidiStatusMsg::kChannelAftertouch << 4;
-		mData1  = pressure;
+		mStatus = static_cast<uint8>(channel & 0x0F | EMidiStatusMsg::ChannelAftertouch << 4);
+		mData1  = static_cast<uint8>(pressure * 127);
 		mData2  = 0;
 		mOffset = offset;
 	}
@@ -234,98 +299,98 @@ struct IMidiMsg
 	 * @param pressure /todo
 	 * @param offset /todo
 	 * @param channel /todo */
-	constexpr void MakePolyATMsg(uint8 noteNumber, uint8 pressure, int32 offset, uint8 channel)
+	constexpr void SetPolyphonicAftertouch(int noteNumber, float pressure, int offset, int channel)
 	{
+		assert(pressure <= 1.0f);
+
 		Clear();
-		mStatus = channel | +EMidiStatusMsg::kPolyAftertouch << 4;
-		mData1  = noteNumber;
-		mData2  = pressure;
+		mStatus = static_cast<uint8>(channel & 0x0F | EMidiStatusMsg::PolyphonicAftertouch << 4);
+		mData1  = static_cast<uint8>(noteNumber);
+		mData2  = static_cast<uint8>(pressure * 127);
 		mOffset = offset;
 	}
 
 	/** @return [0, 15] for midi channels 1 ... 16 */
-	constexpr uint8 Channel() const
+	constexpr int GetChannel() const
 	{
 		return mStatus & 0x0F;
 	}
 
 	/** /todo
 	 * @return EMidiStatusMsg /todo */
-	constexpr EMidiStatusMsg StatusMsg() const
+	constexpr auto GetStatus() const
 	{
-		uint8 e = mStatus >> 4;
-		if (e < +EMidiStatusMsg::kNoteOff || e > +EMidiStatusMsg::kPitchWheel)  // TODO: if( isValidStatusMsg(e) )
+		EMidiStatusMsg currentStatus = static_cast<EMidiStatusMsg>(mStatus >> 4);
+		switch (currentStatus)
 		{
-			return EMidiStatusMsg::kNone;
+			case EMidiStatusMsg::NoteOff:
+			case EMidiStatusMsg::NoteOn:
+			case EMidiStatusMsg::PolyphonicAftertouch:
+			case EMidiStatusMsg::ControlChange:
+			case EMidiStatusMsg::ProgramChange:
+			case EMidiStatusMsg::ChannelAftertouch:
+			case EMidiStatusMsg::PitchBendChange:
+				return currentStatus;
+			default:
+				return EMidiStatusMsg::None;
 		}
-		return static_cast<EMidiStatusMsg>(e);
 	}
 
 	/** @return [0, 127), -1 if NA. */
-	constexpr uint8 NoteNumber() const
+	const int GetNoteNumber() const
 	{
-		switch (StatusMsg())
+		switch (GetStatus())
 		{
-			case EMidiStatusMsg::kNoteOn:
-			case EMidiStatusMsg::kNoteOff:
-			case EMidiStatusMsg::kPolyAftertouch:
+			case EMidiStatusMsg::NoteOn:
+			case EMidiStatusMsg::NoteOff:
+			case EMidiStatusMsg::PolyphonicAftertouch:
 				return mData1;
 			default:
 				return -1;
 		}
 	}
 
-	/** @return returns [0, 127), -1 if NA. */
-	constexpr uint8 Velocity() const
+	/** @return returns [0, 1), -1 if NA. */
+	constexpr float GetVelocity() const
 	{
-		switch (StatusMsg())
+		switch (GetStatus())
 		{
-			case EMidiStatusMsg::kNoteOn:
-			case EMidiStatusMsg::kNoteOff:
-				return mData2;
+			case EMidiStatusMsg::NoteOn:
+			case EMidiStatusMsg::NoteOff:
+				return mData2 / 127.f;
 			default:
 				return -1;
 		}
 	}
 
-	/** @return [0, 127), -1 if NA. */
-	constexpr uint8 PolyAfterTouch() const
+	/** @return [0, 1), -1 if NA. */
+	constexpr float GetPolyphonicAftertouch() const
 	{
-		switch (StatusMsg())
-		{
-			case EMidiStatusMsg::kPolyAftertouch:
-				return mData2;
-			default:
-				return -1;
-		}
+		if (GetStatus() == EMidiStatusMsg::PolyphonicAftertouch)
+			return mData2 / 127.f;
+		return -1;
+	}
+
+	/** @return [0, 1), -1 if NA. */
+	constexpr float GetChannelAftertouch() const
+	{
+		if (GetStatus() == EMidiStatusMsg::ChannelAftertouch)
+			return mData1 / 127.f;
+		return -1;
 	}
 
 	/** @return [0, 127), -1 if NA. */
-	constexpr uint8 ChannelAfterTouch() const
+	constexpr int GetProgram() const
 	{
-		switch (StatusMsg())
-		{
-			case EMidiStatusMsg::kChannelAftertouch:
-				return mData1;
-			default:
-				return -1;
-		}
-	}
-
-	/** @return [0, 127), -1 if NA. */
-	constexpr uint8 Program() const
-	{
-		if (StatusMsg() == EMidiStatusMsg::kProgramChange)
-		{
+		if (GetStatus() == EMidiStatusMsg::ProgramChange)
 			return mData1;
-		}
 		return -1;
 	}
 
 	/** @return [-1.0, 1.0], zero if NA.*/
-	constexpr float PitchWheel() const
+	constexpr float GetPitchWheel() const
 	{
-		if (StatusMsg() == EMidiStatusMsg::kPitchWheel)
+		if (GetStatus() == EMidiStatusMsg::PitchBendChange)
 		{
 			float value = (static_cast<float>((mData2 << 7) | mData1) - 8191.5f) / 8191.5f;
 			return math::IsNearlyZero(value, 0.0001f) ? 0.0f : value;
@@ -335,19 +400,17 @@ struct IMidiMsg
 
 	/** /todo
 	 * @return EMidiControlChangeMsg /todo */
-	constexpr EMidiControlChangeMsg ControlChangeIdx() const
+	constexpr EMidiControlChangeMsg GetControlChangeIdx() const
 	{
 		return static_cast<EMidiControlChangeMsg>(mData1);
 	}
 
 	/** @return [0, 1], -1 if NA.*/
-	constexpr float ControlChange(EMidiControlChangeMsg idx) const
+	constexpr float GetControlChange(EMidiControlChangeMsg idx) const
 	{
-		if (StatusMsg() == EMidiStatusMsg::kControlChange && ControlChangeIdx() == idx)
-		{
+		if (GetStatus() == EMidiStatusMsg::ControlChange && GetControlChangeIdx() == idx)
 			return static_cast<float>(mData2) / 127.0f;
-		}
-		return -1.0;
+		return -1.0f;
 	}
 
 	/** /todo
@@ -368,32 +431,39 @@ struct IMidiMsg
 	/** /todo
 	 * @param msg /todo
 	 * @return const char* /todo */
-	static constexpr const char* StatusMsgStr(EMidiStatusMsg msg)
+	static constexpr const char* GetStatusStr(const EMidiStatusMsg& msg)
 	{
 		switch (msg)
-		{
-			case EMidiStatusMsg::kNone:
-				return "none";
-			case EMidiStatusMsg::kNoteOff:
-				return "noteoff";
-			case EMidiStatusMsg::kNoteOn:
-				return "noteon";
-			case EMidiStatusMsg::kPolyAftertouch:
-				return "aftertouch";
-			case EMidiStatusMsg::kControlChange:
-				return "controlchange";
-			case EMidiStatusMsg::kProgramChange:
-				return "programchange";
-			case EMidiStatusMsg::kChannelAftertouch:
-				return "channelaftertouch";
-			case EMidiStatusMsg::kPitchWheel:
-				return "pitchwheel";
-			default:
-				return "unknown";
-		};
+		{  // clang-format off
+			case EMidiStatusMsg::None:                 return "None";
+			case EMidiStatusMsg::NoteOff:              return "NoteOff";
+			case EMidiStatusMsg::NoteOn:               return "NoteOn";
+			case EMidiStatusMsg::PolyphonicAftertouch: return "Aftertouch";
+			case EMidiStatusMsg::ControlChange:        return "ControlChange";
+			case EMidiStatusMsg::ProgramChange:        return "ProgramChange";
+			case EMidiStatusMsg::ChannelAftertouch:    return "ChannelAftertouch";
+			case EMidiStatusMsg::PitchBendChange:      return "PitchbendChange";
+			//case EMidiStatusMsg::SystemExclusive:      return "SystemExclusive";
+			//case EMidiStatusMsg::MIDITimeCodeQtrFrame: return "MIDITimeCodeQtrFrame";
+			//case EMidiStatusMsg::SongPositionPointer:  return "SongPositionPointer";
+			//case EMidiStatusMsg::SongSelect:           return "SongSelect";
+			//case EMidiStatusMsg::Reserved244:          return "Reserved244";
+			//case EMidiStatusMsg::Reserved245:          return "Reserved245";
+			//case EMidiStatusMsg::TuneRequest:          return "TuneRequest";
+			//case EMidiStatusMsg::EndOfSysEx:           return "EndOfSysEx";
+			//case EMidiStatusMsg::TimingClock:          return "TimingClock";
+			//case EMidiStatusMsg::Reserved249:          return "Reserved249";
+			//case EMidiStatusMsg::Start:                return "Start";
+			//case EMidiStatusMsg::Continue:             return "Continue";
+			//case EMidiStatusMsg::Stop:                 return "Stop";
+			//case EMidiStatusMsg::Reserved253:          return "Reserved253";
+			//case EMidiStatusMsg::ActiveSensing:        return "ActiveSensing";
+			//case EMidiStatusMsg::SystemReset:          return "SystemReset";
+			default:                                   return "unknown";
+		};  // clang-format on
 	}
 
-	static constexpr const char* CCNameStr(int idx)
+	static constexpr const char* GetCCNameStr(int idx)
 	{
 		constexpr const char* ccNameStrs[128] = {
 			"BankSel.MSB", "Modulation",  "BreathCtrl",   "Contr. 3",    "Foot Ctrl",   "Porta.Time",  "DataEntMSB",
@@ -421,13 +491,19 @@ struct IMidiMsg
 	/** /todo */
 	inline const void LogMsg()
 	{
-		Trace(TRACELOC, "midi:(%s:%d:%d:%d)", StatusMsgStr(StatusMsg()), Channel(), mData1, mData2);
+		Trace(TRACELOC, "midi:(%s:%d:%d:%d)", GetStatusStr(GetStatus()), GetChannel(), mData1, mData2);
 	}
 
 	/** /todo */
 	inline const void PrintMsg() const
 	{
-		DBGMSG("midi: offset %i, (%s:%d:%d:%d)\n", mOffset, StatusMsgStr(StatusMsg()), Channel(), mData1, mData2);
+		// Not using any non-static IMidiMsg functions in case of recursive calling
+		DBGMSG("midi: offset %i, (%s:%d:%d:%d)\n",
+			   mOffset,
+			   IMidiMsg::GetStatusStr(static_cast<EMidiStatusMsg>(mStatus >> 4)),
+			   mStatus & 0x0F,
+			   mData1,
+			   mData2);
 	}
 };
 
@@ -564,23 +640,25 @@ void MyPlug::ProcessBlock(double** inputs, double** outputs, int nFrames)
 
 */
 
-#ifndef DEFAULT_BLOCK_SIZE
-	#define DEFAULT_BLOCK_SIZE 512
-#endif
 
 /** A class to help with queuing timestamped MIDI messages
  * @ingroup IPlugUtilities */
 class IMidiQueue
 {
  public:
-	IMidiQueue(int size = DEFAULT_BLOCK_SIZE) : mBuf(NULL), mSize(0), mGrow(Granulize(size)), mFront(0), mBack(0)
+	IMidiQueue(int size = Config::defaultMidiQueueBlockSize)
+		: mBuf(nullptr)
+		, mSize(0)
+		, mGrow(Granulize(size))
+		, mFront(0)
+		, mBack(0)
 	{
 		Expand();
 	}
 
 	~IMidiQueue()
 	{
-		free(mBuf);
+		free(mBuf);  // TODO: implement real memory manager
 	}
 
 	// Adds a MIDI message at the back of the queue. If the queue is full,
@@ -594,22 +672,28 @@ class IMidiQueue
 			else if (!Expand())
 				return;
 		}
-
-#ifndef DONT_SORT_IMIDIQUEUE
-		// Insert the MIDI message at the right offset.
-		if (mBack > mFront && msg.mOffset < mBuf[mBack - 1].mOffset)
+		auto index = mBack;
+		if constexpr (Config::Midi::SortIMidiQueue)
 		{
-			int i = mBack - 2;
-			while (i >= mFront && msg.mOffset < mBuf[i].mOffset)
-				--i;
-			i++;
-			memmove(&mBuf[i + 1], &mBuf[i], (mBack - i) * sizeof(IMidiMsg));
-			mBuf[i] = msg;
+			// Insert the MIDI message at the right offset.
+			if (mBack > mFront && msg.mOffset < mBuf[mBack - 1].mOffset)
+			{
+				index -= 2;
+				while (index >= mFront && msg.mOffset < mBuf[index].mOffset)
+					--index;
+				index++;
+				memmove(&mBuf[index + 1], &mBuf[index], (mBack - index) * sizeof(IMidiMsg));
+			}
 		}
-		else
-#endif
-			mBuf[mBack] = msg;
+		mBuf[index] = msg;
 		++mBack;
+
+		// DBGMSG("IMidiQueue.Add: offset %i, (%s:%d:%d:%d)\n",
+		//	   msg.mOffset,
+		//	   msg.GetStatusStr(msg.GetStatus()),
+		//	   msg.GetChannel(),
+		//	   msg.mData1,
+		//	   msg.mData2);
 	}
 
 	// Removes a MIDI message from the front of the queue (but does *not*
@@ -683,10 +767,11 @@ class IMidiQueue
 
 		mBuf  = (IMidiMsg*) buf;
 		mSize = size;
+		DBGMSG("IMidiQueue.Resize(%i): new size = %i.", size, mSize);
 		return size;
 	}
 
- protected:
+ private:
 	// Automatically expands the queue.
 	bool Expand()
 	{
@@ -700,6 +785,7 @@ class IMidiQueue
 
 		mBuf  = (IMidiMsg*) buf;
 		mSize = size;
+		DBGMSG("IMidiQueue.Expand(): new size = %i.", size, mSize);
 		return true;
 	}
 
@@ -722,10 +808,9 @@ class IMidiQueue
 		return size;
 	}
 
-	IMidiMsg* mBuf;
-
-	int mSize, mGrow;
-	int mFront, mBack;
+	IMidiMsg* mBuf = nullptr;
+	size_t mSize, mGrow;
+	size_t mFront, mBack;
 };
 
 END_IPLUG_NAMESPACE

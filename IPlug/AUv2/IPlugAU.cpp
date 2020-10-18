@@ -349,7 +349,7 @@ OSStatus IPlugAU::IPlugAUEntry(ComponentParameters *params, void* pPlug)
       int note = (int) pNoteParams->mPitch;
       *pNoteID = note;
       IMidiMsg msg;
-      msg.MakeNoteOnMsg(note, (int) pNoteParams->mVelocity, offset);
+      msg.SetNoteOn(note, (int) pNoteParams->mVelocity, offset);
       return noErr;
     }
     case kMusicDeviceStopNoteSelect:
@@ -359,7 +359,7 @@ OSStatus IPlugAU::IPlugAUEntry(ComponentParameters *params, void* pPlug)
       UInt32 offset = GET_COMP_PARAM(UInt32, 0, 3);
       // noteID is supposed to be some incremented unique ID, but we're just storing note number in it.
       IMidiMsg msg;
-      msg.MakeNoteOffMsg(noteID, offset);
+      msg.SetNoteOff(noteID, offset);
       return noErr;
     }
     case kComponentCanDoSelect:
@@ -1842,7 +1842,7 @@ IPlugAU::IPlugAU(const InstanceInfo& info, const Config& config)
 
   AssessInputConnections();
 
-  SetBlockSize(Config::defaultBlockSize);
+  SetBlockSize();
   ResizeScratchBuffers();
   
   CreateTimer();

@@ -215,8 +215,6 @@ class MidiSynth
 	VoiceAllocator mVoiceAllocator;
 	uint16_t mUnisonVoices {1};
 	IMidiQueue mMidiQueue;
-	float mVelocityLUT[128];
-	float mAfterTouchLUT[128];
 	ChannelState mChannelStates[16] {};
 	int mBlockSize;
 	int64_t mSampleTime {0};

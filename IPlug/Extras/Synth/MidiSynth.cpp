@@ -16,12 +16,6 @@ MidiSynth::MidiSynth(VoiceAllocator::EPolyMode mode, int blockSize) : mBlockSize
 {
 	SetPolyMode(mode);
 
-	for (int i = 0; i < 128; i++)
-	{
-		mVelocityLUT[i]   = i / 127.f;
-		mAfterTouchLUT[i] = i / 127.f;
-	}
-
 	// initialize Channel states
 	for (int i = 0; i < 16; ++i)
 	{
@@ -36,59 +30,57 @@ VoiceInputEvent MidiSynth::MidiMessageToEventBasic(const IMidiMsg& msg)
 {
 	VoiceInputEvent event {};
 
-	EMidiStatusMsg status   = msg.StatusMsg();
+	EMidiStatusMsg status   = msg.GetStatus();
 	event.mSampleOffset     = msg.mOffset;
-	event.mAddress.mChannel = msg.Channel();
-	event.mAddress.mKey     = msg.NoteNumber();
-
+	event.mAddress.mChannel = msg.GetChannel();
+	event.mAddress.mKey     = msg.GetNoteNumber();
 	switch (status)
 	{
-		case EMidiStatusMsg::kNoteOn:
+		case EMidiStatusMsg::NoteOn:
 		{
-			uint8 v       = math::Clamp(msg.Velocity(), 0, 127);
-			event.mAction = (v == 0) ? kNoteOffAction : kNoteOnAction;
-			event.mValue  = mVelocityLUT[v];
+			event.mValue  = msg.GetVelocity();
+			event.mAction = (event.mValue == 0) ? kNoteOffAction : kNoteOnAction;
 			break;
 		}
-		case EMidiStatusMsg::kNoteOff:
+		case EMidiStatusMsg::NoteOff:
 		{
-			uint8 v       = math::Clamp(msg.Velocity(), 0, 127);
 			event.mAction = kNoteOffAction;
-			event.mValue  = mVelocityLUT[v];
+			event.mValue  = msg.GetVelocity();
 			break;
 		}
-		case EMidiStatusMsg::kPolyAftertouch:
+		case EMidiStatusMsg::PolyphonicAftertouch:
 		{
 			event.mAction = kPressureAction;
-			event.mValue  = mAfterTouchLUT[msg.PolyAfterTouch()];
+			event.mValue  = msg.GetPolyphonicAftertouch();
 			break;
 		}
-		case EMidiStatusMsg::kChannelAftertouch:
+		case EMidiStatusMsg::ChannelAftertouch:
 		{
 			event.mAction = kPressureAction;
-			event.mValue  = mAfterTouchLUT[msg.ChannelAfterTouch()];
+			event.mValue  = msg.GetChannelAftertouch();
 			break;
 		}
-		case EMidiStatusMsg::kPitchWheel:
+		case EMidiStatusMsg::PitchBendChange:
 		{
 			event.mAction   = kPitchBendAction;
 			float bendRange = mChannelStates[event.mAddress.mChannel].pitchBendRange;
-			event.mValue    = static_cast<float>(msg.PitchWheel()) * bendRange / 12.f;
+			event.mValue    = msg.GetPitchWheel() * bendRange / 12.f;
 			break;
 		}
-		case EMidiStatusMsg::kControlChange:
+		case EMidiStatusMsg::ControlChange:
 		{
-			event.mControllerNumber = static_cast<int>(msg.ControlChangeIdx());
-			event.mValue            = static_cast<float>(msg.ControlChange(msg.ControlChangeIdx()));
-			switch (event.mControllerNumber)
+			auto index              = msg.GetControlChangeIdx();
+			event.mControllerNumber = +index;
+			event.mValue            = msg.GetControlChange(index);
+			switch (index)
 			{
 				// handle special controllers
-				case +EMidiControlChangeMsg::kCutoffFrequency:
+				case EMidiControlChangeMsg::SoundControllerBrightness:
 				{
 					event.mAction = kTimbreAction;
 					break;
 				}
-				case +EMidiControlChangeMsg::kAllNotesOff:
+				case EMidiControlChangeMsg::AllNotesOff:
 				{
 					event.mAddress.mFlags = kVoicesAll;
 					event.mAction         = kNoteOffAction;
@@ -103,10 +95,10 @@ VoiceInputEvent MidiSynth::MidiMessageToEventBasic(const IMidiMsg& msg)
 			}
 			break;
 		}
-		case EMidiStatusMsg::kProgramChange:
+		case EMidiStatusMsg::ProgramChange:
 		{
 			event.mAction           = kProgramChangeAction;
-			event.mControllerNumber = msg.Program();
+			event.mControllerNumber = msg.GetProgram();
 			break;
 		}
 		default:
@@ -122,18 +114,20 @@ VoiceInputEvent MidiSynth::MidiMessageToEventBasic(const IMidiMsg& msg)
 VoiceInputEvent MidiSynth::MidiMessageToEventMPE(const IMidiMsg& msg)
 {
 	VoiceInputEvent event {};
-	EMidiStatusMsg status   = msg.StatusMsg();
+
+	auto status             = msg.GetStatus();
+	auto index              = msg.GetControlChangeIdx();
 	event.mSampleOffset     = msg.mOffset;
-	event.mAddress.mChannel = msg.Channel();
-	event.mAddress.mKey     = msg.NoteNumber();
+	event.mAddress.mChannel = msg.GetChannel();
+	event.mAddress.mKey     = msg.GetNoteNumber();
 	event.mAddress.mZone    = MasterZoneFor(event.mAddress.mChannel);
 
 	// handle pitch bend, channel pressure and CC#74 in the same way:
 	// sum main and member channel values
-	bool isPitchBend       = (status == EMidiStatusMsg::kPitchWheel);
-	bool isChannelPressure = (status == EMidiStatusMsg::kChannelAftertouch);
-	bool isTimbre          = (status == EMidiStatusMsg::kControlChange) &&
-					(msg.ControlChangeIdx() == EMidiControlChangeMsg::kCutoffFrequency);
+	const bool isPitchBend       = (status == EMidiStatusMsg::PitchBendChange);
+	const bool isChannelPressure = (status == EMidiStatusMsg::ChannelAftertouch);
+	const bool isTimbre =
+		(status == EMidiStatusMsg::ControlChange) && (index == EMidiControlChangeMsg::SoundControllerBrightness);
 	if (isPitchBend || isChannelPressure || isTimbre)
 	{
 		float* pChannelDestValue {};
@@ -142,7 +136,7 @@ VoiceInputEvent MidiSynth::MidiMessageToEventMPE(const IMidiMsg& msg)
 		{
 			event.mAction   = kPitchBendAction;
 			float bendRange = mChannelStates[event.mAddress.mChannel].pitchBendRange;
-			event.mValue    = static_cast<float>(msg.PitchWheel()) * bendRange / 12.f;
+			event.mValue    = msg.GetPitchWheel() * bendRange / 12.f;
 
 			pChannelDestValue        = &(mChannelStates[event.mAddress.mChannel].pitchBend);
 			masterChannelStoredValue = mChannelStates[MasterChannelFor(event.mAddress.mChannel)].pitchBend;
@@ -150,14 +144,14 @@ VoiceInputEvent MidiSynth::MidiMessageToEventMPE(const IMidiMsg& msg)
 		else if (isChannelPressure)
 		{
 			event.mAction            = kPressureAction;
-			event.mValue             = mAfterTouchLUT[msg.ChannelAfterTouch()];
+			event.mValue             = msg.GetChannelAftertouch();
 			pChannelDestValue        = &(mChannelStates[event.mAddress.mChannel].pressure);
 			masterChannelStoredValue = mChannelStates[MasterChannelFor(event.mAddress.mChannel)].pressure;
 		}
 		else if (isTimbre)
 		{
 			event.mAction            = kTimbreAction;
-			event.mValue             = static_cast<float>(msg.ControlChange(msg.ControlChangeIdx()));
+			event.mValue             = msg.GetControlChange(msg.GetControlChangeIdx());
 			pChannelDestValue        = &(mChannelStates[event.mAddress.mChannel].timbre);
 			masterChannelStoredValue = mChannelStates[MasterChannelFor(event.mAddress.mChannel)].timbre;
 		}
@@ -168,7 +162,7 @@ VoiceInputEvent MidiSynth::MidiMessageToEventMPE(const IMidiMsg& msg)
 			*pChannelDestValue = event.mValue;
 
 			// no action needed
-			event.mAction = kNullAction;
+			event.mAction = kNullAction;  // Swedish translation incoming... 3... 2... 1.... **** action...
 		}
 		else
 		{
@@ -190,55 +184,47 @@ VoiceInputEvent MidiSynth::MidiMessageToEventMPE(const IMidiMsg& msg)
 		// program change:
 		// we are using MIDI mode 3. A program change sent to a master channel
 		// affects all voices within the zone. Program changes sent to member channels are ignored.
-		case EMidiStatusMsg::kProgramChange:
+		case EMidiStatusMsg::ProgramChange:
 		{
 			if (IsMasterChannel(event.mAddress.mChannel))
 			{
 				event.mAction           = kProgramChangeAction;
-				event.mControllerNumber = msg.Program();
-				//				break;
+				event.mControllerNumber = msg.GetProgram();
+			}
+			else
+				event.mAction = kNullAction;
+			break;
+		}
+		case EMidiStatusMsg::NoteOn:
+		{
+			event.mValue  = msg.GetVelocity();
+			event.mAction = (event.mValue == 0) ? kNoteOffAction : kNoteOnAction;
+			break;
+		}
+		case EMidiStatusMsg::NoteOff:
+		{
+			event.mAction = kNoteOffAction;
+			event.mValue  = msg.GetVelocity();
+			break;
+		}
+		case EMidiStatusMsg::ControlChange:
+		{
+			index                   = msg.GetControlChangeIdx();
+			event.mControllerNumber = +index;
+			if (index == EMidiControlChangeMsg::AllNotesOff)
+			{
+				event.mAddress.mFlags = kVoicesAll;
+				event.mAction         = kNoteOffAction;
 			}
 			else
 			{
-				event.mAction = kNullAction;
+				// send all other controllers to matching channels using the generic control action
+				// note: according to the MPE spec these messages should be sent to all channels in the zone,
+				// but that is less useful IMO - to do so just add the line
+				// event.mAddress.mChannel = kAllChannels;
+				event.mAction = kControllerAction;
 			}
-			break;
-		}
-		case EMidiStatusMsg::kNoteOn:
-		{
-			uint8 v       = math::Clamp<uint8>(msg.Velocity(), 0, 127);
-			event.mAction = (v == 0) ? kNoteOffAction : kNoteOnAction;
-			event.mValue  = mVelocityLUT[v];
-			break;
-		}
-		case EMidiStatusMsg::kNoteOff:
-		{
-			uint8 v       = math::Clamp<uint8>(msg.Velocity(), 0, 127);
-			event.mAction = kNoteOffAction;
-			event.mValue  = mVelocityLUT[v];
-			break;
-		}
-		case EMidiStatusMsg::kControlChange:
-		{
-			event.mControllerNumber = static_cast<int>(msg.ControlChangeIdx());
-			switch (event.mControllerNumber)
-			{
-				case +EMidiControlChangeMsg::kAllNotesOff:
-				{
-					event.mAddress.mFlags = kVoicesAll;
-					event.mAction         = kNoteOffAction;
-					break;
-				}
-
-				default:
-					// send all other controllers to matching channels using the generic control action
-					// note: according to the MPE spec these messages should be sent to all channels in the zone,
-					// but that is less useful IMO - to do so just add the line
-					// event.mAddress.mChannel = kAllChannels;
-					event.mAction = kControllerAction;
-					break;
-			}
-			event.mValue = static_cast<float>(msg.ControlChange(msg.ControlChangeIdx()));
+			event.mValue = msg.GetControlChange(index);
 			break;
 		}
 		default:
@@ -256,12 +242,14 @@ VoiceInputEvent MidiSynth::MidiMessageToEvent(const IMidiMsg& msg)
 }
 
 // sets the number of channels in the lo or hi MPE zones.
-void MidiSynth::SetMPEZones(int channel, int nChans)
+void MidiSynth::SetMPEZones(const int channel, const int nChans)
 {
-	// total channels = member channels + the master channel, or 0 if there is no Zone.
-	// totalChannels is never 1.
-	int memberChannels = math::Clamp(nChans, 0, 15);
-	int totalChannels  = memberChannels ? (memberChannels + 1) : 0;
+	DEBUG_ASSERT(math::ClampEval(channel, 0, 15));
+	DEBUG_ASSERT(math::ClampEval(nChans, 0, 15));
+
+	// total channels = member channels + the master channel, or 0 if there is no Zone. totalChannels is never 1.
+	const int totalChannels = nChans ? (nChans + 1) : 0;
+
 	if (channel == 0)
 	{
 		mMPELowerZoneChannels = totalChannels;
@@ -276,13 +264,9 @@ void MidiSynth::SetMPEZones(int channel, int nChans)
 	// activate / deactivate MPE mode if needed
 	bool anyMPEChannelsActive = (mMPELowerZoneChannels || mMPEUpperZoneChannels);
 	if (anyMPEChannelsActive && (!mMPEMode))
-	{
 		mMPEMode = true;
-	}
 	else if ((!anyMPEChannelsActive) && (mMPEMode))
-	{
 		mMPEMode = false;
-	}
 
 	// reset pitch bend ranges as per MPE spec
 	if (mMPEMode)
@@ -333,47 +317,54 @@ void MidiSynth::SetChannelPitchBendRange(int channelParam, uint8 rangeParam)
 
 bool IsRPNMessage(IMidiMsg msg)
 {
-	if (msg.StatusMsg() != EMidiStatusMsg::kControlChange)
+	if (msg.GetStatus() != EMidiStatusMsg::ControlChange)
 		return false;
-	int cc = msg.mData1;
-	return (cc == 0x64) || (cc == 0x65) || (cc == 0x26) || (cc == 0x06);
+
+	switch (msg.GetControlChangeIdx())
+	{
+		case EMidiControlChangeMsg::DataEntry:
+		case EMidiControlChangeMsg::LSBDataEntry:
+		case EMidiControlChangeMsg::RegisteredParameterNumberLSB:
+		case EMidiControlChangeMsg::RegisteredParameterNumberMSB:
+			return true;
+		default:
+			return false;
+	}
 }
 
 void MidiSynth::HandleRPN(IMidiMsg msg)
 {
-	int channel         = msg.Channel();
+	int channel         = msg.GetChannel();
 	ChannelState& state = mChannelStates[channel];
 
 	uint8_t valueByte = msg.mData2;
 	int param, value;
-	switch (msg.mData1)
+	switch (msg.mLSB)
 	{
-		case 0x64:
+		case EMidiControlChangeMsg::RegisteredParameterNumberLSB:
 			state.paramLSB = valueByte;
 			state.valueMSB = state.valueLSB = 0xff;
 			break;
-		case 0x65:
+		case EMidiControlChangeMsg::RegisteredParameterNumberMSB:
 			state.paramMSB = valueByte;
 			state.valueMSB = state.valueLSB = 0xff;
 			break;
-		case 0x26:
+		case EMidiControlChangeMsg::LSBDataEntry:
 			state.valueLSB = valueByte;
 			break;
-		case 0x06:
+		case EMidiControlChangeMsg::DataEntry:
 			// whenever the value MSB byte is received we constuct the value and take action on the RPN.
 			// if only the MSB has been received, it is used as the entire value so the maximum possible value is 127.
 			state.valueMSB = valueByte;
 			param          = ((state.paramMSB & 0xFF) << 7) + (state.paramLSB & 0xFF);
 
 			if (state.valueLSB != 0xff)
-			{
 				value = ((state.valueMSB & 0xFF) << 7) + (state.valueLSB & 0xFF);
-			}
 			else
-			{
 				value = state.valueMSB & 0xFF;
-			}
-			//			std::cout << "RPN received: channel " << channel << ", param " << param << ", value " << value <<
+
+			//			std::cout << "RPN received: channel " << channel << ", param " << param << ", value " << value
+			//<<
 			//"\n";
 			switch (param)
 			{
@@ -451,17 +442,16 @@ bool MidiSynth::ProcessBlock(sample** inputs, sample** outputs, uint32 nInputs, 
 			voicesbusy |= busy;
 
 			activeCount += (busy == true);
-#if DEBUG_VOICE_COUNT
-			if (GetVoice(v)->GetBusy())
-				printf("X");
-			else
-				DBGMSG("_");
+			if constexpr (Config::Debug::MidiSynthShowVoiceCount)
+			{
+				if (GetVoice(v)->GetBusy())
+					printf("X");
+				else
+					DBGMSG("_");
+			}
 		}
-		DBGMSG("\n");
-		DBGMSG("Num Voices busy %i\n", activeCount);
-#else
-		}
-#endif
+		if constexpr (Config::Debug::MidiSynthShowVoiceCount)
+			DBGMSG("\nNum Voices busy %i\n", activeCount);
 
 		mVoicesAreActive = voicesbusy;
 

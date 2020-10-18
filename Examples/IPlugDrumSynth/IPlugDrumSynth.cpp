@@ -27,7 +27,7 @@ class DrumPadControl : public IControl, public IVectorBase
 	{
 		TriggerAnimation();
 		IMidiMsg msg;
-		msg.MakeNoteOnMsg(mMidiNoteNumber, 1.0f, 0);
+		msg.SetNoteOn(mMidiNoteNumber, 1.0f, 0);
 		GetDelegate()->SendMidiMsgFromUI(msg);
 	}
 
@@ -89,7 +89,7 @@ IPlugDrumSynth::IPlugDrumSynth(const InstanceInfo& info) : Plugin(info, Config(k
 #if IPLUG_EDITOR
 void IPlugDrumSynth::OnMidiMsgUI(const IMidiMsg& msg)
 {
-	if (GetUI() && msg.StatusMsg() == EMidiStatusMsg::kNoteOn)
+	if (GetUI() && msg.StatusMsg() == EMidiStatusMsg::NoteOn)
 	{
 		int pitchClass = msg.NoteNumber() % 12;
 
@@ -154,12 +154,12 @@ void IPlugDrumSynth::ProcessMidiMsg(const IMidiMsg& msg)
 {
 	TRACE;
 
-	EMidiStatusMsg status = msg.StatusMsg();
+	EMidiStatusMsg status = msg.GetStatus();
 
 	switch (status)
 	{
-		case EMidiStatusMsg::kNoteOn:
-		case EMidiStatusMsg::kNoteOff:
+		case EMidiStatusMsg::NoteOn:
+		case EMidiStatusMsg::NoteOff:
 		{
 			goto handle;
 		}

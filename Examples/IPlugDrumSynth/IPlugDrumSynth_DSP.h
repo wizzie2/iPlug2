@@ -75,12 +75,12 @@ class DrumSynthDSP
 				if (msg.mOffset > s)
 					break;
 
-				if (msg.StatusMsg() == EMidiStatusMsg::kNoteOn && msg.Velocity())
+				if (msg.GetStatus() == EMidiStatusMsg::NoteOn && msg.GetVelocity())
 				{
 					int pitchClass = msg.NoteNumber() % 12;
 
 					if (pitchClass < kNumDrums)
-						mDrums[pitchClass].Trigger(msg.Velocity() / 127.f);
+						mDrums[pitchClass].Trigger(msg.GetVelocity());
 				}
 
 				mMidiQueue.Remove();

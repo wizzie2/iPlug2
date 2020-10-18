@@ -186,16 +186,16 @@ class IVKeyboardControl : public IControl
 
 	void OnMidi(const IMidiMsg& msg) override
 	{
-		switch (msg.StatusMsg())
+		switch (msg.GetStatus())
 		{
-			case EMidiStatusMsg::kNoteOn:
-				SetNoteFromMidi(msg.NoteNumber(), (msg.Velocity() != 0));
+			case EMidiStatusMsg::NoteOn:
+				SetNoteFromMidi(msg.GetNoteNumber(), (msg.GetVelocity() != 0));
 				break;
-			case EMidiStatusMsg::kNoteOff:
-				SetNoteFromMidi(msg.NoteNumber(), false);
+			case EMidiStatusMsg::NoteOff:
+				SetNoteFromMidi(msg.GetNoteNumber(), false);
 				break;
-			case EMidiStatusMsg::kControlChange:
-				if (msg.ControlChangeIdx() == EMidiControlChangeMsg::kAllNotesOff)
+			case EMidiStatusMsg::ControlChange:
+				if (msg.GetControlChangeIdx() == EMidiControlChangeMsg::AllNotesOff)
 					ClearNotesFromMidi();
 				break;
 			default:
@@ -716,9 +716,9 @@ class IVKeyboardControl : public IControl
 		const int16 nn = GetMidiNoteNumberForKey(key);
 
 		if (velocity > 0)
-			msg.MakeNoteOnMsg(nn, velocity, 0);
+			msg.SetNoteOn(nn, velocity, 0);
 		else
-			msg.MakeNoteOffMsg(nn, 0);
+			msg.SetNoteOff(nn, 0);
 
 		GetDelegate()->SendMidiMsgFromUI(msg);
 	}
@@ -763,7 +763,7 @@ class IWheelControl : public ISliderControlBase
 	/** Create a WheelControl
 	 * @param bounds The control's bounds
 	 * @param cc A Midi CC to link, defaults to kNoCC which is interpreted as pitch bend */
-	IWheelControl(const IRECT& bounds, EMidiControlChangeMsg cc = EMidiControlChangeMsg::kNoCC, int initBendRange = 12)
+	IWheelControl(const IRECT& bounds, EMidiControlChangeMsg cc = EMidiControlChangeMsg::NoCC, int initBendRange = 12)
 		: ISliderControlBase(bounds, kNoParameter, EDirection::Vertical, DEFAULT_GEARING, 40.f)
 		, mCC(cc)
 		, mPitchBendRange(initBendRange)
@@ -773,14 +773,14 @@ class IWheelControl : public ISliderControlBase
 		mMenu.AddItem("Fifth");
 		mMenu.AddItem("Octave");
 
-		SetValue(cc == EMidiControlChangeMsg::kNoCC ? 0.5 : 0.);
+		SetValue(cc == EMidiControlChangeMsg::NoCC ? 0.5 : 0.);
 		SetWantsMidi(true);
 		SetActionFunction([cc](IControl* pControl) {
 			IMidiMsg msg;
-			if (cc == EMidiControlChangeMsg::kNoCC)  // pitchbend
-				msg.MakePitchWheelMsg((pControl->GetValue() * 2.) - 1.);
+			if (cc == EMidiControlChangeMsg::NoCC)  // pitchbend
+				msg.SetPitchWheel((pControl->GetValue() * 2.) - 1.);
 			else
-				msg.MakeControlChangeMsg(cc, pControl->GetValue());
+				msg.SetControlChange(cc, pControl->GetValue());
 
 			pControl->GetDelegate()->SendMidiMsgFromUI(msg);
 		});
@@ -836,19 +836,19 @@ class IWheelControl : public ISliderControlBase
 
 	void OnMidi(const IMidiMsg& msg) override
 	{
-		if (mCC == EMidiControlChangeMsg::kNoCC)
+		if (mCC == EMidiControlChangeMsg::NoCC)
 		{
-			if (msg.StatusMsg() == EMidiStatusMsg::kPitchWheel)
+			if (msg.GetStatus() == EMidiStatusMsg::PitchBendChange)
 			{
-				SetValue((msg.PitchWheel() + 1.) * 0.5);
+				SetValue((msg.GetPitchWheel() + 1.) * 0.5);
 				SetDirty(false);
 			}
 		}
 		else
 		{
-			if (msg.ControlChangeIdx() == mCC)
+			if (msg.GetControlChangeIdx() == mCC)
 			{
-				SetValue(msg.ControlChange(mCC));
+				SetValue(msg.GetControlChange(mCC));
 				SetDirty(false);
 			}
 		}
@@ -887,7 +887,7 @@ class IWheelControl : public ISliderControlBase
 
 	void OnMouseDown(float x, float y, const IMouseMod& mod) override
 	{
-		if (mod.R && mCC == EMidiControlChangeMsg::kNoCC)
+		if (mod.R && mCC == EMidiControlChangeMsg::NoCC)
 		{
 			switch (mPitchBendRange)
 			{
@@ -915,7 +915,7 @@ class IWheelControl : public ISliderControlBase
 
 	void OnMouseUp(float x, float y, const IMouseMod& mod) override
 	{
-		if (mCC == EMidiControlChangeMsg::kNoCC)  // pitchbend
+		if (mCC == EMidiControlChangeMsg::NoCC)  // pitchbend
 		{
 			float startValue = GetValue();
 			SetAnimation(
