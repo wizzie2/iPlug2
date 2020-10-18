@@ -150,6 +150,7 @@ namespace iplug
 	}
 
 
+	// Equal To operator for EnumClass/Integer or Integer/EnumClass
 	template <class Ta, class Tb>
 	inline constexpr auto operator==(const Ta& lhs, const Tb& rhs)
 		-> std::enable_if_t<(std::is_integral_v<Ta> && type::IsEnumClass<Tb>) ||
@@ -163,6 +164,7 @@ namespace iplug
 	}
 
 
+	// Not Equal To operator for EnumClass/Integer or Integer/EnumClass
 	template <class Ta, class Tb>
 	inline constexpr auto operator!=(const Ta& lhs, const Tb& rhs)
 		-> std::enable_if_t<(type::IsEnumClass<Ta> && std::is_integral_v<Tb>) ||
@@ -229,7 +231,7 @@ namespace iplug
 		-> std::enable_if_t<(std::is_integral_v<Ta> && type::IsEnumClass<Tb>) ||
 								(type::IsEnumClass<Ta> && std::is_integral_v<Tb>) ||
 								(type::IsEnumClass<Ta> && type::IsEnumClass<Tb>),
-							std::conditional_t<type::IsEnumClass<Ta>, Ta, Tb>>
+							Ta>
 	{
 		if constexpr (type::IsEnumClass<Ta> && type::IsEnumClass<Tb>)
 			return static_cast<Ta>(+lhs >> +rhs);
