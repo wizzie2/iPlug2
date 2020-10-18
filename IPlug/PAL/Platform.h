@@ -201,11 +201,14 @@ namespace iplug
 	{   // clang-format off
 		Debug,
 		Release,
+		ReleaseWithDebugInformation,
 		Distributed,
 		Native =
 			#if DISTRIBUTED
 				Distributed
-			#elif NDEBUG
+			#elif RELWITHDEBINFO
+				ReleaseWithDebugInformation
+			#elif RELEASE
 				Release
 			#elif _DEBUG
 				Debug

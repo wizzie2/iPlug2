@@ -410,6 +410,7 @@ macro(_iplug_set_default_compiler_options)
             # Release
             set(CL_FLAGS_RELEASE
                 /DNDEBUG          # Turn off assertion checks
+                /DRELEASE=1       # Set DISTRIBUTED preprocessor variable
                 /GS               # Buffer Security Checks. Detects some buffer overruns that overwrite a function's return address, exception handler address, or certain types of parameters
                 /Zo               # Enhance Optimized Debugging for optimized code in non-debug builds. Tells the compiler to generate additional debugging information for local variables and inlined functions
                 /GL               # Whole Program Optimization
@@ -424,7 +425,8 @@ macro(_iplug_set_default_compiler_options)
             # Release with debug information
             set(CL_FLAGS_RELWITHDEBINFO
                 ${CL_FLAGS_RELEASE}
-                /Zi               # Generates complete debugging information. /ZI (edit and continue) can cause issues in code size, performance, and compiler conformance
+                /DRELWITHDEBINFO=1 # Set DISTRIBUTED preprocessor variable
+                /Zi                # Generates complete debugging information. /ZI (edit and continue) can cause issues in code size, performance, and compiler conformance
             )
 
             # Distributed (lean and mean version, ready for worldwide distribution)

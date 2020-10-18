@@ -23,7 +23,7 @@
 BEGIN_IPLUG_NAMESPACE
 
 // clang-format off
-#ifdef NDEBUG
+#if defined NDEBUG && !defined RELWITHDEBINFO
 	#define DBGMSG(...) ((void) 0)
 #else
 	#if PLATFORM_MAC || PLATFORM_LINUX || PLATFORM_WEB || PLATFORM_IOS
@@ -73,91 +73,91 @@ BEGIN_IPLUG_NAMESPACE
 
 #define TRACELOC __FUNCTION__, __LINE__
 
-struct LogFile
-{
-	FILE* mFP;
-
-	LogFile()
-	{
-		char logFilePath[100];
-		if constexpr (EPlatform::Native == EPlatform::Windows)
-			sprintf(logFilePath, "%s/%s", "C:\\", LOGFILE);  // TODO: check windows logFilePath
-		else
-			sprintf(logFilePath, "%s/%s", getenv("HOME"), LOGFILE);
-
-		mFP = fopen(logFilePath, "w");
-		assert(mFP);
-
-		DBGMSG("Logging to %s\n", logFilePath);
-	}
-
-	~LogFile()
-	{
-		fclose(mFP);
-		mFP = nullptr;
-	}
-
-	LogFile(const LogFile&) = delete;
-	LogFile& operator=(const LogFile&) = delete;
-};
+//struct LogFile
+//{
+//	FILE* mFP;
+//
+//	LogFile()
+//	{
+//		char logFilePath[100];
+//		if constexpr (EPlatform::Native == EPlatform::Windows)
+//			sprintf(logFilePath, "%s/%s", "C:\\", LOGFILE);  // TODO: check windows logFilePath
+//		else
+//			sprintf(logFilePath, "%s/%s", getenv("HOME"), LOGFILE);
+//
+//		mFP = fopen(logFilePath, "w");
+//		assert(mFP);
+//
+//		DBGMSG("Logging to %s\n", logFilePath);
+//	}
+//
+//	~LogFile()
+//	{
+//		fclose(mFP);
+//		mFP = nullptr;
+//	}
+//
+//	LogFile(const LogFile&) = delete;
+//	LogFile& operator=(const LogFile&) = delete;
+//};
 
 // TODO: move to string class
-static bool IsWhitespace(char c)
-{
-	return (c == ' ' || c == '\t' || c == '\n' || c == '\r');
-}
+//static bool IsWhitespace(char c)
+//{
+//	return (c == ' ' || c == '\t' || c == '\n' || c == '\r');
+//}
 
 // TODO: move to timer class
-static const char* CurrentTime()
-{
-	//    TODO: replace with std::chrono based version
-	time_t t = time(0);
-	tm* pT   = localtime(&t);
+//static const char* CurrentTime()
+//{
+//	//    TODO: replace with std::chrono based version
+//	time_t t = time(0);
+//	tm* pT   = localtime(&t);
+//
+//	char cStr[32];
+//	strftime(cStr, 32, "%Y%m%d %H:%M ", pT);
+//
+//	int tz   = 60 * pT->tm_hour + pT->tm_min;
+//	int yday = pT->tm_yday;
+//	pT       = gmtime(&t);
+//	tz -= 60 * pT->tm_hour + pT->tm_min;
+//	yday -= pT->tm_yday;
+//	if (yday != 0)
+//	{
+//		if (yday > 1)
+//			yday = -1;
+//		else if (yday < -1)
+//			yday = 1;
+//		tz += 24 * 60 * yday;
+//	}
+//	int i     = (int) strlen(cStr);
+//	cStr[i++] = tz >= 0 ? '+' : '-';
+//	if (tz < 0)
+//		tz = -tz;
+//	sprintf(&cStr[i], "%02d%02d", tz / 60, tz % 60);
+//
+//	static char sTimeStr[32];
+//	strcpy(sTimeStr, cStr);
+//	return sTimeStr;
+//}
 
-	char cStr[32];
-	strftime(cStr, 32, "%Y%m%d %H:%M ", pT);
-
-	int tz   = 60 * pT->tm_hour + pT->tm_min;
-	int yday = pT->tm_yday;
-	pT       = gmtime(&t);
-	tz -= 60 * pT->tm_hour + pT->tm_min;
-	yday -= pT->tm_yday;
-	if (yday != 0)
-	{
-		if (yday > 1)
-			yday = -1;
-		else if (yday < -1)
-			yday = 1;
-		tz += 24 * 60 * yday;
-	}
-	int i     = (int) strlen(cStr);
-	cStr[i++] = tz >= 0 ? '+' : '-';
-	if (tz < 0)
-		tz = -tz;
-	sprintf(&cStr[i], "%02d%02d", tz / 60, tz % 60);
-
-	static char sTimeStr[32];
-	strcpy(sTimeStr, cStr);
-	return sTimeStr;
-}
-
-inline static const char* AppendTimestamp(const char* Mmm_dd_yyyy, const char* hh_mm_ss, const char* cStr)
-{
-	static WDL_String str;
-	str.Set(cStr);
-	str.Append(" ");
-	WDL_String tStr;
-	tStr.Set("[");
-	tStr.Append(Mmm_dd_yyyy);
-	tStr.SetLen(7);
-	tStr.DeleteSub(4, 1);
-	tStr.Append(" ");
-	tStr.Append(hh_mm_ss);
-	tStr.SetLen(12);
-	tStr.Append("]");
-	str.Append(tStr.Get());
-	return str.Get();
-}
+//inline static const char* AppendTimestamp(const char* Mmm_dd_yyyy, const char* hh_mm_ss, const char* cStr)
+//{
+//	static WDL_String str;
+//	str.Set(cStr);
+//	str.Append(" ");
+//	WDL_String tStr;
+//	tStr.Set("[");
+//	tStr.Append(Mmm_dd_yyyy);
+//	tStr.SetLen(7);
+//	tStr.DeleteSub(4, 1);
+//	tStr.Append(" ");
+//	tStr.Append(hh_mm_ss);
+//	tStr.SetLen(12);
+//	tStr.Append("]");
+//	str.Append(tStr.Get());
+//	return str.Get();
+//}
 
 #if defined TRACER_BUILD
 
