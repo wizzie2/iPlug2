@@ -103,7 +103,7 @@ public:
       for (int i = 0; i < nPresets; i++) {
         const char* str = pluginBase->GetPresetName(i);
         if (i == currentPresetIdx)
-          mMenu.AddItem(str, -1, IPopupMenu::Item::kChecked);
+          mMenu.AddItem(str, -1, IPopupMenu::Item::Flags::kChecked);
         else
           mMenu.AddItem(str);
       }

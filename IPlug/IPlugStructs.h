@@ -322,10 +322,10 @@ namespace iplug
 		{
 			int n = mBytes.GetSize();
 			mBytes.Resize(newSize);
+
 			if (newSize > n)
-			{
-				memset(mBytes.Get() + n, 0, (newSize - n));
-			}
+				memset(mBytes.Get() + n, 0, static_cast<size_t>(newSize) - n);
+
 			return n;
 		}
 

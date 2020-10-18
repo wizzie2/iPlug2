@@ -16,8 +16,6 @@
  * @copydoc IBubbleControl
  */
 
-#include "IControl.h"
-
 BEGIN_IPLUG_NAMESPACE
 BEGIN_IGRAPHICS_NAMESPACE
 
@@ -29,7 +27,7 @@ class IBubbleControl : public IControl
 {
  public:
 	/** An enumerated list, that is used to determine the state of the menu, mainly for animations*/
-	enum EPopupState
+	enum class EPopupState
 	{
 		kCollapsed = 0,
 		kExpanding,
@@ -37,7 +35,7 @@ class IBubbleControl : public IControl
 		kCollapsing,
 	};
 
-	enum EArrowDir
+	enum class EArrowDir
 	{
 		kNorth,
 		kEast,
@@ -54,9 +52,9 @@ class IBubbleControl : public IControl
 				   const IColor& strokeColor = COLOR_BLACK,
 				   float roundness           = 5.f)
 		: IControl(IRECT())
+		, mRoundness(roundness)
 		, mFillColor(fillColor)
 		, mStrokeColor(strokeColor)
-		, mRoundness(roundness)
 	{
 		mText        = text;
 		mHide        = true;
@@ -67,32 +65,32 @@ class IBubbleControl : public IControl
 
 			if (progress > 1.)
 			{
-				if (mState == kExpanding)
+				if (mState == EPopupState::kExpanding)
 				{
 					mBlend.mWeight = mOpacity;
-					mState         = kExpanded;
+					mState         = EPopupState::kExpanded;
 				}
-				else if (mState == kExpanded)
+				else if (mState == EPopupState::kExpanded)
 				{
 					if (GetUI()->ControlIsCaptured(mCaller))
 					{
-						mState = kExpanded;
+						mState = EPopupState::kExpanded;
 						SetDirty(true);  // triggers animation again
 					}
 					else
 					{
 						mBlend.mWeight = mOpacity;
-						mState         = kCollapsing;
+						mState         = EPopupState::kCollapsing;
 						SetDirty(true);  // triggers animation again
 					}
 
 					return;  // don't remove animation
 				}
-				else if (mState == kCollapsing)
+				else if (mState == EPopupState::kCollapsing)
 				{
 					mBlend.mWeight = 0.;
 					Hide(true);
-					mState = kCollapsed;
+					mState = EPopupState::kCollapsed;
 					SetDirty(false);
 				}
 
@@ -102,13 +100,13 @@ class IBubbleControl : public IControl
 
 			switch (mState)
 			{
-				case kExpanding:
+				case EPopupState::kExpanding:
 					mBlend.mWeight = (float) progress * mOpacity;
 					break;
-				case kExpanded:
+				case EPopupState::kExpanded:
 					mBlend.mWeight = mOpacity;
 					break;
-				case kCollapsing:
+				case EPopupState::kCollapsing:
 					mBlend.mWeight = (float) (1. - progress) * mOpacity;
 					break;
 				default:
@@ -121,7 +119,7 @@ class IBubbleControl : public IControl
 		});
 
 		SetAnimationEndActionFunction([animationFunc, this](IControl* pCaller) {
-			if (mState == kExpanded)
+			if (mState == EPopupState::kExpanded)
 			{
 				SetAnimation(animationFunc, 1000);
 			}
@@ -166,7 +164,7 @@ class IBubbleControl : public IControl
 		g.PathMoveTo(r.L, r.T + mRoundness);
 		g.PathArc(r.L + mRoundness, r.T + mRoundness, mRoundness, 270.f, 360.f);
 
-		if (mArrowDir == kWest)
+		if (mArrowDir == EArrowDir::kWest)
 		{
 			g.PathArc(r.R - mRoundness, r.T + mRoundness, mRoundness, 0.f, 90.f);
 			g.PathArc(r.R - mRoundness, r.B - mRoundness, mRoundness, 90.f, 180.f);
@@ -175,7 +173,7 @@ class IBubbleControl : public IControl
 			g.PathLineTo(r.L - mCalloutSize, r.MH());
 			g.PathLineTo(r.L, r.MH() - halfCalloutSize);
 		}
-		else if (mArrowDir == kEast)
+		else if (mArrowDir == EArrowDir::kEast)
 		{
 			g.PathArc(r.R - mRoundness, r.T + mRoundness, mRoundness, 0.f, 90.f);
 			g.PathLineTo(r.R, r.MH() - halfCalloutSize);
@@ -184,7 +182,7 @@ class IBubbleControl : public IControl
 			g.PathArc(r.R - mRoundness, r.B - mRoundness, mRoundness, 90.f, 180.f);
 			g.PathArc(r.L + mRoundness, r.B - mRoundness, mRoundness, 180.f, 270.f);
 		}
-		else if (mArrowDir == kNorth)
+		else if (mArrowDir == EArrowDir::kNorth)
 		{
 			g.PathLineTo(r.MW() - halfCalloutSize, r.T);
 			g.PathLineTo(r.MW(), r.T - mCalloutSize);
@@ -193,7 +191,7 @@ class IBubbleControl : public IControl
 			g.PathArc(r.R - mRoundness, r.B - mRoundness, mRoundness, 90.f, 180.f);
 			g.PathArc(r.L + mRoundness, r.B - mRoundness, mRoundness, 180.f, 270.f);
 		}
-		else if (mArrowDir == kSouth)
+		else if (mArrowDir == EArrowDir::kSouth)
 		{
 			g.PathArc(r.R - mRoundness, r.T + mRoundness, mRoundness, 0.f, 90.f);
 			g.PathArc(r.R - mRoundness, r.B - mRoundness, mRoundness, 90.f, 180.f);
@@ -288,10 +286,10 @@ class IBubbleControl : public IControl
 
 		SetRECT(mRECT.Union(mBubbleBounds));
 
-		if (mState == kCollapsed)
+		if (mState == EPopupState::kCollapsed)
 		{
 			Hide(false);
-			mState = kExpanding;
+			mState = EPopupState::kExpanding;
 			SetDirty(true);
 		}
 
@@ -324,7 +322,7 @@ class IBubbleControl : public IControl
 	float mHorizontalPadding = 5.f;
 	IColor mFillColor        = COLOR_WHITE;
 	IColor mStrokeColor      = COLOR_BLACK;
-	EPopupState mState       = kCollapsed;  // The state of the pop-up, mainly used for animation
+	EPopupState mState       = EPopupState::kCollapsed;  // The state of the pop-up, mainly used for animation
 };
 
 END_IGRAPHICS_NAMESPACE

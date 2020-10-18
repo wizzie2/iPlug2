@@ -590,7 +590,7 @@ void IGraphics::PromptUserInput(IControl& control, const IRECT& bounds, int valI
 				const char* str = pParam->GetDisplayText(i);
 				// TODO: what if two parameters have the same text?
 				if (!strcmp(str, currentText.Get()))  // strings are equal
-					mPromptPopupMenu.AddItem(new IPopupMenu::Item(str, IPopupMenu::Item::kChecked), -1);
+					mPromptPopupMenu.AddItem(new IPopupMenu::Item(str, IPopupMenu::Item::Flags::kChecked), -1);
 				else  // not equal
 					mPromptPopupMenu.AddItem(new IPopupMenu::Item(str), -1);
 

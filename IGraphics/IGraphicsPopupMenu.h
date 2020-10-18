@@ -36,7 +36,7 @@ public:
   class Item
   {
   public:
-    enum Flags
+    enum class Flags
     {
       kNoFlags  = 0,
       kDisabled = 1 << 0,     // item is gray and not selectable
@@ -45,7 +45,7 @@ public:
       kSeparator  = 1 << 3    // item is a separator
     };
     
-    Item(const char* str, int flags = kNoFlags, int tag = -1)
+    Item(const char* str, Flags flags = Flags::kNoFlags, int tag = -1)
     : mFlags(flags)
     , mTag(tag)
     {
@@ -53,8 +53,8 @@ public:
     }
     
     Item (const char* str, IPopupMenu* pSubMenu)
-    : mFlags(kNoFlags)
-    , mSubmenu(pSubMenu)
+    : mSubmenu(pSubMenu)
+    , mFlags(Flags::kNoFlags)
     {
       SetText(str);
     }
@@ -69,10 +69,10 @@ public:
     void SetText(const char* str) { mText.Set(str); }
     const char* GetText() const { return mText.Get(); }; // TODO: Text -> Str!
     
-    bool GetEnabled() const { return !(mFlags & kDisabled); }
-    bool GetChecked() const { return (mFlags & kChecked) != 0; }
-    bool GetIsTitle() const { return (mFlags & kTitle) != 0; }
-    bool GetIsSeparator() const { return (mFlags & kSeparator) != 0; }
+    bool GetEnabled() const { return !(mFlags & Flags::kDisabled); }
+    bool GetChecked() const { return (mFlags & Flags::kChecked) != 0; }
+    bool GetIsTitle() const { return (mFlags & Flags::kTitle) != 0; }
+    bool GetIsSeparator() const { return (mFlags & Flags::kSeparator) != 0; }
     int GetTag() const { return mTag; }
     IPopupMenu* GetSubmenu() const { return mSubmenu.get(); }
     bool GetIsChoosable() const
@@ -85,9 +85,9 @@ public:
       return true;
     }
     
-    void SetEnabled(bool state) { SetFlag(kDisabled, !state); }
-    void SetChecked(bool state) { SetFlag(kChecked, state); }
-    void SetTitle(bool state) {SetFlag(kTitle, state); }
+    void SetEnabled(bool state) { SetFlag(Flags::kDisabled, !state); }
+    void SetChecked(bool state) { SetFlag(Flags::kChecked, state); }
+    void SetTitle(bool state) {SetFlag(Flags::kTitle, state); }
 
   protected:
     void SetFlag(Flags flag, bool state)
@@ -100,7 +100,7 @@ public:
 
     WDL_String mText;
     std::unique_ptr<IPopupMenu> mSubmenu;
-    int mFlags;
+    Flags mFlags;
     int mTag = -1;
   };
   
@@ -151,7 +151,7 @@ public:
     return pItem;
   }
   
-  Item* AddItem(const char* str, int index = -1, int itemFlags = Item::kNoFlags) { return AddItem(new Item(str, itemFlags), index); }
+  Item* AddItem(const char* str, int index = -1, Item::Flags itemFlags = Item::Flags::kNoFlags) { return AddItem(new Item(str, itemFlags), index); }
   
   Item* AddItem(const char* str, int index, IPopupMenu* pSubmenu)
   {
@@ -175,7 +175,7 @@ public:
   
   Item* AddSeparator(int index = -1)
   {
-    Item* pItem = new Item ("", Item::kSeparator);
+    Item* pItem = new Item ("", Item::Flags::kSeparator);
     return AddItem(pItem, index);
   }
   

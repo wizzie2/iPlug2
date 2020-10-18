@@ -2263,8 +2263,8 @@ struct IMatrix
 	 * @param y0 /todo */
 	void TransformPoint(float& x, float& y, float x0, float y0) const
 	{
-		x = x0 * mXX + y0 * mXY + mTX;
-		y = x0 * mYX + y0 * mYY + mTY;
+		x = x0 * static_cast<float>(mXX) + y0 * static_cast<float>(mXY) + static_cast<float>(mTX);
+		y = x0 * static_cast<float>(mYX) + y0 * static_cast<float>(mYY) + static_cast<float>(mTY);
 	};
 
 	void TransformPoint(double& x, double& y, double x0, double y0) const
@@ -2751,12 +2751,9 @@ struct IVStyle
 			float shadowOffset        = DEFAULT_SHADOW_OFFSET,
 			float widgetFrac          = DEFAULT_WIDGET_FRAC,
 			float angle               = DEFAULT_WIDGET_ANGLE)
-		: showLabel(showLabel)
+		: hideCursor(hideCursor)
+		, showLabel(showLabel)
 		, showValue(showValue)
-		, colorSpec(colors)
-		, labelText(labelText)
-		, valueText(valueText)
-		, hideCursor(hideCursor)
 		, drawFrame(drawFrame)
 		, drawShadows(drawShadows)
 		, emboss(emboss)
@@ -2765,6 +2762,9 @@ struct IVStyle
 		, shadowOffset(shadowOffset)
 		, widgetFrac(widgetFrac)
 		, angle(angle)
+		, colorSpec(colors)
+		, labelText(labelText)
+		, valueText(valueText)
 	{
 	}
 
