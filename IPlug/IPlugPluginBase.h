@@ -21,7 +21,7 @@ BEGIN_IPLUG_NAMESPACE
 /** Base class that contains plug-in info and state manipulation methods */
 class IPluginBase : public EDITOR_DELEGATE_CLASS
 {
- public:
+public:
 	IPluginBase(int nParams, int nPresets);
 	virtual ~IPluginBase();
 
@@ -369,24 +369,10 @@ class IPluginBase : public EDITOR_DELEGATE_CLASS
 	 * @return /c true on success */
 	bool LoadPresetFromFXP(const char* file);
 
-	/** Load VST2 format bank [VST2 only]
-	 * @param file The full path of the file to load
-	 * @return /c true on success */
+  /** Load VST2 format bank [VST2 only]
+   * @param file The full path of the file to load
+   * @return /c true on success */
 	bool LoadBankFromFXB(const char* file);
-
-	/** Save current bank as individual VST2 format presets [VST2 only]
-	 * @param file The full path of the file to write or overwrite
-	 * @return /c true on success */
-	bool SaveBankAsFXPs(const char* path) const
-	{
-		return false;
-	}
-
-	/** /todo
-	 * @param chunk /todo
-	 * @param componentState /todo
-	 * @param controllerState /todo */
-	void MakeVSTPresetChunk(IByteChunk& chunk, IByteChunk& componentState, IByteChunk& controllerState) const;
 
 	/** Save VST3 format preset
 	 * @param file The full path of the file to write or overwrite
@@ -397,65 +383,6 @@ class IPluginBase : public EDITOR_DELEGATE_CLASS
 	 * @param file The full path of the file to load
 	 * @return /c true on success */
 	bool LoadPresetFromVSTPreset(const char* file);
-
-	/** Save VST2 bank as individual VST3 format presets [VST2 only]
-	 * @param path The full path of the folder where the files should be saved
-	 * @return /c true on success */
-	bool SaveBankAsVSTPresets(const char* path)
-	{
-		return false;
-	}
-
-	/** Save AUv2 format preset
-	 * @param file The full path of the file to write or overwrite
-	 * @return /c true on success */
-	bool SavePresetAsAUPreset(const char* name, const char* file) const
-	{
-		return false;
-	}
-
-	/** Load AUv2 format preset
-	 * @param file The full path of the file to load
-	 * @return /c true on success */
-	bool LoadPresetFromAUPreset(const char* file)
-	{
-		return false;
-	}
-
-	/** Save VST2 bank as individual AUv2 format presets [VST2 only]
-	 * @param path The full path of the folder where the files should be saved
-	 * @return /c true on success */
-	bool SaveBankAsAUPresets(const char* path)
-	{
-		return false;
-	}
-
-	/** Save ProTools format preset
-	 * @param presetName The name to place in the in the preset
-	 * @param file The full path of the file to write or overwrite
-	 * @param pluginID The protools plugid to place in the preset
-	 * @return /c true on success */
-	bool SavePresetAsProToolsPreset(const char* presetName, const char* file, unsigned long pluginID) const
-	{
-		return false;
-	}
-
-	/** Load ProTools format preset
-	 * @param file The full path of the file to load
-	 * @return /c true on success */
-	bool LoadPresetFromProToolsPreset(const char* file)
-	{
-		return false;
-	}
-
-	/** Save VST2 bank as individual ProTools format presets [VST2 only]
-	 * @param path The full path of the folder where the files should be saved
-	 * @param pluginID The protools plugid to place in the preset
-	 * @return /c true on success */
-	bool SaveBankAsProToolsPresets(const char* path, unsigned long pluginID)
-	{
-		return false;
-	}
 
 #pragma mark - Parameter manipulation
 
@@ -485,11 +412,11 @@ class IPluginBase : public EDITOR_DELEGATE_CLASS
 						double minVal,
 						double maxVal,
 						double step,
-						const char* label               = "",
-						int flags                       = 0,
-						const char* group               = "",
-						const IParam::Shape& shape      = IParam::ShapeLinear(),
-						IParam::EParamUnit unit         = IParam::kUnitCustom,
+						const char* label = "",
+						int flags = 0,
+						const char* group = "",
+						const IParam::Shape& shape = IParam::ShapeLinear(),
+						IParam::EParamUnit unit = IParam::kUnitCustom,
 						IParam::DisplayFunc displayFunc = nullptr);
 
 	/** Clone a range of parameters, optionally doing a string substitution on the parameter name.
@@ -502,9 +429,9 @@ class IPluginBase : public EDITOR_DELEGATE_CLASS
 	void CloneParamRange(int cloneStartIdx,
 						 int cloneEndIdx,
 						 int startIdx,
-						 const char* searchStr  = "",
+						 const char* searchStr = "",
 						 const char* replaceStr = "",
-						 const char* newGroup   = "");
+						 const char* newGroup = "");
 
 	/** Modify a range of parameters with a lamda function
 	 * @param startIdx The index of the first parameter to modify
@@ -557,7 +484,7 @@ class IPluginBase : public EDITOR_DELEGATE_CLASS
 	/** Default parameter values for a parameter group  */
 	void PrintParamValues();
 
- protected:
+protected:
 	int mCurrentPresetIdx = 0;
 	/** \c true if the plug-in does opaque state chunks. If false the host will provide a default interface */
 	bool mStateChunks = false;
@@ -597,8 +524,8 @@ class IPluginBase : public EDITOR_DELEGATE_CLASS
 #ifdef PARAMS_MUTEX
 	friend class IPlugVST3ProcessorBase;
 
- protected:
-	/** Lock when accessing mParams (including via GetParam) from the audio thread */
+protected:
+   /** Lock when accessing mParams (including via GetParam) from the audio thread */
 	WDL_Mutex mParams_mutex;
 #endif
 };

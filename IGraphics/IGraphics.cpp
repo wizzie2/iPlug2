@@ -52,8 +52,8 @@ IGraphics::~IGraphics()
 
 void IGraphics::SetScreenScale(int scale)
 {
-	mScreenScale     = scale;
-	int windowWidth  = GetWindowWidth() * GetPlatformWindowScale();
+	mScreenScale = scale;
+	int windowWidth = GetWindowWidth() * GetPlatformWindowScale();
 	int windowHeight = GetWindowHeight() * GetPlatformWindowScale();
 
 	PlatformResize(GetDelegate()->EditorResizeFromUI(windowWidth, windowHeight, true));
@@ -75,13 +75,13 @@ void IGraphics::Resize(int w, int h, float scale, bool needsPlatformResize)
 	ReleaseMouseCapture();
 
 	mDrawScale = scale;
-	mWidth     = w;
-	mHeight    = h;
+	mWidth = w;
+	mHeight = h;
 
 	if (mCornerResizer)
 		mCornerResizer->OnRescale();
 
-	int windowWidth  = GetWindowWidth() * GetPlatformWindowScale();
+	int windowWidth = GetWindowWidth() * GetPlatformWindowScale();
 	int windowHeight = GetWindowHeight() * GetPlatformWindowScale();
 
 	PlatformResize(GetDelegate()->EditorResizeFromUI(windowWidth, windowHeight, needsPlatformResize));
@@ -165,10 +165,10 @@ void IGraphics::RemoveAllControls()
 	ReleaseMouseCapture();
 	ClearMouseOver();
 
-	mPopupControl     = nullptr;
+	mPopupControl = nullptr;
 	mTextEntryControl = nullptr;
-	mCornerResizer    = nullptr;
-	mPerfDisplay      = nullptr;
+	mCornerResizer = nullptr;
+	mPerfDisplay = nullptr;
 
 #ifndef NDEBUG
 	mLiveEdit = nullptr;
@@ -310,7 +310,7 @@ void IGraphics::AttachCornerResizer(ICornerResizerControl* pControl, EUIResizerM
 	if (!mCornerResizer)
 	{
 		mCornerResizer.swap(control);
-		mGUISizeMode    = sizeMode;
+		mGUISizeMode = sizeMode;
 		mLayoutOnResize = layoutOnResize;
 		mCornerResizer->SetDelegate(*GetDelegate());
 	}
@@ -539,7 +539,8 @@ void IGraphics::SetAllControlsClean()
 
 void IGraphics::AssignParamNameToolTips()
 {
-	auto func = [](IControl& control) {
+	auto func = [](IControl& control)
+	{
 		if (control.GetParamIdx() > kNoParameter)
 			control.SetTooltip(control.GetParam()->GetName());
 	};
@@ -552,7 +553,8 @@ void IGraphics::UpdatePeers(IControl* pCaller, int callerValIdx)  // TODO: this 
 	double value = pCaller->GetValue(callerValIdx);
 	int paramIdx = pCaller->GetParamIdx(callerValIdx);
 
-	auto func = [pCaller, paramIdx, value](IControl& control) {
+	auto func = [pCaller, paramIdx, value](IControl& control)
+	{
 		int valIdx = control.LinkedToParam(paramIdx);
 
 		// Not actually called from the delegate, but we don't want to push the updates back to the delegate
@@ -699,18 +701,18 @@ void IGraphics::DrawBitmapedText(const IBitmap& bitmap,
 			if (widthAsOneLine > bounds.W())
 			{
 				nCharsThatFitIntoLine = int(bounds.W() / (float) charWidth);
-				nLines                = int(float(widthAsOneLine) / bounds.W()) + 1;
+				nLines = int(float(widthAsOneLine) / bounds.W()) + 1;
 			}
 			else  // line is shorter than width of bounds
 			{
 				nCharsThatFitIntoLine = stringLength;
-				nLines                = 1;
+				nLines = 1;
 			}
 		}
 		else
 		{
 			nCharsThatFitIntoLine = int(bounds.W() / (float) charWidth);
-			nLines                = 1;
+			nLines = 1;
 		}
 
 		for (int line = 0; line < nLines; line++)
@@ -725,7 +727,7 @@ void IGraphics::DrawBitmapedText(const IBitmap& bitmap,
 				int frameOffset = (int) str[stridx++] - 31;  // calculate which frame to look up
 
 				float xOffset = ((float) linepos * ((float) charWidth + (float) charOffset)) +
-								basicXOffset;  // calculate xOffset for character we're drawing
+					basicXOffset;  // calculate xOffset for character we're drawing
 				IRECT charRect = IRECT(xOffset, yOffset, xOffset + charWidth, yOffset + charHeight);
 				DrawBitmap(bitmap, charRect, frameOffset, pBlend);
 			}
@@ -736,7 +738,7 @@ void IGraphics::DrawBitmapedText(const IBitmap& bitmap,
 void IGraphics::DrawVerticalLine(
 	const IColor& color, const IRECT& bounds, float x, const IBlend* pBlend, float thickness)
 {
-	x        = math::Clamp(x, 0.0f, 1.0f);
+	x = math::Clamp(x, 0.0f, 1.0f);
 	float xi = bounds.L + int(x * (bounds.R - bounds.L));
 	return DrawVerticalLine(color, xi, bounds.T, bounds.B, pBlend, thickness);
 }
@@ -744,7 +746,7 @@ void IGraphics::DrawVerticalLine(
 void IGraphics::DrawHorizontalLine(
 	const IColor& color, const IRECT& bounds, float y, const IBlend* pBlend, float thickness)
 {
-	y        = math::Clamp(y, 0.0f, 1.0f);
+	y = math::Clamp(y, 0.0f, 1.0f);
 	float yi = bounds.B - (y * (float) (bounds.B - bounds.T));
 	return DrawHorizontalLine(color, yi, bounds.L, bounds.R, pBlend, thickness);
 }
@@ -813,13 +815,15 @@ bool IGraphics::IsDirty(IRECTList& rects)
 	if (mDisplayTickFunc)
 		mDisplayTickFunc();
 
-	ForAllControlsFunc([](IControl& control) {
+	ForAllControlsFunc([](IControl& control)
+	{
 		control.Animate();
 	});
 
 	bool dirty = false;
 
-	auto func = [&dirty, &rects](IControl& control) {
+	auto func = [&dirty, &rects](IControl& control)
+	{
 		if (control.IsDirty())
 		{
 			// N.B padding outlines for single line outlines
@@ -859,7 +863,7 @@ void IGraphics::BeginFrame()
 	if (mPerfDisplay)
 	{
 		const double timestamp = GetTimestamp();
-		const double timeDiff  = timestamp - mPrevTimestamp;
+		const double timeDiff = timestamp - mPrevTimestamp;
 		mPerfDisplay->Update((float) timeDiff);
 		mPrevTimestamp = timestamp;
 	}
@@ -872,24 +876,24 @@ void IGraphics::DrawControl(IControl* pControl, const IRECT& bounds, float scale
 	{
 		// N.B. Padding allows single line outlines on controls
 		IRECT controlBounds = pControl->GetRECT().GetPadded(0.75).GetPixelAligned(scale);
-		IRECT clipBounds    = bounds.Intersect(controlBounds);
+		IRECT clipBounds = bounds.Intersect(controlBounds);
 
 		if (clipBounds.W() <= 0.0 || clipBounds.H() <= 0)
 			return;
 
 		PrepareRegion(clipBounds);
 		pControl->Draw(*this);
-#ifdef AAX_API
+	#ifdef AAX_API
 		pControl->DrawPTHighlight(*this);
-#endif
+	#endif
 
-#ifndef NDEBUG
+	#ifndef NDEBUG
 		if (mShowControlBounds)
 		{
 			PrepareRegion(clipBounds);
 			DrawRect(CONTROL_BOUNDS_COLOR, pControl->GetRECT());
 		}
-#endif
+	#endif
 
 		CompleteRegion(clipBounds);
 	}
@@ -897,7 +901,8 @@ void IGraphics::DrawControl(IControl* pControl, const IRECT& bounds, float scale
 
 void IGraphics::Draw(const IRECT& bounds, float scale)
 {
-	ForAllControlsFunc([this, bounds, scale](IControl& control) {
+	ForAllControlsFunc([this, bounds, scale](IControl& control)
+	{
 		DrawControl(&control, bounds, scale);
 	});
 
@@ -978,36 +983,37 @@ void IGraphics::OnMouseDown(const std::vector<IMouseInfo>& points)
 
 	for (auto& point : points)
 	{
-		float x              = point.x;
-		float y              = point.y;
+		float x = point.x;
+		float y = point.y;
 		const IMouseMod& mod = point.ms;
 
 		IControl* pCapturedControl = GetMouseControl(x, y, true, false, mod.touchID);
 
 		if (pCapturedControl)
 		{
-			int nVals    = pCapturedControl->NVals();
-			int valIdx   = pCapturedControl->GetValIdxForPos(x, y);
+			int nVals = pCapturedControl->NVals();
+			int valIdx = pCapturedControl->GetValIdxForPos(x, y);
 			int paramIdx = pCapturedControl->GetParamIdx((valIdx > kNoValIdx) ? valIdx : 0);
 
-#ifdef AAX_API
+		#ifdef AAX_API
 			if (mAAXViewContainer && paramIdx > kNoParameter)
 			{
-				auto GetAAXModifiersFromIMouseMod = [](const IMouseMod& mod) {
+				auto GetAAXModifiersFromIMouseMod = [](const IMouseMod& mod)
+				{
 					uint32_t modifiers = 0;
 
 					if (mod.A)
 						modifiers |= AAX_eModifiers_Option;  // ALT Key on Windows, ALT/Option key on mac
 
-	#if PLATFORM_WINDOWS
+				#if PLATFORM_WINDOWS
 					if (mod.C)
 						modifiers |= AAX_eModifiers_Command;
-	#else
+				#else
 					if (mod.C)
 						modifiers |= AAX_eModifiers_Control;
 					if (mod.R)
 						modifiers |= AAX_eModifiers_Command;
-	#endif
+				#endif
 					if (mod.S)
 						modifiers |= AAX_eModifiers_Shift;
 					if (mod.R)
@@ -1017,12 +1023,12 @@ void IGraphics::OnMouseDown(const std::vector<IMouseInfo>& points)
 				};
 
 				uint32_t aaxModifiersForPT = GetAAXModifiersFromIMouseMod(mod);
-	#if PLATFORM_WINDOWS
-				// required to get start/windows and alt keys
+			#if PLATFORM_WINDOWS
+						// required to get start/windows and alt keys
 				uint32_t aaxModifiersFromPT = 0;
 				mAAXViewContainer->GetModifiers(&aaxModifiersFromPT);
 				aaxModifiersForPT |= aaxModifiersFromPT;
-	#endif
+			#endif
 				WDL_String paramID;
 				paramID.SetFormatted(32, "%i", paramIdx + 1);
 
@@ -1031,16 +1037,16 @@ void IGraphics::OnMouseDown(const std::vector<IMouseInfo>& points)
 					return;  // event handled by PT
 				}
 			}
-#endif
+		#endif
 
-#ifndef IGRAPHICS_NO_CONTEXT_MENU
+		#ifndef IGRAPHICS_NO_CONTEXT_MENU
 			if (mod.R && paramIdx > kNoParameter)
 			{
 				ReleaseMouseCapture();
 				PopupHostContextMenuForParam(pCapturedControl, paramIdx, x, y);
 				return;
 			}
-#endif
+		#endif
 
 			for (int v = 0; v < nVals; v++)
 			{
@@ -1062,10 +1068,10 @@ void IGraphics::OnMouseUp(const std::vector<IMouseInfo>& points)
 	{
 		for (auto& point : points)
 		{
-			float x              = point.x;
-			float y              = point.y;
+			float x = point.x;
+			float y = point.y;
 			const IMouseMod& mod = point.ms;
-			auto itr             = mCapturedMap.find(mod.touchID);
+			auto itr = mCapturedMap.find(mod.touchID);
 
 			if (itr != mCapturedMap.end())
 			{
@@ -1113,8 +1119,8 @@ void IGraphics::OnTouchCancelled(const std::vector<IMouseInfo>& points)
 		// work out which of mCapturedMap controls the cancel relates to
 		for (auto& point : points)
 		{
-			float x              = point.x;
-			float y              = point.y;
+			float x = point.x;
+			float y = point.y;
 			const IMouseMod& mod = point.ms;
 
 			auto itr = mCapturedMap.find(mod.touchID);
@@ -1202,10 +1208,10 @@ void IGraphics::OnMouseDrag(const std::vector<IMouseInfo>& points)
 
 		for (auto& point : points)
 		{
-			float x       = point.x;
-			float y       = point.y;
-			float dX      = point.dX;
-			float dY      = point.dY;
+			float x = point.x;
+			float y = point.y;
+			float dX = point.dX;
+			float dY = point.dY;
 			IMouseMod mod = point.ms;
 
 			auto itr = mCapturedMap.find(mod.touchID);
@@ -1258,10 +1264,10 @@ bool IGraphics::OnMouseDblClick(float x, float y, const IMouseMod& mod)
 		if (pControl->GetMouseDblAsSingleClick())
 		{
 			IMouseInfo info;
-			info.x  = x;
-			info.y  = y;
+			info.x = x;
+			info.y = y;
 			info.ms = mod;
-			std::vector<IMouseInfo> list {info};
+			std::vector<IMouseInfo> list{info};
 			OnMouseDown(list);
 		}
 		else
@@ -1365,10 +1371,10 @@ int IGraphics::GetMouseControlIdx(float x, float y, bool mouseOver)
 		{
 			IControl* pControl = GetControl(c);
 
-#ifndef NDEBUG
+		#ifndef NDEBUG
 			if (!mLiveEdit)
 			{
-#endif
+			#endif
 				if (!pControl->IsHidden() && !pControl->GetIgnoreMouse())
 				{
 					if ((!pControl->IsDisabled() ||
@@ -1380,13 +1386,13 @@ int IGraphics::GetMouseControlIdx(float x, float y, bool mouseOver)
 						}
 					}
 				}
-#ifndef NDEBUG
+			#ifndef NDEBUG
 			}
 			else if (pControl->GetRECT().Contains(x, y))
 			{
 				return c;
 			}
-#endif
+		#endif
 		}
 	}
 
@@ -1429,7 +1435,7 @@ IControl* IGraphics::GetMouseControl(float x, float y, bool capture, bool mouseO
 	if (!pControl)
 	{
 		controlIdx = GetMouseControlIdx(x, y, mouseOver);
-		pControl   = (controlIdx >= 0) ? GetControl(controlIdx) : nullptr;
+		pControl = (controlIdx >= 0) ? GetControl(controlIdx) : nullptr;
 	}
 
 	if (capture && pControl)
@@ -1462,7 +1468,7 @@ int IGraphics::GetParamIdxForPTAutomation(float x, float y)
 
 int IGraphics::GetLastClickedParamForPTAutomation()
 {
-	const int idx     = mLastClickedParam;
+	const int idx = mLastClickedParam;
 	mLastClickedParam = kNoParameter;
 	return idx;
 }
@@ -1481,7 +1487,7 @@ void IGraphics::PopupHostContextMenuForParam(IControl* pControl, int paramIdx, f
 	{
 		pControl->CreateContextMenu(contextMenu);
 
-#if VST3_API
+	#if VST3_API
 	#if !VST3P_API
 		Plugin* pVST3 = dynamic_cast<Plugin*>(GetDelegate());
 
@@ -1520,12 +1526,12 @@ void IGraphics::PopupHostContextMenuForParam(IControl* pControl, int paramIdx, f
 			pVST3ContextMenu->release();
 		}
 	#endif
-#else
+	#else
 		if (!contextMenu.NItems())
 			return;
 
 		DoCreatePopupMenu(*pControl, contextMenu, IRECT(x, y, x, y), kNoValIdx, true);
-#endif
+	#endif
 	}
 }
 
@@ -1538,7 +1544,7 @@ void IGraphics::OnGUIIdle()
 {
 	TRACE
 
-	ForAllControls(&IControl::OnGUIIdle);
+		ForAllControls(&IControl::OnGUIIdle);
 }
 
 void IGraphics::OnDragResize(float x, float y)
@@ -1724,7 +1730,7 @@ WDL_TypedBuf<uint8_t> IGraphics::LoadResource(const char* fileNameOrResID, const
 #ifdef PLATFORM_WINDOWS
 	if (resourceFound == EResourceLocation::kWinBinary)
 	{
-		int size             = 0;
+		int size = 0;
 		const void* pResData = LoadWinResource(path.Get(), fileType, size, GetWinModuleHandle());
 		result.Resize(size);
 		result.Set((const uint8_t*) pResData, size);
@@ -1861,7 +1867,7 @@ IBitmap IGraphics::LoadBitmap(
 		if (!pAPIBitmap)
 		{
 			loadedBitmap = std::unique_ptr<APIBitmap>(LoadAPIBitmap(name, pData, dataSize, 1));
-			pAPIBitmap   = loadedBitmap.get();
+			pAPIBitmap = loadedBitmap.get();
 		}
 
 		// Protection from searching for non-existent bitmaps (e.g. typos in config.h or .rc)
@@ -1900,17 +1906,17 @@ IBitmap IGraphics::ScaleBitmap(const IBitmap& inBitmap, const char* name, int sc
 	float drawScale = GetDrawScale();
 
 	mScreenScale = scale;
-	mDrawScale   = inBitmap.GetDrawScale();
+	mDrawScale = inBitmap.GetDrawScale();
 
 	IRECT bounds = IRECT(0, 0, inBitmap.W() / inBitmap.GetDrawScale(), inBitmap.H() / inBitmap.GetDrawScale());
 	StartLayer(nullptr, bounds, true);
 	DrawBitmap(inBitmap, bounds, 0, 0, nullptr);
-	ILayerPtr layer   = EndLayer();
+	ILayerPtr layer = EndLayer();
 	IBitmap outBitmap = IBitmap(layer->mBitmap.release(), inBitmap.N(), inBitmap.GetFramesAreHorizontal(), name);
 	RetainBitmap(outBitmap, name);
 
 	mScreenScale = screenScale;
-	mDrawScale   = drawScale;
+	mDrawScale = drawScale;
 
 	return outBitmap;
 }
@@ -1981,7 +1987,7 @@ void IGraphics::StyleAllVectorControls(const IVStyle& style)
 
 void IGraphics::CreateTextEntry(IControl& control, const IText& text, const IRECT& bounds, const char* str, int valIdx)
 {
-	mInTextEntry     = &control;
+	mInTextEntry = &control;
 	mTextEntryValIdx = valIdx;
 
 	int paramIdx = valIdx > kNoValIdx ? control.GetParamIdx(valIdx) : kNoParameter;
@@ -1998,9 +2004,9 @@ void IGraphics::DoCreatePopupMenu(IControl& control, IPopupMenu& menu, const IRE
 {
 	ReleaseMouseCapture();
 
-	mInPopupMenu     = &control;
+	mInPopupMenu = &control;
 	mPopupMenuValIdx = valIdx;
-	mIsContextMenu   = isContext;
+	mIsContextMenu = isContext;
 
 	if (mPopupControl)  // if we are not using platform pop-up menus
 	{
@@ -2008,7 +2014,7 @@ void IGraphics::DoCreatePopupMenu(IControl& control, IPopupMenu& menu, const IRE
 	}
 	else
 	{
-		bool isAsync            = false;
+		bool isAsync = false;
 		IPopupMenu* pReturnMenu = CreatePlatformPopupMenu(menu, bounds, isAsync);
 
 		if (!isAsync)
@@ -2036,9 +2042,9 @@ void IGraphics::EndDragResize()
 void IGraphics::StartLayer(IControl* pControl, const IRECT& r, bool cacheable)
 {
 	auto pixelBackingScale = GetBackingPixelScale();
-	IRECT alignedBounds    = r.GetPixelAligned(pixelBackingScale);
-	const int w            = static_cast<int>(std::ceil(pixelBackingScale * std::ceil(alignedBounds.W())));
-	const int h            = static_cast<int>(std::ceil(pixelBackingScale * std::ceil(alignedBounds.H())));
+	IRECT alignedBounds = r.GetPixelAligned(pixelBackingScale);
+	const int w = static_cast<int>(std::ceil(pixelBackingScale * std::ceil(alignedBounds.W())));
+	const int h = static_cast<int>(std::ceil(pixelBackingScale * std::ceil(alignedBounds.H())));
 
 	PushLayer(new ILayer(CreateAPIBitmap(w, h, GetScreenScale(), GetDrawScale(), cacheable),
 						 alignedBounds,
@@ -2102,7 +2108,7 @@ bool IGraphics::CheckLayer(const ILayerPtr& layer)
 	}
 
 	return pBitmap && !layer->mInvalid && pBitmap->GetDrawScale() == GetDrawScale() &&
-		   pBitmap->GetScale() == GetScreenScale();
+		pBitmap->GetScale() == GetScreenScale();
 }
 
 void IGraphics::DrawLayer(const ILayerPtr& layer, const IBlend* pBlend)
@@ -2115,7 +2121,7 @@ void IGraphics::DrawLayer(const ILayerPtr& layer, const IBlend* pBlend)
 
 void IGraphics::DrawFittedLayer(const ILayerPtr& layer, const IRECT& bounds, const IBlend* pBlend)
 {
-	IBitmap bitmap    = layer->GetBitmap();
+	IBitmap bitmap = layer->GetBitmap();
 	IRECT layerBounds = layer->Bounds();
 	PathTransformSave();
 	PathTransformTranslate(bounds.L, bounds.T);
@@ -2130,7 +2136,7 @@ void IGraphics::DrawRotatedLayer(const ILayerPtr& layer, double angle)
 	PathTransformSave();
 	PathTransformReset();
 	IBitmap bitmap = layer->GetBitmap();
-	IRECT bounds   = layer->Bounds();
+	IRECT bounds = layer->Bounds();
 	DrawRotatedBitmap(bitmap, bounds.MW(), bounds.MH(), angle);
 	PathTransformRestore();
 }
@@ -2145,7 +2151,8 @@ void IGraphics::ApplyLayerDropShadow(ILayerPtr& layer, const IShadow& shadow)
 							   int outStride,
 							   int inStride,
 							   int kernelSize,
-							   uint32_t norm) {
+							   uint32_t norm)
+	{
 		for (int i = 0; i < height; i++, in += inStride)
 		{
 			for (int j = 0; j < kernelSize - 1; j++)
@@ -2188,16 +2195,16 @@ void IGraphics::ApplyLayerDropShadow(ILayerPtr& layer, const IShadow& shadow)
 	temp2.Resize(temp1.GetSize());
 
 	// Form kernel (reference blurSize from zero (which will be no blur))
-	bool flipped    = FlippedBitmap();
-	float scale     = layer->GetAPIBitmap()->GetScale() * layer->GetAPIBitmap()->GetDrawScale();
-	float blurSize  = std::max(1.f, (shadow.mBlurSize * scale) + 1.f);
+	bool flipped = FlippedBitmap();
+	float scale = layer->GetAPIBitmap()->GetScale() * layer->GetAPIBitmap()->GetDrawScale();
+	float blurSize = std::max(1.f, (shadow.mBlurSize * scale) + 1.f);
 	float blurConst = 4.5f / (blurSize * blurSize);
-	int iSize       = static_cast<int>(ceil(blurSize));
-	int width       = layer->GetAPIBitmap()->GetWidth();
-	int height      = layer->GetAPIBitmap()->GetHeight();
-	int stride1     = temp1.GetSize() / width;
-	int stride2     = flipped ? -temp1.GetSize() / height : temp1.GetSize() / height;
-	int stride3     = flipped ? -stride2 : stride2;
+	int iSize = static_cast<int>(ceil(blurSize));
+	int width = layer->GetAPIBitmap()->GetWidth();
+	int height = layer->GetAPIBitmap()->GetHeight();
+	int stride1 = temp1.GetSize() / width;
+	int stride2 = flipped ? -temp1.GetSize() / height : temp1.GetSize() / height;
+	int stride3 = flipped ? -stride2 : stride2;
 
 	kernel.Resize(iSize);
 
@@ -2341,17 +2348,19 @@ void IGraphics::CalculateTextRotation(const IText& text, const IRECT& bounds, IR
 
 void IGraphics::SetQwertyMidiKeyHandlerFunc(std::function<void(const IMidiMsg& msg)> func)
 {
-	SetKeyHandlerFunc([&, func](const IKeyPress& key, bool isUp) {
+	SetKeyHandlerFunc([&, func](const IKeyPress& key, bool isUp)
+	{
 		IMidiMsg msg;
 
-		int note                  = 0;
-		static int base           = 48;
+		int note = 0;
+		static int base = 48;
 		static bool keysDown[128] = {};
 
-		auto onOctSwitch = [&]() {
+		auto onOctSwitch = [&]()
+		{
 			base = math::Clamp(base, 24, 96);
 
-			for (int16 i = 0; i < 128; i++)
+			for (auto i = 0; i<128; i++)
 			{
 				if (keysDown[i])
 				{
@@ -2365,61 +2374,24 @@ void IGraphics::SetQwertyMidiKeyHandlerFunc(std::function<void(const IMidiMsg& m
 
 		switch (key.VK)
 		{
-			case kVK_A:
-				note = 0;
-				break;
-			case kVK_W:
-				note = 1;
-				break;
-			case kVK_S:
-				note = 2;
-				break;
-			case kVK_E:
-				note = 3;
-				break;
-			case kVK_D:
-				note = 4;
-				break;
-			case kVK_F:
-				note = 5;
-				break;
-			case kVK_T:
-				note = 6;
-				break;
-			case kVK_G:
-				note = 7;
-				break;
-			case kVK_Y:
-				note = 8;
-				break;
-			case kVK_H:
-				note = 9;
-				break;
-			case kVK_U:
-				note = 10;
-				break;
-			case kVK_J:
-				note = 11;
-				break;
-			case kVK_K:
-				note = 12;
-				break;
-			case kVK_O:
-				note = 13;
-				break;
-			case kVK_L:
-				note = 14;
-				break;
-			case kVK_Z:
-				base -= 12;
-				onOctSwitch();
-				return true;
-			case kVK_X:
-				base += 12;
-				onOctSwitch();
-				return true;
-			default:
-				return true;  // don't beep, but don't do anything
+			case kVK_A: note = 0; break;
+			case kVK_W: note = 1; break;
+			case kVK_S: note = 2; break;
+			case kVK_E: note = 3; break;
+			case kVK_D: note = 4; break;
+			case kVK_F: note = 5; break;
+			case kVK_T: note = 6; break;
+			case kVK_G: note = 7; break;
+			case kVK_Y: note = 8; break;
+			case kVK_H: note = 9; break;
+			case kVK_U: note = 10; break;
+			case kVK_J: note = 11; break;
+			case kVK_K: note = 12; break;
+			case kVK_O: note = 13; break;
+			case kVK_L: note = 14; break;
+			case kVK_Z: if (!isUp) { base -= 12; onOctSwitch(); } return true;
+			case kVK_X: if (!isUp) { base += 12; onOctSwitch(); } return true;
+			default: return true; // don't beep, but don't do anything
 		}
 
 		int pitch = base + note;
@@ -2428,7 +2400,7 @@ void IGraphics::SetQwertyMidiKeyHandlerFunc(std::function<void(const IMidiMsg& m
 		{
 			if (keysDown[pitch] == false)
 			{
-				msg.SetNoteOn(pitch, 127, 0);
+				msg.SetNoteOn(pitch, 1.0f, 0);
 				keysDown[pitch] = true;
 				GetDelegate()->SendMidiMsgFromUI(msg);
 				if (func)
@@ -2439,7 +2411,7 @@ void IGraphics::SetQwertyMidiKeyHandlerFunc(std::function<void(const IMidiMsg& m
 		{
 			if (keysDown[pitch] == true)
 			{
-				msg.SetNoteOff(pitch, 127, 0);
+				msg.SetNoteOff(pitch, 0);
 				keysDown[pitch] = false;
 				GetDelegate()->SendMidiMsgFromUI(msg);
 				if (func)
@@ -2513,8 +2485,8 @@ void IGraphics::AttachImGui(std::function<void(IGraphics*)> drawFunc, std::funct
 {
 	mImGuiRenderer = std::make_unique<ImGuiRenderer>(this, drawFunc, setupFunc);
 
-	#if !defined IGRAPHICS_GL
+#if !defined IGRAPHICS_GL
 	CreatePlatformImGui();
-	#endif
+#endif
 }
 #endif

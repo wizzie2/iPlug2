@@ -94,9 +94,9 @@ constexpr const char* IPluginBase::GetAPIStr() const
 // TODO: move to PAL
 const char* IPluginBase::GetArchStr() const
 {
-	if constexpr(EPlugApi::Native == EPlugApi::WEB)
+	if constexpr (EPlugApi::Native == EPlugApi::WEB)
 		return "WASM";
-	else if constexpr(EArch::Native == EArch::_64bit)
+	else if constexpr (EArch::Native == EArch::_64bit)
 		return "x64";
 	else
 		return "x86";
@@ -121,7 +121,7 @@ void IPluginBase::GetBuildInfoStr(WDL_String& str) const
 bool IPluginBase::SerializeParams(IByteChunk& chunk) const
 {
 	TRACE
-	bool savedOK = true;
+		bool savedOK = true;
 	int i, n = mParams.GetSize();
 	for (i = 0; i < n && savedOK; ++i)
 	{
@@ -136,21 +136,21 @@ bool IPluginBase::SerializeParams(IByteChunk& chunk) const
 int IPluginBase::UnserializeParams(const IByteChunk& chunk, int startPos)
 {
 	TRACE
-	int i, n = mParams.GetSize(), pos = startPos;
+		int i, n = mParams.GetSize(), pos = startPos;
 	ENTER_PARAMS_MUTEX
-	for (i = 0; i < n && pos >= 0; ++i)
-	{
-		IParam* pParam = mParams.Get(i);
-		double v       = 0.0;
-		pos            = chunk.Get(&v, pos);
-		pParam->Set(v);
-		Trace(TRACELOC, "%d %s %f", i, pParam->GetName(), pParam->Value());
-	}
+		for (i = 0; i < n && pos >= 0; ++i)
+		{
+			IParam* pParam = mParams.Get(i);
+			double v = 0.0;
+			pos = chunk.Get(&v, pos);
+			pParam->Set(v);
+			Trace(TRACELOC, "%d %s %f", i, pParam->GetName(), pParam->Value());
+		}
 
 	OnParamReset(EParamSource::kPresetRecall);
 	LEAVE_PARAMS_MUTEX
 
-	return pos;
+		return pos;
 }
 
 void IPluginBase::InitParamRange(int startIdx,
@@ -187,7 +187,7 @@ void IPluginBase::CloneParamRange(int cloneStartIdx,
 	for (auto p = cloneStartIdx; p <= cloneEndIdx; p++)
 	{
 		IParam* pParam = GetParam(p);
-		int outIdx     = startIdx + (p - cloneStartIdx);
+		int outIdx = startIdx + (p - cloneStartIdx);
 		GetParam(outIdx)->Init(*pParam, searchStr, replaceStr, newGroup);
 		GetParam(outIdx)->Set(pParam->Value());
 	}
@@ -257,14 +257,16 @@ void IPluginBase::DefaultParamValues()
 
 void IPluginBase::DefaultParamValues(int startIdx, int endIdx)
 {
-	ForParamInRange(startIdx, endIdx, [](int paramIdx, IParam& param) {
+	ForParamInRange(startIdx, endIdx, [](int paramIdx, IParam& param)
+	{
 		param.SetToDefault();
 	});
 }
 
 void IPluginBase::DefaultParamValues(const char* paramGroup)
 {
-	ForParamInGroup(paramGroup, [](int paramIdx, IParam& param) {
+	ForParamInGroup(paramGroup, [](int paramIdx, IParam& param)
+	{
 		param.SetToDefault();
 	});
 }
@@ -276,21 +278,24 @@ void IPluginBase::RandomiseParamValues()
 
 void IPluginBase::RandomiseParamValues(int startIdx, int endIdx)
 {
-	ForParamInRange(startIdx, endIdx, [&](int paramIdx, IParam& param) {
+	ForParamInRange(startIdx, endIdx, [&](int paramIdx, IParam& param)
+	{
 		param.SetNormalized(static_cast<float>(std::rand() / (static_cast<float>(RAND_MAX) + 1.f)));
 	});
 }
 
 void IPluginBase::RandomiseParamValues(const char* paramGroup)
 {
-	ForParamInGroup(paramGroup, [&](int paramIdx, IParam& param) {
+	ForParamInGroup(paramGroup, [&](int paramIdx, IParam& param)
+	{
 		param.SetNormalized(static_cast<float>(std::rand() / (static_cast<float>(RAND_MAX) + 1.f)));
 	});
 }
 
 void IPluginBase::PrintParamValues()
 {
-	ForParamInRange(0, NParams() - 1, [](int paramIdx, IParam& param) {
+	ForParamInRange(0, NParams() - 1, [](int paramIdx, IParam& param)
+	{
 		param.PrintDetails();
 		DBGMSG("\n");
 	});
@@ -348,7 +353,7 @@ void IPluginBase::MakePreset(const char* name, ...)
 void IPluginBase::MakePresetFromNamedParams(const char* name, int nParamsNamed, ...)
 {
 	TRACE
-	IPreset* pPreset = GetNextUninitializedPreset(&mPresets);
+		IPreset* pPreset = GetNextUninitializedPreset(&mPresets);
 	if (pPreset)
 	{
 		pPreset->mInitialized = true;
@@ -413,7 +418,7 @@ void IPluginBase::MakePresetFromBlob(const char* name, const char* blob, int siz
 static void MakeDefaultUserPresetName(WDL_PtrList<IPreset>* pPresets, char* str)
 {
 	int nDefaultNames = 0;
-	int n             = pPresets->GetSize();
+	int n = pPresets->GetSize();
 	for (int i = 0; i < n; ++i)
 	{
 		IPreset* pPreset = pPresets->Get(i);
@@ -428,13 +433,13 @@ static void MakeDefaultUserPresetName(WDL_PtrList<IPreset>* pPresets, char* str)
 void IPluginBase::EnsureDefaultPreset()
 {
 	TRACE
-	MakeDefaultPreset("Empty", mPresets.GetSize());
+		MakeDefaultPreset("Empty", mPresets.GetSize());
 }
 
 void IPluginBase::PruneUninitializedPresets()
 {
 	TRACE
-	int i = 0;
+		int i = 0;
 	while (i < mPresets.GetSize())
 	{
 		IPreset* pPreset = mPresets.Get(i);
@@ -452,7 +457,7 @@ void IPluginBase::PruneUninitializedPresets()
 bool IPluginBase::RestorePreset(int idx)
 {
 	TRACE
-	bool restoredOK = false;
+		bool restoredOK = false;
 	if (idx >= 0 && idx < mPresets.GetSize())
 	{
 		IPreset* pPreset = mPresets.Get(idx);
@@ -525,8 +530,8 @@ void IPluginBase::ModifyCurrentPreset(const char* name)
 bool IPluginBase::SerializePresets(IByteChunk& chunk) const
 {
 	TRACE
-	bool savedOK = true;
-	int n        = mPresets.GetSize();
+		bool savedOK = true;
+	int n = mPresets.GetSize();
 	for (int i = 0; i < n && savedOK; ++i)
 	{
 		IPreset* pPreset = mPresets.Get(i);
@@ -546,12 +551,12 @@ bool IPluginBase::SerializePresets(IByteChunk& chunk) const
 int IPluginBase::UnserializePresets(const IByteChunk& chunk, int startPos)
 {
 	TRACE
-	WDL_String name;
+		WDL_String name;
 	int n = mPresets.GetSize(), pos = startPos;
 	for (int i = 0; i < n && pos >= 0; ++i)
 	{
 		IPreset* pPreset = mPresets.Get(i);
-		pos              = chunk.GetStr(name, pos);
+		pos = chunk.GetStr(name, pos);
 		strcpy(pPreset->mName, name.Get());
 
 		Trace(TRACELOC, "%d %s", i, pPreset->mName);
@@ -667,7 +672,7 @@ void IPluginBase::DumpPresetBlob(const char* filename) const
 	char buf[Config::maxDumpPresetBlobLength];
 
 	IByteChunk* pPresetChunk = &mPresets.Get(mCurrentPresetIdx)->mChunk;
-	uint8_t* byteStart       = pPresetChunk->GetData();
+	uint8_t* byteStart = pPresetChunk->GetData();
 
 	wdl_base64encode(byteStart, buf, pPresetChunk->Size());
 
@@ -688,12 +693,12 @@ bool IPluginBase::SavePresetAsFXP(const char* file) const
 		IByteChunk pgm;
 
 		int32_t chunkMagic = WDL_bswap32('CcnK');
-		int32_t byteSize   = 0;
+		int32_t byteSize = 0;
 		int32_t fxpMagic;
-		int32_t fxpVersion    = WDL_bswap32(kFXPVersionNum);
-		int32_t pluginID      = WDL_bswap32(GetUniqueID());
+		int32_t fxpVersion = WDL_bswap32(kFXPVersionNum);
+		int32_t pluginID = WDL_bswap32(GetUniqueID());
 		int32_t pluginVersion = WDL_bswap32(GetPluginVersion(true));
-		int32_t numParams     = WDL_bswap32(NParams());
+		int32_t numParams = WDL_bswap32(NParams());
 		char prgName[28];
 		memset(prgName, 0, 28);
 		strcpy(prgName, GetPresetName(GetCurrentPresetIdx()));
@@ -711,7 +716,7 @@ bool IPluginBase::SavePresetAsFXP(const char* file) const
 			SerializeState(state);
 
 			chunkSize = WDL_bswap32(state.Size());
-			byteSize  = WDL_bswap32(state.Size() + 60);
+			byteSize = WDL_bswap32(state.Size() + 60);
 
 			pgm.Put(&byteSize);
 			pgm.Put(&fxpMagic);
@@ -738,7 +743,7 @@ bool IPluginBase::SavePresetAsFXP(const char* file) const
 			for (int i = 0; i < NParams(); i++)
 			{
 				WDL_EndianFloat v32;
-				v32.f                = (float) GetParam(i)->GetNormalized();
+				v32.f = (float) GetParam(i)->GetNormalized();
 				unsigned int swapped = WDL_bswap32(v32.int32);
 				pgm.Put(&swapped);
 			}
@@ -761,13 +766,13 @@ bool IPluginBase::SaveBankAsFXB(const char* file) const
 		IByteChunk bnk;
 
 		int32_t chunkMagic = WDL_bswap32('CcnK');
-		int32_t byteSize   = 0;
+		int32_t byteSize = 0;
 		int32_t fxbMagic;
-		int32_t fxbVersion    = WDL_bswap32(kFXBVersionNum);
-		int32_t pluginID      = WDL_bswap32(GetUniqueID());
+		int32_t fxbVersion = WDL_bswap32(kFXBVersionNum);
+		int32_t pluginID = WDL_bswap32(GetUniqueID());
 		int32_t pluginVersion = WDL_bswap32(GetPluginVersion(true));
-		int32_t numPgms       = WDL_bswap32(NPresets());
-		int32_t currentPgm    = WDL_bswap32(GetCurrentPresetIdx());
+		int32_t numPgms = WDL_bswap32(NPresets());
+		int32_t currentPgm = WDL_bswap32(GetCurrentPresetIdx());
 		char future[124];
 		memset(future, 0, 124);
 
@@ -784,7 +789,7 @@ bool IPluginBase::SaveBankAsFXB(const char* file) const
 			SerializePresets(state);
 
 			chunkSize = WDL_bswap32(state.Size());
-			byteSize  = WDL_bswap32(160 + state.Size());
+			byteSize = WDL_bswap32(160 + state.Size());
 
 			bnk.Put(&byteSize);
 			bnk.Put(&fxbMagic);
@@ -811,9 +816,9 @@ bool IPluginBase::SaveBankAsFXB(const char* file) const
 			bnk.Put(&currentPgm);
 			bnk.PutBytes(&future, 124);
 
-			int32_t fxpMagic   = WDL_bswap32('FxCk');
+			int32_t fxpMagic = WDL_bswap32('FxCk');
 			int32_t fxpVersion = WDL_bswap32(kFXPVersionNum);
-			int32_t numParams  = WDL_bswap32(NParams());
+			int32_t numParams = WDL_bswap32(NParams());
 
 			for (int p = 0; p < NPresets(); p++)
 			{
@@ -838,10 +843,10 @@ bool IPluginBase::SaveBankAsFXB(const char* file) const
 				for (int i = 0; i < NParams(); i++)
 				{
 					double v = 0.0;
-					pos      = pPreset->mChunk.Get(&v, pos);
+					pos = pPreset->mChunk.Get(&v, pos);
 
 					WDL_EndianFloat v32;
-					v32.f            = (float) GetParam(i)->ToNormalized(v);
+					v32.f = (float) GetParam(i)->ToNormalized(v);
 					uint32_t swapped = WDL_bswap32(v32.int32);
 					bnk.Put(&swapped);
 				}
@@ -888,21 +893,21 @@ bool IPluginBase::LoadPresetFromFXP(const char* file)
 			int32_t numParams;
 			char prgName[28];
 
-			pos           = pgm.Get(&chunkMagic, pos);
-			chunkMagic    = WDL_bswap_if_le(chunkMagic);
-			pos           = pgm.Get(&byteSize, pos);
-			byteSize      = WDL_bswap_if_le(byteSize);
-			pos           = pgm.Get(&fxpMagic, pos);
-			fxpMagic      = WDL_bswap_if_le(fxpMagic);
-			pos           = pgm.Get(&fxpVersion, pos);
-			fxpVersion    = WDL_bswap_if_le(fxpVersion);
-			pos           = pgm.Get(&pluginID, pos);
-			pluginID      = WDL_bswap_if_le(pluginID);
-			pos           = pgm.Get(&pluginVersion, pos);
+			pos = pgm.Get(&chunkMagic, pos);
+			chunkMagic = WDL_bswap_if_le(chunkMagic);
+			pos = pgm.Get(&byteSize, pos);
+			byteSize = WDL_bswap_if_le(byteSize);
+			pos = pgm.Get(&fxpMagic, pos);
+			fxpMagic = WDL_bswap_if_le(fxpMagic);
+			pos = pgm.Get(&fxpVersion, pos);
+			fxpVersion = WDL_bswap_if_le(fxpVersion);
+			pos = pgm.Get(&pluginID, pos);
+			pluginID = WDL_bswap_if_le(pluginID);
+			pos = pgm.Get(&pluginVersion, pos);
 			pluginVersion = WDL_bswap_if_le(pluginVersion);
-			pos           = pgm.Get(&numParams, pos);
-			numParams     = WDL_bswap_if_le(numParams);
-			pos           = pgm.GetBytes(prgName, 28, pos);
+			pos = pgm.Get(&numParams, pos);
+			numParams = WDL_bswap_if_le(numParams);
+			pos = pgm.GetBytes(prgName, 28, pos);
 
 			if (chunkMagic != 'CcnK')
 				return false;
@@ -917,7 +922,7 @@ bool IPluginBase::LoadPresetFromFXP(const char* file)
 			if (DoesStateChunks() && fxpMagic == 'FPCh')
 			{
 				int32_t chunkSize;
-				pos       = pgm.Get(&chunkSize, pos);
+				pos = pgm.Get(&chunkSize, pos);
 				chunkSize = WDL_bswap_if_le(chunkSize);
 
 				IByteChunk::GetIPlugVerFromChunk(pgm, pos);
@@ -932,16 +937,16 @@ bool IPluginBase::LoadPresetFromFXP(const char* file)
 					 'FxCk')  // Due to the big Endian-ness of FXP/FXB format we cannot call SerializeParams()
 			{
 				ENTER_PARAMS_MUTEX
-				for (int i = 0; i < NParams(); i++)
-				{
-					WDL_EndianFloat v32;
-					pos       = pgm.Get(&v32.int32, pos);
-					v32.int32 = WDL_bswap_if_le(v32.int32);
-					GetParam(i)->SetNormalized((double) v32.f);
-				}
+					for (int i = 0; i < NParams(); i++)
+					{
+						WDL_EndianFloat v32;
+						pos = pgm.Get(&v32.int32, pos);
+						v32.int32 = WDL_bswap_if_le(v32.int32);
+						GetParam(i)->SetNormalized((double) v32.f);
+					}
 				LEAVE_PARAMS_MUTEX
 
-				ModifyCurrentPreset(prgName);
+					ModifyCurrentPreset(prgName);
 				RestorePreset(GetCurrentPresetIdx());
 				InformHostOfPresetChange();
 
@@ -986,23 +991,23 @@ bool IPluginBase::LoadBankFromFXB(const char* file)
 			char future[124];
 			memset(future, 0, 124);
 
-			pos           = bnk.Get(&chunkMagic, pos);
-			chunkMagic    = WDL_bswap_if_le(chunkMagic);
-			pos           = bnk.Get(&byteSize, pos);
-			byteSize      = WDL_bswap_if_le(byteSize);
-			pos           = bnk.Get(&fxbMagic, pos);
-			fxbMagic      = WDL_bswap_if_le(fxbMagic);
-			pos           = bnk.Get(&fxbVersion, pos);
-			fxbVersion    = WDL_bswap_if_le(fxbVersion);
-			pos           = bnk.Get(&pluginID, pos);
-			pluginID      = WDL_bswap_if_le(pluginID);
-			pos           = bnk.Get(&pluginVersion, pos);
+			pos = bnk.Get(&chunkMagic, pos);
+			chunkMagic = WDL_bswap_if_le(chunkMagic);
+			pos = bnk.Get(&byteSize, pos);
+			byteSize = WDL_bswap_if_le(byteSize);
+			pos = bnk.Get(&fxbMagic, pos);
+			fxbMagic = WDL_bswap_if_le(fxbMagic);
+			pos = bnk.Get(&fxbVersion, pos);
+			fxbVersion = WDL_bswap_if_le(fxbVersion);
+			pos = bnk.Get(&pluginID, pos);
+			pluginID = WDL_bswap_if_le(pluginID);
+			pos = bnk.Get(&pluginVersion, pos);
 			pluginVersion = WDL_bswap_if_le(pluginVersion);
-			pos           = bnk.Get(&numPgms, pos);
-			numPgms       = WDL_bswap_if_le(numPgms);
-			pos           = bnk.Get(&currentPgm, pos);
-			currentPgm    = WDL_bswap_if_le(currentPgm);
-			pos           = bnk.GetBytes(future, 124, pos);
+			pos = bnk.Get(&numPgms, pos);
+			numPgms = WDL_bswap_if_le(numPgms);
+			pos = bnk.Get(&currentPgm, pos);
+			currentPgm = WDL_bswap_if_le(currentPgm);
+			pos = bnk.GetBytes(future, 124, pos);
 
 			if (chunkMagic != 'CcnK')
 				return false;
@@ -1016,7 +1021,7 @@ bool IPluginBase::LoadBankFromFXB(const char* file)
 			if (DoesStateChunks() && fxbMagic == 'FBCh')
 			{
 				int32_t chunkSize;
-				pos       = bnk.Get(&chunkSize, pos);
+				pos = bnk.Get(&chunkSize, pos);
 				chunkSize = WDL_bswap_if_le(chunkSize);
 
 				IByteChunk::GetIPlugVerFromChunk(bnk, pos);
@@ -1039,20 +1044,20 @@ bool IPluginBase::LoadBankFromFXB(const char* file)
 
 				for (int i = 0; i < numPgms; i++)
 				{
-					pos           = bnk.Get(&chunkMagic, pos);
-					chunkMagic    = WDL_bswap_if_le(chunkMagic);
-					pos           = bnk.Get(&byteSize, pos);
-					byteSize      = WDL_bswap_if_le(byteSize);
-					pos           = bnk.Get(&fxpMagic, pos);
-					fxpMagic      = WDL_bswap_if_le(fxpMagic);
-					pos           = bnk.Get(&fxpVersion, pos);
-					fxpVersion    = WDL_bswap_if_le(fxpVersion);
-					pos           = bnk.Get(&pluginID, pos);
-					pluginID      = WDL_bswap_if_le(pluginID);
-					pos           = bnk.Get(&pluginVersion, pos);
+					pos = bnk.Get(&chunkMagic, pos);
+					chunkMagic = WDL_bswap_if_le(chunkMagic);
+					pos = bnk.Get(&byteSize, pos);
+					byteSize = WDL_bswap_if_le(byteSize);
+					pos = bnk.Get(&fxpMagic, pos);
+					fxpMagic = WDL_bswap_if_le(fxpMagic);
+					pos = bnk.Get(&fxpVersion, pos);
+					fxpVersion = WDL_bswap_if_le(fxpVersion);
+					pos = bnk.Get(&pluginID, pos);
+					pluginID = WDL_bswap_if_le(pluginID);
+					pos = bnk.Get(&pluginVersion, pos);
 					pluginVersion = WDL_bswap_if_le(pluginVersion);
-					pos           = bnk.Get(&numParams, pos);
-					numParams     = WDL_bswap_if_le(numParams);
+					pos = bnk.Get(&numParams, pos);
+					numParams = WDL_bswap_if_le(numParams);
 
 					if (chunkMagic != 'CcnK')
 						return false;
@@ -1068,16 +1073,16 @@ bool IPluginBase::LoadBankFromFXB(const char* file)
 					RestorePreset(i);
 
 					ENTER_PARAMS_MUTEX
-					for (int j = 0; j < NParams(); j++)
-					{
-						WDL_EndianFloat v32;
-						pos       = bnk.Get(&v32.int32, pos);
-						v32.int32 = WDL_bswap_if_le(v32.int32);
-						GetParam(j)->SetNormalized((double) v32.f);
-					}
+						for (int j = 0; j < NParams(); j++)
+						{
+							WDL_EndianFloat v32;
+							pos = bnk.Get(&v32.int32, pos);
+							v32.int32 = WDL_bswap_if_le(v32.int32);
+							GetParam(j)->SetNormalized((double) v32.f);
+						}
 					LEAVE_PARAMS_MUTEX
 
-					ModifyCurrentPreset(prgName);
+						ModifyCurrentPreset(prgName);
 				}
 
 				RestorePreset(currentPgm);
@@ -1093,7 +1098,8 @@ bool IPluginBase::LoadBankFromFXB(const char* file)
 
 bool IPluginBase::LoadPresetFromVSTPreset(const char* path)
 {
-	auto isEqualID = [](const ChunkID id1, const ChunkID id2) {
+	auto isEqualID = [](const ChunkID id1, const ChunkID id2)
+	{
 		return memcmp(id1, id2, sizeof(ChunkID)) == 0;
 	};
 
@@ -1120,7 +1126,7 @@ bool IPluginBase::LoadPresetFromVSTPreset(const char* path)
 
 		// HEADER
 		ChunkID chunkID;
-		int32_t version    = 0;
+		int32_t version = 0;
 		int64_t listOffset = 0;
 
 		pos = pgm.Get(&chunkID, pos);
@@ -1144,7 +1150,7 @@ bool IPluginBase::LoadPresetFromVSTPreset(const char* path)
 			return false;
 
 		int32_t entryCount = 0;
-		pos                = pgm.Get(&entryCount, pos);
+		pos = pgm.Get(&entryCount, pos);
 
 		if (entryCount < 2)
 			return false;
@@ -1155,10 +1161,10 @@ bool IPluginBase::LoadPresetFromVSTPreset(const char* path)
 			return false;
 
 		int64_t offsetToComponentState = 0;
-		pos                            = pgm.Get(&offsetToComponentState, pos);
+		pos = pgm.Get(&offsetToComponentState, pos);
 
 		int64_t componentStateSize = 0;
-		pos                        = pgm.Get(&componentStateSize, pos);
+		pos = pgm.Get(&componentStateSize, pos);
 
 		pos = pgm.Get(&chunkID, pos);
 
@@ -1166,10 +1172,10 @@ bool IPluginBase::LoadPresetFromVSTPreset(const char* path)
 			return false;
 
 		int64_t offsetToCtrlrState = 0;
-		pos                        = pgm.Get(&offsetToCtrlrState, pos);
+		pos = pgm.Get(&offsetToCtrlrState, pos);
 
 		int64_t ctrlrStateSize = 0;
-		pos                    = pgm.Get(&ctrlrStateSize, pos);
+		pos = pgm.Get(&ctrlrStateSize, pos);
 
 		// Forget about kMetaInfo chunk
 
@@ -1198,64 +1204,60 @@ bool IPluginBase::LoadPresetFromVSTPreset(const char* path)
 	return false;
 }
 
-void IPluginBase::MakeVSTPresetChunk(IByteChunk& chunk, IByteChunk& componentState, IByteChunk& controllerState) const
-{
-	WDL_String metaInfo("");
-
-	metaInfo.Append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n", 1024);
-	metaInfo.Append("<MetaInfo>\n", 1024);
-	metaInfo.Append("\t<Attribute id=\"MediaType\" value=\"VstPreset\" type=\"string\" flags=\"writeProtected\"/>\n",
-					1024);
-	metaInfo.AppendFormatted(
-		1024, "\t<Attribute id=\"plugname\" value=\"%s\" type=\"string\" flags=\"\"/>\n", mProductName.Get());
-	metaInfo.AppendFormatted(
-		1024, "\t<Attribute id=\"plugtype\" value=\"%s\" type=\"string\" flags=\"\"/>\n", mVST3ProductCategory.Get());
-	metaInfo.Append("</MetaInfo>\n", 1024);
-
-	// HEADER
-	chunk.Put(&commonChunks[kHeader]);
-	int32_t version = kFormatVersion;
-	chunk.Put(&version);
-	chunk.PutBytes(mVST3ProcessorUIDStr.Get(), kClassIDSize);
-	int64_t offsetToChunkList = componentState.Size() + controllerState.Size() +
-								(2 * sizeof(int) /* 2 ints for sizes */) + strlen(metaInfo.Get()) + kHeaderSize;
-	chunk.Put(&offsetToChunkList);
-
-	// DATA AREA
-	int componentSize = componentState.Size();
-	chunk.Put(&componentSize);
-	chunk.PutChunk(&componentState);
-	int ctrlrSize = controllerState.Size();
-	chunk.Put(&ctrlrSize);
-	chunk.PutChunk(&controllerState);
-	chunk.PutBytes(metaInfo.Get(), metaInfo.GetLength());
-
-	// CHUNK LIST
-	chunk.Put(&commonChunks[kChunkList]);
-	int32_t entryCount = 3;
-	chunk.Put(&entryCount);
-
-	chunk.Put(&commonChunks[kComponentState]);
-	int64_t offsetToComponentState = kHeaderSize;
-	chunk.Put(&offsetToComponentState);
-	int64_t componentStateSize = componentState.Size() + sizeof(int);
-	chunk.Put(&componentStateSize);
-
-	chunk.Put(&commonChunks[kControllerState]);
-	int64_t offsetToCtrlrState = kHeaderSize + componentStateSize;
-	chunk.Put(&offsetToCtrlrState);
-	int64_t ctrlrStateSize = controllerState.Size() + sizeof(int);
-	chunk.Put(&ctrlrStateSize);
-
-	chunk.Put(&commonChunks[kMetaInfo]);
-	int64_t offsetToMetaInfo = kHeaderSize + componentStateSize + ctrlrStateSize;
-	chunk.Put(&offsetToMetaInfo);
-	int64_t metaInfoSize = metaInfo.GetLength();
-	chunk.Put(&metaInfoSize);
-}
-
 bool IPluginBase::SavePresetAsVSTPreset(const char* path) const
 {
+	auto MakeVSTPresetChunk = [&](IByteChunk& chunk, IByteChunk& componentState, IByteChunk& controllerState)
+	{
+		WDL_String metaInfo("");
+
+		metaInfo.Append("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n", 1024);
+		metaInfo.Append("<MetaInfo>\n", 1024);
+		metaInfo.Append("\t<Attribute id=\"MediaType\" value=\"VstPreset\" type=\"string\" flags=\"writeProtected\"/>\n", 1024);
+		metaInfo.AppendFormatted(1024, "\t<Attribute id=\"plugname\" value=\"%s\" type=\"string\" flags=\"\"/>\n", mProductName.Get());
+		metaInfo.AppendFormatted(1024, "\t<Attribute id=\"plugtype\" value=\"%s\" type=\"string\" flags=\"\"/>\n", mVST3ProductCategory.Get());
+		metaInfo.Append("</MetaInfo>\n", 1024);
+
+		//HEADER
+		chunk.Put(&commonChunks[kHeader]);
+		int32_t version = kFormatVersion;
+		chunk.Put(&version);
+		chunk.PutBytes(mVST3ProcessorUIDStr.Get(), kClassIDSize);
+		int64_t offsetToChunkList = componentState.Size() + controllerState.Size() + (2 * sizeof(int) /* 2 ints for sizes */) + strlen(metaInfo.Get()) + kHeaderSize;
+		chunk.Put(&offsetToChunkList);
+
+		//DATA AREA
+		int componentSize = componentState.Size();
+		chunk.Put(&componentSize);
+		chunk.PutChunk(&componentState);
+		int ctrlrSize = controllerState.Size();
+		chunk.Put(&ctrlrSize);
+		chunk.PutChunk(&controllerState);
+		chunk.PutBytes(metaInfo.Get(), metaInfo.GetLength());
+
+		//CHUNK LIST
+		chunk.Put(&commonChunks[kChunkList]);
+		int32_t entryCount = 3;
+		chunk.Put(&entryCount);
+
+		chunk.Put(&commonChunks[kComponentState]);
+		int64_t offsetToComponentState = kHeaderSize;
+		chunk.Put(&offsetToComponentState);
+		int64_t componentStateSize = componentState.Size() + sizeof(int);
+		chunk.Put(&componentStateSize);
+
+		chunk.Put(&commonChunks[kControllerState]);
+		int64_t offsetToCtrlrState = kHeaderSize + componentStateSize;
+		chunk.Put(&offsetToCtrlrState);
+		int64_t ctrlrStateSize = controllerState.Size() + sizeof(int);
+		chunk.Put(&ctrlrStateSize);
+
+		chunk.Put(&commonChunks[kMetaInfo]);
+		int64_t offsetToMetaInfo = kHeaderSize + componentStateSize + ctrlrStateSize;
+		chunk.Put(&offsetToMetaInfo);
+		int64_t metaInfoSize = metaInfo.GetLength();
+		chunk.Put(&metaInfoSize);
+	};
+
 	if (path)
 	{
 		FILE* fp = fopen(path, "wb");

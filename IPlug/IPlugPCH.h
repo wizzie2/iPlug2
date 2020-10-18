@@ -99,4 +99,6 @@
 	#include "IVMeterControl.h"
 	#include "IVMultiSliderControl.h"
 	#include "IVScopeControl.h"
+	#include "IVPresetManagerControl.h"
+	#include "IVNumberBoxControl.h"
 #endif

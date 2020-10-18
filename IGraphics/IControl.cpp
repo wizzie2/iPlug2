@@ -748,8 +748,34 @@ ISwitchControlBase::ISwitchControlBase(const IRECT& bounds, int paramIdx, IActio
 	: IControl(bounds, paramIdx, aF)
 	, mNumStates(numStates)
 {
-	assert(mNumStates > 1);
-	mDblAsSingleClick = true;
+  assert(mNumStates > 1);
+  mDisabledState.Resize(numStates);
+  SetAllStatesDisabled(false);
+  mDblAsSingleClick = true;
+}
+
+void ISwitchControlBase::SetAllStatesDisabled(bool disabled)
+{
+  for(int i=0; i<mNumStates; i++)
+  {
+    SetStateDisabled(i, disabled);
+  }
+  SetDirty(false);
+}
+
+void ISwitchControlBase::SetStateDisabled(int stateIdx, bool disabled)
+{
+  if(stateIdx >= 0 && stateIdx < mNumStates)
+    mDisabledState.Get()[stateIdx] = disabled;
+  
+  SetDirty(false);
+}
+
+bool ISwitchControlBase::GetStateDisabled(int stateIdx) const
+{
+  if(stateIdx >= 0 && stateIdx < mNumStates)
+    return mDisabledState.Get()[stateIdx];
+  return false;
 }
 
 void ISwitchControlBase::OnInit()

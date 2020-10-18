@@ -280,42 +280,47 @@ class IPopupMenuControl : public IControl
 #endif
 	};
 
-	// An array of ptrs to MenuPanel objects for every panel, expands as
-	// sub menus are revealed, contents deleted when the menu is dismissed
-	WDL_PtrList<MenuPanel> mMenuPanels;
-
-	EPopupState mState             = kCollapsed;  // The state of the pop-up, mainly used for animation
+	WDL_PtrList<MenuPanel> mMenuPanels;  // An array of ptrs to MenuPanel objects for every panel, expands as sub menus
+										 // are revealed, contents deleted when the menu is dismissed
 	MenuPanel* mActiveMenuPanel    = nullptr;     // A pointer to the active MenuPanel within the mMenuPanels array
 	MenuPanel* mAppearingMenuPanel = nullptr;     // A pointer to a MenuPanel that's in the process of fading in
+	EPopupState mState             = kCollapsed;  // The state of the pop-up, mainly used for animation
 	IRECT* mMouseCellBounds        = nullptr;
+	IPopupMenu* mMenu = nullptr;  // Pointer to the main IPopupMenu, that this control is visualising. This control does
+								  // not own the menu.
 
-	// Pointer to the main IPopupMenu, that this control is visualising. This control does not own the menu.
-	IPopupMenu* mMenu = nullptr;
+	int mMaxColumnItems = 0;  // How long the list can get before adding a new column - 0 equals no limit
+	bool mScrollIfTooBig =
+		true;  // If the menu is higher than the graphics context, should it scroll or should it start a new column
+	bool mCallOut = false;  // set true if popup should be outside of bounds (i.e. on a tablet touchscreen interface)
+	bool mMenuHasSubmenu =
+		false;  // Gets automatically set to true in CreatePopupMenu() if *mMenu contains any submenus... false if not.
+	bool mForcedSouth = true;  // if set true, a menu in the lower half of the GUI will appear below it's control if
+							   // there is enough room for it.
+	bool mSubmenuOnRight =
+		true;  // If set true, the submenu will be drawn on the right of the parent menu.... on the left if false.
+	bool mSubMenuOpened = false;  // Is set true when a submenu panel is open and false when menu is collapsed.
 
-	// clang-format off
-	int mMaxColumnItems   = 0;     // How long the list can get before adding a new column - 0 equals no limit
-	bool mScrollIfTooBig  = true;  // If the menu is higher than the graphics context, should it scroll or should it start a new column
-	bool mCallOut         = false; // set true if popup should be outside of bounds (i.e. on a tablet touchscreen interface)
-	bool mMenuHasSubmenu  = false; // Gets automatically set to true in CreatePopupMenu() if *mMenu contains any submenus... false if not.
-	bool mForcedSouth     = false; // if set true, a menu in the lower half of the GUI will appear below it's control if there is enough room for it.
-	bool mSubmenuOnRight  = true;  // If set true, the submenu will be drawn on the right of the parent menu.... on the left if false.
-	bool mSubMenuOpened   = false; // Is set true when a submenu panel is open and false when menu is collapsed.
+	float mCellGap        = 2.f;    // The gap between cells in pixels
+	float mSeparatorSize  = 2.;     // The size in pixels of a separator. This could be width or height
+	float mRoundness      = 5.f;    // The roundness of the corners of the menu panel backgrounds
+	float mDropShadowSize = 10.f;   // The size in pixels of the drop shadow
+	float mOpacity        = 0.95f;  // The opacity of the menu panel backgrounds when fully faded in
+	float mMenuShift = 0.f;  // The distance in pixels the main menu is shifted to make room for submenus (only if one
+							 // exist). Set by SetShiftForSubmenus()
 
-	float mCellGap        = 2.f;   // The gap between cells in pixels
-	float mSeparatorSize  = 2.;    // The size in pixels of a separator. This could be width or height
-	float mRoundness      = 5.f;   // The roundness of the corners of the menu panel backgrounds
-	float mDropShadowSize = 10.f;  // The size in pixels of the drop shadow
-	float mOpacity        = 0.95f; // The opacity of the menu panel backgrounds when fully faded in
-	float mMenuShift      = 0.f;   // The distance in pixels the main menu is shifted to make room for submenus (only if one exist). Set by SetShiftForSubmenus()
+	IRECT mAnchorArea;          // The area where the menu was triggered; menu will be adjacent, but won't occupy it.
+	IRECT mCalloutArrowBounds;  // The rectangle in which the CallOut arrow is drawn.
+	IRECT mSubMenuCalloutArrowBounds;  // The rectangle in which the CallOut arrow for a submenus is drawn.
+	IRECT mMaxBounds;  // if view is only showing a part of the graphics context, we need to know because menus can't go
+					   // there
 
-	IRECT mAnchorArea;                // The area where the menu was triggered; menu will be adjacent, but won't occupy it.
-	IRECT mCalloutArrowBounds;        // The rectangle in which the CallOut arrow is drawn.
-	IRECT mSubMenuCalloutArrowBounds; // The rectangle in which the CallOut arrow for a submenus is drawn.
-	IRECT mMaxBounds;                 // if view is only showing a part of the graphics context, we need to know because menus can't go there
-
-	static inline constexpr float TEXT_HPAD     = 5.;  // The amount of horizontal padding on either side of cell text in pixels
-	static inline constexpr float TICK_SIZE     = 10.; // The size of the area on the left of the cell where a tick mark appears on checked items - actual
-	static inline constexpr float ARROW_SIZE    = 8;   // The width of the area on the right of the cell where an arrow appears for new submenus
+	static inline constexpr float TEXT_HPAD =
+		5.;  // The amount of horizontal padding on either side of cell text in pixels
+	static inline constexpr float TICK_SIZE =
+		10.;  // The size of the area on the left of the cell where a tick mark appears on checked items - actual
+	static inline constexpr float ARROW_SIZE =
+		8;  // The width of the area on the right of the cell where an arrow appears for new submenus
 	static inline constexpr float PAD           = 5.;  // How much white space between the background and the cells
 	static inline constexpr float CALLOUT_SPACE = 8;   // The space between start bounds and callout
 	// clang-format on
