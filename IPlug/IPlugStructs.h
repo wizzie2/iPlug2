@@ -53,16 +53,17 @@ namespace iplug
 		static constexpr const char* bundleID               = BUNDLE_ID;
 		static constexpr const char* sharedResourcesSubpath = SHARED_RESOURCES_SUBPATH;
 
-		// TODO: add option to set values from cmake configuration
-		static constexpr   bool sortIMidiQueue            = true;
-		static constexpr    int defaultMidiQueueBlockSize = 512;
-		static constexpr    int defaultBlockSize          = 1024;
-		static constexpr double defaultTempo              = 120;
-		static constexpr double defaultSampleRate         = 44100;
-		static constexpr size_t maxDumpPresetBlobLength   = 2048;
-		static constexpr   bool debugShowVBlankMessages   = (EBuildType::Native == EBuildType::Debug);
-		static constexpr    int defaultFPS                = plugFPS > 0 ? math::Clamp(plugFPS, 1, 1000) : 60;
-		static constexpr double defaultFrameTimeMs        = 1000.0 / defaultFPS;
+		// TODO: add option to set values from cmake configuration (collect options first)
+		static constexpr   bool sortIMidiQueue               = true;
+		static constexpr    int defaultMidiQueueBlockSize    = 512;
+		static constexpr    int defaultBlockSize             = 1024;
+		static constexpr double defaultTempo                 = 120;
+		static constexpr double defaultSampleRate            = 44100;
+		static constexpr size_t maxDumpPresetBlobLength      = 2048;
+		static constexpr    int defaultFPS                   = plugFPS > 0 ? math::Clamp(plugFPS, 1, 1000) : 60;
+		static constexpr double defaultFrameTimeMs           = 1000.0 / defaultFPS;
+		static constexpr   bool debugShowVBlankMessages      = (EBuildType::Native == EBuildType::Debug);
+		static constexpr   bool debugMidiSynthShowVoiceCount = false;
 
 		explicit Config(int nParams, int nPresets) : nParams(nParams), nPresets(nPresets) {};
 	};  // clang-format on

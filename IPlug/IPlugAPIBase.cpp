@@ -22,20 +22,22 @@ IPlugAPIBase::IPlugAPIBase(Config c, EPlugApi plugAPI) : IPluginBase(c.nParams, 
 	mUniqueID = c.uniqueID;
 	mMfrID    = c.mfrID;
 	mVersion  = c.vendorVersion;
-	mPluginName.Set(c.pluginName, MAX_PLUGIN_NAME_LEN);
-	mProductName.Set(c.productName, MAX_PLUGIN_NAME_LEN);
-	mMfrName.Set(c.mfrName, MAX_PLUGIN_NAME_LEN);
-//	mHasUI      = c.plugHasUI;
+
+	mPluginName.Set(c.pluginName);
+	mProductName.Set(c.productName);
+	mMfrName.Set(c.mfrName);
+
+	// mHasUI      = c.plugHasUI;
 	mHostResize = c.plugHostResize;
 	// TODO: Don't set constraints without knowing the resolution of the client monitor displaying the plugin.
 	//       Constraints should be defined in %, not pixels.
 	SetEditorSize(c.plugWidth, c.plugHeight);
 	SetSizeConstraints(c.plugMinWidth, c.plugMaxWidth, c.plugMinHeight, c.plugMaxHeight);
 	mStateChunks = c.plugDoesChunks;
-//	mAPI         = plugAPI;
+	// mAPI         = plugAPI;
 	mBundleID.Set(c.bundleID);
 
-	Trace(TRACELOC, "%s:%s", c.pluginName, CurrentTime());
+	// Trace(TRACELOC, "%s:%s", c.pluginName, CurrentTime());
 
 	mParamDisplayStr.Set("", MAX_PARAM_DISPLAY_LEN);
 }
@@ -147,7 +149,7 @@ void IPlugAPIBase::OnTimer(Timer& t)
 {
 	if (HasUI())
 	{
-		if constexpr(EPlugApi::Native == EPlugApi::VST3) // VST3 ***
+		if constexpr (EPlugApi::Native == EPlugApi::VST3)  // VST3 ***
 		{
 			while (mMidiMsgsFromProcessor.ElementsAvailable())
 			{
@@ -169,7 +171,7 @@ void IPlugAPIBase::OnTimer(Timer& t)
 					SendSysexMsgFromDelegate({msg.mOffset, msg.mData, msg.mSize});
 			}
 		}
-		else // !VST3 ***
+		else  // !VST3 ***
 		{
 			while (mParamChangeFromProcessor.ElementsAvailable())
 			{
