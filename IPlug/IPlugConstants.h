@@ -294,7 +294,7 @@ namespace iplug
 
 
 #ifndef IDLE_TIMER_RATE
-	#define IDLE_TIMER_RATE 20  // this controls the frequency of data going from processor to editor (and OnIdle calls)
+	#define IDLE_TIMER_RATE 15  // this controls the frequency of data going from processor to editor (and OnIdle calls)
 #endif
 
 #ifndef MAX_SYSEX_SIZE

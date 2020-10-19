@@ -145,6 +145,9 @@ void IPlugAPIBase::SendParameterValueFromAPI(int paramIdx, double value, bool no
 	mParamChangeFromProcessor.Push(ParamTuple {paramIdx, value});
 }
 
+// TODO: Better handling of data transfer. Since the timer is set manually, and can't be lower than 10ms, it transfers data
+//       that produces a stuttering, or choppy display output. It needs to be synced with the display to give a smooth result.
+//       Which obviously is difficult to do from the real time thread. But something has to be done.
 void IPlugAPIBase::OnTimer(Timer& t)
 {
 	if (HasUI())
