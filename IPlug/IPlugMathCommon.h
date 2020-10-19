@@ -254,25 +254,26 @@ namespace iplug::math
 	 * If value is outside given range, it will be set to one of the boundaries */
 	template <class T, class Tx>
 	NODISCARD constexpr auto Clamp(const T& value, const Tx& min, const Tx& max)
+		-> std::enable_if_t<type::IsArithmetic<T> && type::IsArithmetic<Tx>, T>
 	{
-		static_assert(type::IsArithmetic<T>);
-		static_assert(type::IsArithmetic<Tx>);
 		DEBUG_ASSERT(!(max < min));
-		return value < min ? static_cast<T>(min) : value < max ? value : static_cast<T>(max);
+		if constexpr (type::IsSame<T, Tx>)
+			return value < min ? min : value <= max ? value : max;
+		else
+		{
+			auto minv = static_cast<T>(min);
+			auto maxv = static_cast<T>(max);
+			return value < minv ? minv : value <= maxv ? value : maxv;
+		}
 	}
 
 
-	// True if value would be clamped
-	template <class Tr = bool, class T, class Tx>
-	NODISCARD constexpr Tr ClampEval(const T& value, const Tx& min, const Tx& max)
+	// False if value would be clamped
+	template <class T, class Tx>
+	NODISCARD constexpr auto ClampEval(const T& value, const Tx& min, const Tx& max)
+		-> std::enable_if_t<type::IsArithmetic<T> && type::IsArithmetic<Tx>, bool>
 	{
-		static_assert(type::IsArithmetic<T>);
-		static_assert(type::IsArithmetic<Tx>);
-		DEBUG_ASSERT(!(max < min));
-		if constexpr (type::IsIntegral<T> && type::IsIntegral<Tx>)
-			return (((value - static_cast<T>(min)) | (static_cast<T>(max) - value)) >= 0);
-		else
-			return value < min ? false : value <= max ? true : false;
+		return (value == Clamp(value, min, max));
 	}
 
 
