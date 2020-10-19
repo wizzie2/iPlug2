@@ -830,7 +830,11 @@ function(_iplug_add_target_lib _target _pluginapi_lib)
     # We can't use the interface libraries directly since we have to filter
     # out some of the source files depending on what the target type is.
     get_target_property(_iplug_src_list IPlug INTERFACE_SOURCES)
-    get_target_property(_igraphics_src_list IGraphics INTERFACE_SOURCES)
+    if(GFXLIB_NONE)
+        set(_igraphics_src_list "")
+    else()
+        get_target_property(_igraphics_src_list IGraphics INTERFACE_SOURCES)
+    endif()
     set(_src_list ${_iplug_src_list} ${_igraphics_src_list})
 
     # Filter out unused sources from compiling.
@@ -840,8 +844,6 @@ function(_iplug_add_target_lib _target _pluginapi_lib)
     # exclude those we don't need from compiling on a per target instead. But, since
     # we can have multiple targets for the same source file per project, it's not
     # possible until such option is implemented in cmake.
-
-    list(FILTER _src_list EXCLUDE REGEX "\\.pch$")
 
     # APP
     if(NOT _pluginapi_lib STREQUAL "IPlug_APP")
