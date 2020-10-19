@@ -15,12 +15,6 @@
  * @copydoc IGraphicsPathBase
  */
 
-#include "IGraphics.h"
-
-BEGIN_INCLUDE_DEPENDENCIES
-#include "nanosvg.h"
-END_INCLUDE_DEPENDENCIES
-
 BEGIN_IPLUG_NAMESPACE
 BEGIN_IGRAPHICS_NAMESPACE
 

@@ -56,6 +56,7 @@ namespace iplug::type
 
 BEGIN_INCLUDE_DEPENDENCIES
 #include <CoreFoundation/CoreFoundation.h>
+#include <CoreText/CoreText.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <dirent.h>

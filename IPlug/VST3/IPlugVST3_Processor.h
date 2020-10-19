@@ -15,9 +15,6 @@
 
 #pragma once
 
-#include "IPlugVST3_ProcessorBase.h"
-#include "IPlugVST3_Common.h"
-
 
 BEGIN_IPLUG_NAMESPACE
 

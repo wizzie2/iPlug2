@@ -74,12 +74,10 @@
 		return static_cast<std::underlying_type_t<className>>(e); \
 	}
 
-#ifndef IGRAPHICS_GL
-	#if defined IGRAPHICS_GLES2 || IGRAPHICS_GLES3 || IGRAPHICS_GL2 || IGRAPHICS_GL3
-		#define IGRAPHICS_GL 1
-	#endif
+#if defined IGRAPHICS_GLES2 || defined IGRAPHICS_GLES3 || defined IGRAPHICS_GL2 || defined IGRAPHICS_GL3
+	#undef IGRAPHICS_GL
+	#define IGRAPHICS_GL 1
 #endif
-
 
 // Default floating-point type to use for variables and functions unless explicitly specified
 #ifndef PLUG_TFLOAT_TYPE

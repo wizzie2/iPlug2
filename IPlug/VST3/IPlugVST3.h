@@ -15,13 +15,13 @@
 
 #pragma once
 
-
+// Forward declarations
 namespace iplug
 {
-	// Fwd
+	template <class T>
+	class IPlugVST3View;
 	class IPlugVST3ControllerBase;
 }  // namespace iplug
-
 
 #include "IPlugVST3_Common.h"
 #include "IPlugVST3_Parameter.h"
@@ -30,6 +30,7 @@ namespace iplug
 #include "IPlugVST3_ProcessorBase.h"
 #include "IPlugVST3_View.h"
 
+#include "IPlugVST3_Processor.h"
 
 
 namespace iplug

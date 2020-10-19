@@ -44,8 +44,17 @@ BEGIN_INCLUDE_DEPENDENCIES
 #include <unistd.h>
 #include <sys/types.h>
 #include <dirent.h>
+
 #if !NO_IGRAPHICS
 	#include <OpenGL/gl.h>
 #endif
-#include <IPlugSWELL.h>
+
+#include <WDL/swell/swell.h>
 END_INCLUDE_DEPENDENCIES
+
+#undef LineTo
+#undef SetPixel
+#undef FillRect
+#undef DrawText
+#undef Polygon
+#undef SetCursorPos

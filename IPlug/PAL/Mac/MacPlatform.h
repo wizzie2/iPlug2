@@ -55,21 +55,31 @@ namespace iplug::type
 //-----------------------------------------------------------------------------
 
 BEGIN_INCLUDE_DEPENDENCIES
-#include <CoreGraphics/CoreGraphics.h>
 #include <CoreFoundation/CoreFoundation.h>
+#include <CoreText/CoreText.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <dirent.h>
-#ifdef __OBJC__
+
+#ifdef __OBJC__  // Is this needed?
 	#import <Cocoa/Cocoa.h>
 	#import <Foundation/Foundation.h>
 #endif
+
 #if !NO_IGRAPHICS
+	#include <CoreGraphics/CoreGraphics.h>
 	#if defined IGRAPHICS_GL2
 		#include <OpenGL/gl.h>
 	#elif defined IGRAPHICS_GL3
 		#include <OpenGL/gl3.h>
 	#endif
 #endif
-#include <IPlugSWELL.h>
+#include <WDL/swell/swell.h>
 END_INCLUDE_DEPENDENCIES
+
+#undef LineTo
+#undef SetPixel
+#undef FillRect
+#undef DrawText
+#undef Polygon
+#undef SetCursorPos

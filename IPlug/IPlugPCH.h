@@ -15,7 +15,6 @@
  * @brief IPlug2 Precompiled headers
  */
 
-
 // std headers
 #include <algorithm>
 #include <array>
@@ -53,52 +52,5 @@
 	#include <bit>
 #endif
 
-// IPlug
 #include "IPlug.h"
-#include "IPlugConstants.h"
-#include "IPlugLogger.h"
-#include "IPlugMath.h"
-#include "IPlugStructs.h"
-#include "IPlugUtilities.h"
-#include "IPlugMidi.h"
-#include "IPlugQueue.h"
-#include "IPlugPaths.h"
-#include "IPlugTimer.h"
-#include "IPlugParameter.h"
-#include "IPlugDelegate_select.h"
-#include "IPlugEditorDelegate.h"
-#include "IPlugPluginBase.h"
-#include "IPlugAPIBase.h"
-#include "IPlugProcessor.h"
-#include "ISender.h"
-#if __has_include(IPLUG2_API_HEADER)
-	#include IPLUG2_API_HEADER
-#endif
-
-// IGraphics
-#ifndef NO_IGRAPHICS
-	#include "IGraphicsConstants.h"
-	#include "IGraphicsStructs.h"
-	#include "IGraphicsPopupMenu.h"
-	#include "IGraphicsUtilities.h"
-	#include "IGraphics.h"
-	#include "IGraphics_select.h"
-	#include "IControl.h"
-	#include "IControls.h"
-	#include "IBubbleControl.h"
-	#include "IColorPickerControl.h"
-	#include "ICornerResizerControl.h"
-	#include "IFPSDisplayControl.h"
-	#include "IGraphicsLiveEdit.h"
-	#include "ILEDControl.h"
-	#include "IPopupMenuControl.h"
-	#include "IRTTextControl.h"
-	#include "ITextEntryControl.h"
-	#include "IVDisplayControl.h"
-	#include "IVKeyboardControl.h"
-	#include "IVMeterControl.h"
-	#include "IVMultiSliderControl.h"
-	#include "IVScopeControl.h"
-	#include "IVPresetManagerControl.h"
-	#include "IVNumberBoxControl.h"
-#endif
+#include "IGraphics_select.h"

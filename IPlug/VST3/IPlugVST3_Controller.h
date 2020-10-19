@@ -15,10 +15,6 @@
  * @copydoc IPlugVST3Controller
  */
 
-#include "IPlugVST3_View.h"
-#include "IPlugVST3_ControllerBase.h"
-#include "IPlugVST3_Common.h"
-
 BEGIN_IPLUG_NAMESPACE
 
 /**  VST3 Controller API-base class for a distributed IPlug VST3 plug-in

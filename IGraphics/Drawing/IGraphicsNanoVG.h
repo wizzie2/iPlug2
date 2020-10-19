@@ -10,16 +10,16 @@
 
 #pragma once
 
-#include "IGraphicsPathBase.h"
-
 BEGIN_INCLUDE_DEPENDENCIES
+#include <nanosvg.h>
 #include <nanovg.h>
 
-	// Thanks to Olli Wang/MOUI for much of this macro magic  https://github.com/ollix/moui
-
+// Thanks to Olli Wang/MOUI for much of this macro magic  https://github.com/ollix/moui
 #if defined IGRAPHICS_GL
-	#define NANOVG_FBO_VALID 1
-	#include <glad.h>  // TODO: temporary, "nanovg_gl_utils.h" needs to know about types from glad.h
+	#define NANOVG_FBO_VALID                       1
+	#define nvgBindFramebuffer(fb)                 nvgluBindFramebuffer(fb)
+	#define nvgCreateFramebuffer(ctx, w, h, flags) nvgluCreateFramebuffer(ctx, w, h, flags)
+	#define nvgDeleteFramebuffer(fb)               nvgluDeleteFramebuffer(fb)
 	#include <nanovg_gl_utils.h>
 #elif defined IGRAPHICS_METAL
 	#include <nanovg_mtl.h>
@@ -28,9 +28,9 @@ BEGIN_INCLUDE_DEPENDENCIES
 #endif
 END_INCLUDE_DEPENDENCIES
 
+
 BEGIN_IPLUG_NAMESPACE
 BEGIN_IGRAPHICS_NAMESPACE
-
 #if defined IGRAPHICS_GL2
 	#define NANOVG_GL2                1
 	#define nvgCreateContext(flags)   nvgCreateGL2(flags)
@@ -56,9 +56,6 @@ BEGIN_IGRAPHICS_NAMESPACE
 #endif
 
 #if defined IGRAPHICS_GL
-	#define nvgBindFramebuffer(fb)                 nvgluBindFramebuffer(fb)
-	#define nvgCreateFramebuffer(ctx, w, h, flags) nvgluCreateFramebuffer(ctx, w, h, flags)
-	#define nvgDeleteFramebuffer(fb)               nvgluDeleteFramebuffer(fb)
 using NVGframebuffer = NVGLUframebuffer;
 #elif defined IGRAPHICS_METAL
 using NVGframebuffer = MNVGframebuffer;

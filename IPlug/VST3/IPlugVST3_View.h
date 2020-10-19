@@ -1,10 +1,10 @@
 /*
  ==============================================================================
- 
- This file is part of the iPlug 2 library. Copyright (C) the iPlug 2 developers. 
- 
+
+ This file is part of the iPlug 2 library. Copyright (C) the iPlug 2 developers.
+
  See LICENSE.txt for  more info.
- 
+
  ==============================================================================
 */
 
@@ -14,7 +14,8 @@
 BEGIN_IPLUG_NAMESPACE
 
 /** IPlug VST3 View  */
-template <class T> class IPlugVST3View : public Steinberg::CPluginView, public Steinberg::IPlugViewContentScaleSupport
+template <class T>
+class IPlugVST3View : public Steinberg::CPluginView, public Steinberg::IPlugViewContentScaleSupport
 {
  public:
 	IPlugVST3View(T& owner) : mOwner(owner)
@@ -178,63 +179,120 @@ template <class T> class IPlugVST3View : public Steinberg::CPluginView, public S
 
 		switch (code)
 		{
-			case KEY_BACK: return kVK_BACK;
-			case KEY_TAB: return kVK_TAB;
-			case KEY_CLEAR: return kVK_CLEAR;
-			case KEY_RETURN: return kVK_RETURN;
-			case KEY_PAUSE: return kVK_PAUSE;
-			case KEY_ESCAPE: return kVK_ESCAPE;
-			case KEY_SPACE: return kVK_SPACE;
-			case KEY_NEXT: return kVK_NEXT;
-			case KEY_END: return kVK_END;
-			case KEY_HOME: return kVK_HOME;
-			case KEY_LEFT: return kVK_LEFT;
-			case KEY_UP: return kVK_UP;
-			case KEY_RIGHT: return kVK_RIGHT;
-			case KEY_DOWN: return kVK_DOWN;
-			case KEY_PAGEUP: return kVK_PRIOR;
-			case KEY_PAGEDOWN: return kVK_NEXT;
-			case KEY_SELECT: return kVK_SELECT;
-			case KEY_PRINT: return kVK_PRINT;
-			case KEY_ENTER: return kVK_RETURN;
-			case KEY_SNAPSHOT: return kVK_SNAPSHOT;
-			case KEY_INSERT: return kVK_INSERT;
-			case KEY_DELETE: return kVK_DELETE;
-			case KEY_HELP: return kVK_HELP;
-			case KEY_NUMPAD0: return kVK_NUMPAD0;
-			case KEY_NUMPAD1: return kVK_NUMPAD1;
-			case KEY_NUMPAD2: return kVK_NUMPAD2;
-			case KEY_NUMPAD3: return kVK_NUMPAD3;
-			case KEY_NUMPAD4: return kVK_NUMPAD4;
-			case KEY_NUMPAD5: return kVK_NUMPAD5;
-			case KEY_NUMPAD6: return kVK_NUMPAD6;
-			case KEY_NUMPAD7: return kVK_NUMPAD7;
-			case KEY_NUMPAD8: return kVK_NUMPAD8;
-			case KEY_NUMPAD9: return kVK_NUMPAD9;
-			case KEY_MULTIPLY: return kVK_MULTIPLY;
-			case KEY_ADD: return kVK_ADD;
-			case KEY_SEPARATOR: return kVK_SEPARATOR;
-			case KEY_SUBTRACT: return kVK_SUBTRACT;
-			case KEY_DECIMAL: return kVK_DECIMAL;
-			case KEY_DIVIDE: return kVK_DIVIDE;
-			case KEY_F1: return kVK_F1;
-			case KEY_F2: return kVK_F2;
-			case KEY_F3: return kVK_F3;
-			case KEY_F4: return kVK_F4;
-			case KEY_F5: return kVK_F5;
-			case KEY_F6: return kVK_F6;
-			case KEY_F7: return kVK_F7;
-			case KEY_F8: return kVK_F8;
-			case KEY_F9: return kVK_F9;
-			case KEY_F10: return kVK_F10;
-			case KEY_F11: return kVK_F11;
-			case KEY_F12: return kVK_F12;
-			case KEY_NUMLOCK: return kVK_NUMLOCK;
-			case KEY_SCROLL: return kVK_SCROLL;
-			case KEY_SHIFT: return kVK_SHIFT;
-			case KEY_CONTROL: return kVK_CONTROL;
-			case KEY_ALT: return kVK_MENU;
-			case KEY_EQUALS: return kVK_NONE;
+			case KEY_BACK:
+				return kVK_BACK;
+			case KEY_TAB:
+				return kVK_TAB;
+			case KEY_CLEAR:
+				return kVK_CLEAR;
+			case KEY_RETURN:
+				return kVK_RETURN;
+			case KEY_PAUSE:
+				return kVK_PAUSE;
+			case KEY_ESCAPE:
+				return kVK_ESCAPE;
+			case KEY_SPACE:
+				return kVK_SPACE;
+			case KEY_NEXT:
+				return kVK_NEXT;
+			case KEY_END:
+				return kVK_END;
+			case KEY_HOME:
+				return kVK_HOME;
+			case KEY_LEFT:
+				return kVK_LEFT;
+			case KEY_UP:
+				return kVK_UP;
+			case KEY_RIGHT:
+				return kVK_RIGHT;
+			case KEY_DOWN:
+				return kVK_DOWN;
+			case KEY_PAGEUP:
+				return kVK_PRIOR;
+			case KEY_PAGEDOWN:
+				return kVK_NEXT;
+			case KEY_SELECT:
+				return kVK_SELECT;
+			case KEY_PRINT:
+				return kVK_PRINT;
+			case KEY_ENTER:
+				return kVK_RETURN;
+			case KEY_SNAPSHOT:
+				return kVK_SNAPSHOT;
+			case KEY_INSERT:
+				return kVK_INSERT;
+			case KEY_DELETE:
+				return kVK_DELETE;
+			case KEY_HELP:
+				return kVK_HELP;
+			case KEY_NUMPAD0:
+				return kVK_NUMPAD0;
+			case KEY_NUMPAD1:
+				return kVK_NUMPAD1;
+			case KEY_NUMPAD2:
+				return kVK_NUMPAD2;
+			case KEY_NUMPAD3:
+				return kVK_NUMPAD3;
+			case KEY_NUMPAD4:
+				return kVK_NUMPAD4;
+			case KEY_NUMPAD5:
+				return kVK_NUMPAD5;
+			case KEY_NUMPAD6:
+				return kVK_NUMPAD6;
+			case KEY_NUMPAD7:
+				return kVK_NUMPAD7;
+			case KEY_NUMPAD8:
+				return kVK_NUMPAD8;
+			case KEY_NUMPAD9:
+				return kVK_NUMPAD9;
+			case KEY_MULTIPLY:
+				return kVK_MULTIPLY;
+			case KEY_ADD:
+				return kVK_ADD;
+			case KEY_SEPARATOR:
+				return kVK_SEPARATOR;
+			case KEY_SUBTRACT:
+				return kVK_SUBTRACT;
+			case KEY_DECIMAL:
+				return kVK_DECIMAL;
+			case KEY_DIVIDE:
+				return kVK_DIVIDE;
+			case KEY_F1:
+				return kVK_F1;
+			case KEY_F2:
+				return kVK_F2;
+			case KEY_F3:
+				return kVK_F3;
+			case KEY_F4:
+				return kVK_F4;
+			case KEY_F5:
+				return kVK_F5;
+			case KEY_F6:
+				return kVK_F6;
+			case KEY_F7:
+				return kVK_F7;
+			case KEY_F8:
+				return kVK_F8;
+			case KEY_F9:
+				return kVK_F9;
+			case KEY_F10:
+				return kVK_F10;
+			case KEY_F11:
+				return kVK_F11;
+			case KEY_F12:
+				return kVK_F12;
+			case KEY_NUMLOCK:
+				return kVK_NUMLOCK;
+			case KEY_SCROLL:
+				return kVK_SCROLL;
+			case KEY_SHIFT:
+				return kVK_SHIFT;
+			case KEY_CONTROL:
+				return kVK_CONTROL;
+			case KEY_ALT:
+				return kVK_MENU;
+			case KEY_EQUALS:
+				return kVK_NONE;
 		}
 
 		if (code >= VKEY_FIRST_ASCII)

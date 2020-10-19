@@ -10,10 +10,6 @@
 
 #pragma once
 
-
-#include "Extras/NChanDelay.h"
-
-
 /**
  * @file
  * @copydoc IPlugProcessor
