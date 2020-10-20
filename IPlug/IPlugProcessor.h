@@ -134,7 +134,7 @@ class IPlugProcessor
 
 #pragma mark -
 	/** @return The number of samples elapsed since start of project timeline. */
-	double GetSamplePos() const
+	uint64 GetSamplePos() const
 	{
 		return mTimeInfo.mSamplePos;
 	}
