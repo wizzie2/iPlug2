@@ -1922,7 +1922,7 @@ void IPlugAU::PreProcess()
     mHostCallbacks.transportStateProc(mHostCallbacks.hostUserData, &playing, &changed, &samplePos, &looping, &loopStartBeat, &loopEndBeat);
 
     if (samplePos > 0.0)
-      timeInfo.mSamplePos = samplePos;
+      timeInfo.mSamplePos = static_cast<uint64>(samplePos);
     
     if (loopStartBeat > 0.0)
       timeInfo.mCycleStart = loopStartBeat;

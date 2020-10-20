@@ -609,7 +609,7 @@ static AUAudioUnitPreset* NewAUPreset(NSInteger number, NSString* pName)
 
       _transportStateCapture(&transportStateFlags, &samplePos, &cycleStart, &cycleEnd);
 
-      timeInfo.mSamplePos = samplePos;
+      timeInfo.mSamplePos = static_cast<uint64>(samplePos);
       timeInfo.mCycleStart = cycleStart;
       timeInfo.mCycleEnd = cycleEnd;
       timeInfo.mTransportIsRunning = transportStateFlags == AUHostTransportStateMoving || transportStateFlags == AUHostTransportStateRecording;

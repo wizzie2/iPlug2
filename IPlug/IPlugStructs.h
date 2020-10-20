@@ -38,7 +38,6 @@
 #endif
 
 
-
 namespace iplug
 {
 	// Struct to set compile time options
@@ -83,8 +82,8 @@ namespace iplug
 		static constexpr      size_t maxDumpPresetBlobLength   = 2048;
 		static constexpr         int defaultFPS                = plugFPS > 0 ? math::Clamp(plugFPS, 1, 1000) : 60;
 		static constexpr      double defaultFrameTimeMs        = 1000.0 / defaultFPS;
-        static constexpr const char* SubCategoryString         = VST3_SUBCATEGORY;
-        static constexpr        bool UsePresetList             = VST3_PRESET_LIST;
+		static constexpr const char* SubCategoryString         = VST3_SUBCATEGORY;
+		static constexpr        bool UsePresetList             = VST3_PRESET_LIST;
 
 		struct Audio
 		{
@@ -602,7 +601,7 @@ namespace iplug
 	struct ITimeInfo
 	{
 		double mTempo      = Config::defaultTempo;
-		double mSamplePos  = -1.0;
+		uint64 mSamplePos  = 0;
 		double mPPQPos     = -1.0;
 		double mLastBar    = -1.0;
 		double mCycleStart = -1.0;

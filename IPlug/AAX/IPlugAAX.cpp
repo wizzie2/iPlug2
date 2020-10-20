@@ -346,7 +346,7 @@ void IPlugAAX::RenderAudio(AAX_SIPlugRenderInfo* pRenderInfo, const TParamValPai
       timeInfo.mPPQPos = 0;
  
     mTransport->GetCurrentNativeSampleLocation(&samplePos);
-    timeInfo.mSamplePos = (double) samplePos;
+    timeInfo.mSamplePos = static_cast<uint64>(samplePos);
     
     mTransport->GetCurrentLoopPosition(&timeInfo.mTransportLoopEnabled, &cStart, &cEnd);
     timeInfo.mCycleStart = (double) cStart / 960000.0;

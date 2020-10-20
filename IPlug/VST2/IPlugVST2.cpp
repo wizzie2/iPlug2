@@ -931,7 +931,7 @@ void IPlugVST2::VSTPreProcess(SAMPLETYPE** inputs, SAMPLETYPE** outputs, VstInt3
 
   if (pTI)
   {
-    timeInfo.mSamplePos = pTI->samplePos;
+    timeInfo.mSamplePos = static_cast<uint64>(pTI->samplePos);
 
     if ((pTI->flags & kVstPpqPosValid) && pTI->ppqPos >= 0.0) timeInfo.mPPQPos = pTI->ppqPos;
     if ((pTI->flags & kVstTempoValid) && pTI->tempo > 0.0) timeInfo.mTempo = pTI->tempo;
