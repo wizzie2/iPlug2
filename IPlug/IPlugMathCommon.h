@@ -239,9 +239,9 @@ namespace iplug::math
 	 * @param max Maximum value to be allowed
 	 * If value is outside given range, it will be set to one of the boundaries */
 	template <class T>
-	NODISCARD constexpr const auto& Clamp(const T& value, const T& min, const T& max)
+	NODISCARD constexpr auto Clamp(const T& value, const T& min, const T& max)
+		-> std::enable_if_t<type::IsArithmetic<T>, T>
 	{
-		static_assert(type::IsArithmetic<T>);
 		DEBUG_ASSERT(!(max < min));
 		return value < min ? min : value < max ? value : max;
 	}
@@ -256,15 +256,7 @@ namespace iplug::math
 	NODISCARD constexpr auto Clamp(const T& value, const Tx& min, const Tx& max)
 		-> std::enable_if_t<type::IsArithmetic<T> && type::IsArithmetic<Tx>, T>
 	{
-		DEBUG_ASSERT(!(max < min));
-		if constexpr (type::IsSame<T, Tx>)
-			return value < min ? min : value <= max ? value : max;
-		else
-		{
-			auto minv = static_cast<T>(min);
-			auto maxv = static_cast<T>(max);
-			return value < minv ? minv : value <= maxv ? value : maxv;
-		}
+		return Clamp(value, static_cast<T>(min), static_cast<T>(max));
 	}
 
 
@@ -274,6 +266,28 @@ namespace iplug::math
 		-> std::enable_if_t<type::IsArithmetic<T> && type::IsArithmetic<Tx>, bool>
 	{
 		return (value == Clamp(value, min, max));
+	}
+
+
+	// Re-map a normalized value to a specified range.
+	template <class T>
+	NODISCARD constexpr auto ReMap(const T& value, const T& toMin, const T& toMax)
+		-> std::enable_if_t<type::IsFloatingPoint<T>, T>
+	{
+		DEBUG_ASSERT(ClampEval(value, 0.0f, 1.0f));
+		DEBUG_ASSERT(!(toMax < toMin));
+		return toMin + value * (toMax - toMin);
+	}
+
+
+	// Re-map a value from one range another.
+	template <class T>
+	NODISCARD constexpr auto ReMap(const T& value, const T& fromMin, const T& fromMax, const T& toMin, const T& toMax)
+		-> std::enable_if_t<type::IsArithmetic<T>, T>
+	{
+		DEBUG_ASSERT(!(fromMax < fromMin));
+		DEBUG_ASSERT(!(toMax < toMin));
+		return toMin + (toMax - toMin) * (value - fromMin) / (fromMax - fromMin);
 	}
 
 
