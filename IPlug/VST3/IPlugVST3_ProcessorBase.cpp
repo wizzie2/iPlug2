@@ -111,9 +111,9 @@ void IPlugVST3ProcessorBase::ProcessMidiIn(Steinberg::Vst::IEventList* pEventLis
 					case Steinberg::Vst::Event::kPolyPressureEvent:
 					{
 						msg.SetPolyphonicAftertouch(event.polyPressure.pitch,
-										  event.polyPressure.pressure * 127.,
-										  event.sampleOffset,
-										  event.polyPressure.channel);
+													event.polyPressure.pressure,
+													event.sampleOffset,
+													event.polyPressure.channel);
 						ProcessMidiMsg(msg);
 						processorQueue.Push(msg);
 						break;
@@ -170,8 +170,11 @@ void IPlugVST3ProcessorBase::ProcessMidiOut(IPlugQueue<SysExData>& sysExQueue,
 			}
 			else if (msg.GetStatus() == EMidiStatusMsg::PolyphonicAftertouch)
 			{
-				Steinberg::Vst::Helpers::initLegacyMIDICCOutEvent(
-					toAdd, Steinberg::Vst::ControllerNumbers::kCtrlPolyPressure, msg.GetChannel(), msg.mData1, msg.mData2);
+				Steinberg::Vst::Helpers::initLegacyMIDICCOutEvent(toAdd,
+																  Steinberg::Vst::ControllerNumbers::kCtrlPolyPressure,
+																  msg.GetChannel(),
+																  msg.mData1,
+																  msg.mData2);
 				toAdd.sampleOffset = msg.mOffset;
 				pOutputEvents->addEvent(toAdd);
 			}
@@ -184,8 +187,11 @@ void IPlugVST3ProcessorBase::ProcessMidiOut(IPlugQueue<SysExData>& sysExQueue,
 			}
 			else if (msg.GetStatus() == EMidiStatusMsg::ProgramChange)
 			{
-				Steinberg::Vst::Helpers::initLegacyMIDICCOutEvent(
-					toAdd, Steinberg::Vst::ControllerNumbers::kCtrlProgramChange, msg.GetChannel(), msg.GetProgram(), 0);
+				Steinberg::Vst::Helpers::initLegacyMIDICCOutEvent(toAdd,
+																  Steinberg::Vst::ControllerNumbers::kCtrlProgramChange,
+																  msg.GetChannel(),
+																  msg.GetProgram(),
+																  0);
 				toAdd.sampleOffset = msg.mOffset;
 				pOutputEvents->addEvent(toAdd);
 			}
@@ -203,9 +209,9 @@ void IPlugVST3ProcessorBase::ProcessMidiOut(IPlugQueue<SysExData>& sysExQueue,
 				toAdd.sampleOffset            = msg.mOffset;
 				toAdd.midiCCOut.controlNumber = Steinberg::Vst::ControllerNumbers::kPitchBend;
 
-				 //int16 tmp             = static_cast<int16>(msg.GetPitchWheel() * 0x3FFF);
-				 //toAdd.midiCCOut.value  = tmp & 0x7F;
-				 //toAdd.midiCCOut.value2 = (tmp >> 7) & 0x7F;
+				// int16 tmp             = static_cast<int16>(msg.GetPitchWheel() * 0x3FFF);
+				// toAdd.midiCCOut.value  = tmp & 0x7F;
+				// toAdd.midiCCOut.value2 = (tmp >> 7) & 0x7F;
 				toAdd.midiCCOut.value  = msg.mData1;
 				toAdd.midiCCOut.value2 = msg.mData2;
 
@@ -295,7 +301,8 @@ void IPlugVST3ProcessorBase::PrepareProcessContext(Steinberg::Vst::ProcessData& 
 		memcpy(&mProcessContext, data.processContext, sizeof(Steinberg::Vst::ProcessContext));
 
 	if (mProcessContext.state & Steinberg::Vst::ProcessContext::kProjectTimeMusicValid)
-		timeInfo.mSamplePos = (double) mProcessContext.projectTimeSamples;
+		timeInfo.mSamplePos = mProcessContext.projectTimeSamples;
+
 	timeInfo.mPPQPos               = mProcessContext.projectTimeMusic;
 	timeInfo.mTempo                = mProcessContext.tempo;
 	timeInfo.mLastBar              = mProcessContext.barPositionMusic;
@@ -327,64 +334,123 @@ void IPlugVST3ProcessorBase::ProcessParameterChanges(Steinberg::Vst::ProcessData
 			continue;
 
 		int32 numPoints = paramQueue->getPointCount();
-		Steinberg::int32 offsetSamples;
-		double value;
+		int32 offsetSamples;
+		Steinberg::Vst::ParamValue value;
 
-		if (paramQueue->getPoint(numPoints - 1, offsetSamples, value) == Steinberg::kResultTrue)
+		if (paramQueue->getPoint(numPoints - 1, offsetSamples, value) != Steinberg::kResultTrue)
+			continue;
+
+		uint32 idx = paramQueue->getParameterId();
+
+		if (idx == EVST3ParamIDs::kBypassParam)
 		{
-			uint32 idx = paramQueue->getParameterId();
-
-			switch (idx)
+			const bool bypassed = (value > 0.5);
+			if (bypassed != GetBypassed())
+				SetBypassed(bypassed);
+		}
+		else
+		{
+			if (idx >= 0 && idx < static_cast<uint32>(mPlug.NParams()))
 			{
-				case +EVST3ParamIDs::kBypassParam:
+				//#ifdef PARAMS_MUTEX
+				// mPlug.mParams_mutex.Enter();
+				//#endif
+
+				mPlug.GetParam(idx)->SetNormalized(value);
+
+				// In VST3 non distributed the same parameter value is also set via
+				// IPlugVST3Controller::setParamNormalized(ParamID tag, ParamValue value)
+				mPlug.OnParamChange(idx, EParamSource::kHost, offsetSamples);
+
+				//#ifdef PARAMS_MUTEX
+				// mPlug.mParams_mutex.Leave();
+				//#endif
+			}
+			else if (idx >= +EVST3ParamIDs::kMIDICCParamStartIdx)
+			{
+				auto index    = idx - +EVST3ParamIDs::kMIDICCParamStartIdx;
+				uint8 channel = static_cast<uint8>(index / Steinberg::Vst::kCountCtrlNumber);
+
+				auto ctrlr = index % Steinberg::Vst::kCountCtrlNumber;
+
+				IMidiMsg msg;
+
+				switch (ctrlr)
 				{
-					const bool bypassed = (value > 0.5);
-
-					if (bypassed != GetBypassed())
-						SetBypassed(bypassed);
-
-					break;
+					case Steinberg::Vst::ControllerNumbers::kAfterTouch:
+						msg.SetChannelAftertouch(value, offsetSamples, channel);
+						break;
+					case Steinberg::Vst::ControllerNumbers::kPitchBend:
+						msg.SetPitchWheel(value * 2 - 1, channel, offsetSamples);
+						break;
+					default:
+						msg.SetControlChange(static_cast<EMidiControlChangeMsg>(ctrlr), value, channel, offsetSamples);
+						break;
 				}
-				default:
-				{
-					if (idx >= 0 && idx < static_cast<uint32>(mPlug.NParams()))
-					{
-#ifdef PARAMS_MUTEX
-						mPlug.mParams_mutex.Enter();
-#endif
-						mPlug.GetParam(idx)->SetNormalized(value);
 
-						// In VST3 non distributed the same parameter value is also set via
-						// IPlugVST3Controller::setParamNormalized(ParamID tag, ParamValue value)
-						mPlug.OnParamChange(idx, EParamSource::kHost, offsetSamples);
-#ifdef PARAMS_MUTEX
-						mPlug.mParams_mutex.Leave();
-#endif
-					}
-					else if (idx >= +EVST3ParamIDs::kMIDICCParamStartIdx)
-					{
-						int index   = idx - +EVST3ParamIDs::kMIDICCParamStartIdx;
-						uint8 channel = static_cast<uint8>(index / Steinberg::Vst::kCountCtrlNumber);
-
-						EMidiControlChangeMsg ctrlr =
-							static_cast<EMidiControlChangeMsg>(index % Steinberg::Vst::kCountCtrlNumber);
-
-						IMidiMsg msg;
-
-						if (+ctrlr == Steinberg::Vst::ControllerNumbers::kAfterTouch)
-							msg.SetChannelAftertouch(static_cast<float>(value), offsetSamples, channel);
-						else if (+ctrlr == Steinberg::Vst::ControllerNumbers::kPitchBend)
-							msg.SetPitchWheel((value * 2) - 1, channel, offsetSamples);
-						else
-							msg.SetControlChange(ctrlr, value, channel, offsetSamples);
-
-						fromProcessor.Push(msg);
-						ProcessMidiMsg(msg);
-					}
-				}
-				break;
+				fromProcessor.Push(msg);
+				ProcessMidiMsg(msg);
 			}
 		}
+
+		//		switch (idx)
+		//		{
+		//			case +EVST3ParamIDs::kBypassParam:
+		//			{
+		//				const bool bypassed = (value > 0.5);
+		//
+		//				if (bypassed != GetBypassed())
+		//					SetBypassed(bypassed);
+		//
+		//				break;
+		//			}
+		//
+		//
+		//			default:
+		//			{
+		//				if (idx >= 0 && idx < static_cast<uint32>(mPlug.NParams()))
+		//				{
+		//#ifdef PARAMS_MUTEX
+		//					mPlug.mParams_mutex.Enter();
+		//#endif
+		//					mPlug.GetParam(idx)->SetNormalized(value);
+		//
+		//					// In VST3 non distributed the same parameter value is also set via
+		//					// IPlugVST3Controller::setParamNormalized(ParamID tag, ParamValue value)
+		//					mPlug.OnParamChange(idx, EParamSource::kHost, offsetSamples);
+		//#ifdef PARAMS_MUTEX
+		//					mPlug.mParams_mutex.Leave();
+		//#endif
+		//				}
+		//				else if (idx >= +EVST3ParamIDs::kMIDICCParamStartIdx)
+		//				{
+		//					auto index     = idx - +EVST3ParamIDs::kMIDICCParamStartIdx;
+		//					uint8 channel = static_cast<uint8>(index / Steinberg::Vst::kCountCtrlNumber);
+		//
+		//					auto ctrlr = index % Steinberg::Vst::kCountCtrlNumber;
+		//
+		//					IMidiMsg msg;
+		//
+		//					switch (ctrlr)
+		//					{
+		//						case Steinberg::Vst::ControllerNumbers::kAfterTouch:
+		//							msg.SetChannelAftertouch(value, offsetSamples, channel);
+		//							break;
+		//						case Steinberg::Vst::ControllerNumbers::kPitchBend:
+		//							msg.SetPitchWheel(value * 2 - 1, channel, offsetSamples);
+		//							break;
+		//						default:
+		//							msg.SetControlChange(
+		//								static_cast<EMidiControlChangeMsg>(ctrlr), value, channel, offsetSamples);
+		//							break;
+		//					}
+		//
+		//					fromProcessor.Push(msg);
+		//					ProcessMidiMsg(msg);
+		//				}
+		//			}
+		//			break;
+		//		}
 	}
 }
 
