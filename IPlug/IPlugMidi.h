@@ -221,9 +221,10 @@ struct IMidiMsg
 	 * @param channel /todo */
 	constexpr void SetNoteOn(int noteNumber, float velocity, int offset, int channel = 0)
 	{
-		assert(velocity <= 1.0f);  // velocity input range 0.0-1.0. please fix.
-		Clear();
-		mStatus = static_cast<uint8>(channel & 0x0F | EMidiStatusMsg::NoteOn << 4);
+		DEBUG_ASSERT(math::ClampEval(noteNumber, 0, 127));
+		DEBUG_ASSERT(math::ClampEval(velocity, 0, 1));
+		DEBUG_ASSERT(math::ClampEval(channel, 0, 15));
+		mStatus = static_cast<uint8>(channel | EMidiStatusMsg::NoteOn << 4);
 		mData1  = static_cast<uint8>(noteNumber);
 		mData2  = static_cast<uint8>(velocity * 127);
 		mOffset = offset;
@@ -235,9 +236,11 @@ struct IMidiMsg
 	 * @param channel /todo */
 	constexpr void SetNoteOff(int noteNumber, int offset, int channel = 0)
 	{
-		Clear();
-		mStatus = static_cast<uint8>(channel & 0x0F | EMidiStatusMsg::NoteOff << 4);
+		DEBUG_ASSERT(math::ClampEval(noteNumber, 0, 127));
+		DEBUG_ASSERT(math::ClampEval(channel, 0, 15));
+		mStatus = static_cast<uint8>(channel | EMidiStatusMsg::NoteOff << 4);
 		mData1  = static_cast<uint8>(noteNumber);
+		mData2  = 0;
 		mOffset = offset;
 	}
 
@@ -245,15 +248,16 @@ struct IMidiMsg
 	 * @param value range [-1, 1], converts to [0, 16383) where 8192 = no pitch change.
 	 * @param channel /todo
 	 * @param offset /todo */
-	constexpr void SetPitchWheel(float value, int channel = 0, int offset = 0)
+	constexpr void SetPitchWheel(float pitch, int channel = 0, int offset = 0)
 	{
-		Clear();
-		mStatus = static_cast<uint8>(channel & 0x0F | EMidiStatusMsg::PitchBendChange << 4);
-		int32 i = static_cast<int32>(value * 8191.5f + 8192);
-		DEBUG_ASSERT(math::ClampEval(i, 0, 16383));
-		mData2  = static_cast<uint8>(i) >> 7;
-		mData1  = static_cast<uint8>(i) & 0x7F;
-		mOffset = offset;
+		DEBUG_ASSERT(math::ClampEval(pitch, -1, 1));
+		DEBUG_ASSERT(math::ClampEval(channel, 0, 15));
+		uint16 i = static_cast<uint16>(pitch > 0.0f ? math::ReMap(pitch, 8192.0f, 16383.0f)
+													: math::ReMap(pitch, -1.0f, 0.0f, 0.0f, 8192.0f));
+		mStatus  = static_cast<uint8>(channel | EMidiStatusMsg::PitchBendChange << 4);
+		mData1   = static_cast<uint8>(i) & 0x7F;
+		mData2   = static_cast<uint8>(i) >> 7;
+		mOffset  = offset;
 	}
 
 	/** /todo
@@ -263,8 +267,9 @@ struct IMidiMsg
 	 * @param offset /todo */
 	constexpr void SetControlChange(EMidiControlChangeMsg idx, float value, int channel = 0, int offset = 0)
 	{
-		Clear();
-		mStatus = static_cast<uint8>(channel & 0x0F | EMidiStatusMsg::ControlChange << 4);
+		DEBUG_ASSERT(math::ClampEval(channel, 0, 15));
+		DEBUG_ASSERT(math::ClampEval(value, 0, 1));
+		mStatus = static_cast<uint8>(channel | EMidiStatusMsg::ControlChange << 4);
 		mData1  = static_cast<uint8>(idx);
 		mData2  = static_cast<uint8>(value * 127.0);
 		mOffset = offset;
@@ -273,9 +278,11 @@ struct IMidiMsg
 	/** /todo */
 	constexpr void SetProgramChange(int program, int channel = 0, int offset = 0)
 	{
-		Clear();
-		mStatus = static_cast<uint8>(channel & 0x0F | EMidiStatusMsg::ProgramChange << 4);
+		DEBUG_ASSERT(math::ClampEval(channel, 0, 15));
+		DEBUG_ASSERT(math::ClampEval(program, 0, 127));
+		mStatus = static_cast<uint8>(channel | EMidiStatusMsg::ProgramChange << 4);
 		mData1  = static_cast<uint8>(program);
+		mData2  = 0;
 		mOffset = offset;
 	}
 
@@ -283,12 +290,11 @@ struct IMidiMsg
 	 * @param pressure /todo
 	 * @param offset /todo
 	 * @param channel /todo */
-	constexpr void SetChannelAftertouch(float pressure, int offset, int channel)
+	constexpr void SetChannelAftertouch(float pressure, int offset = 0, int channel = 0)
 	{
-		assert(pressure <= 1.0f);
-
-		Clear();
-		mStatus = static_cast<uint8>(channel & 0x0F | EMidiStatusMsg::ChannelAftertouch << 4);
+		DEBUG_ASSERT(math::ClampEval(channel, 0, 15));
+		DEBUG_ASSERT(math::ClampEval(pressure, 0, 1));
+		mStatus = static_cast<uint8>(channel | EMidiStatusMsg::ChannelAftertouch << 4);
 		mData1  = static_cast<uint8>(pressure * 127);
 		mData2  = 0;
 		mOffset = offset;
@@ -301,10 +307,10 @@ struct IMidiMsg
 	 * @param channel /todo */
 	constexpr void SetPolyphonicAftertouch(int noteNumber, float pressure, int offset, int channel)
 	{
-		assert(pressure <= 1.0f);
-
-		Clear();
-		mStatus = static_cast<uint8>(channel & 0x0F | EMidiStatusMsg::PolyphonicAftertouch << 4);
+		DEBUG_ASSERT(math::ClampEval(noteNumber, 0, 127));
+		DEBUG_ASSERT(math::ClampEval(channel, 0, 15));
+		DEBUG_ASSERT(math::ClampEval(pressure, 0, 1));
+		mStatus = static_cast<uint8>(channel | EMidiStatusMsg::PolyphonicAftertouch << 4);
 		mData1  = static_cast<uint8>(noteNumber);
 		mData2  = static_cast<uint8>(pressure * 127);
 		mOffset = offset;
@@ -392,8 +398,9 @@ struct IMidiMsg
 	{
 		if (GetStatus() == EMidiStatusMsg::PitchBendChange)
 		{
-			float value = (static_cast<float>((mData2 << 7) | mData1) - 8191.5f) / 8191.5f;
-			return math::IsNearlyZero(value, 0.0001f) ? 0.0f : value;
+			const float value = static_cast<float>((mData2 << 7) | mData1);
+			return value <= 8192 ? math::ReMap(value, 0.0f, 8192.0f, -1.0f, 0.0f)
+								 : math::ReMap(value, 8191.0f, 16383.0f, 0.0f, 1.0f);
 		}
 		return 0.0f;
 	}
@@ -413,20 +420,6 @@ struct IMidiMsg
 		return -1.0f;
 	}
 
-	/** /todo
-	 * @param msgValue /todo
-	 * @return \c true = on */
-	// static constexpr bool ControlChangeOnOff(double msgValue)
-	//{
-	//	return (msgValue >= 0.5);
-	//}
-
-	/** /todo */
-	constexpr void Clear()
-	{
-		mOffset = 0;
-		mStatus = mData1 = mData2 = 0;
-	}
 
 	/** /todo
 	 * @param msg /todo
