@@ -60,7 +60,7 @@ class IPlugVST3ControllerBase
 						if (pPlug->GetMidiNoteText(pitch, pNoteText))
 						{
 							Steinberg::UString(pitchName, str16BufferSize(Steinberg::Vst::String128)).assign(pNoteText);
-							pList->setPitchName(programIdx, pitch, pitchName);
+							pList->setPitchName(programIdx, static_cast<int16>(pitch), pitchName);
 						}
 					}
 				}
@@ -166,16 +166,8 @@ class IPlugVST3ControllerBase
 
 		if (tag >= +EVST3ParamIDs::kBypassParam)
 		{
-			switch (tag)
-			{
-				case +EVST3ParamIDs::kPresetParam:
-				{
-					pPlug->RestorePreset(std::round((pPlug->NPresets() - 1.0) * value));
-					break;
-				}
-				default:
-					break;
-			}
+			if (tag == +EVST3ParamIDs::kPresetParam)
+				pPlug->RestorePreset(math::RoundToInt((pPlug->NPresets() - 1) * value));
 		}
 		else
 		{
