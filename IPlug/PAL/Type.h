@@ -84,7 +84,7 @@ namespace iplug::type  // move everything to iplug namespace?
 
 	// clang-format off
 
-	// Returns uint8, uint16, uint32 or uint64 depending on the size of T
+	// Returns a type of uint8, uint16, uint32 or uint64 depending on the size of T
 	template <class T>
 	using uint_sizeof = std::conditional_t<sizeof(T) == 1, uint8,
 						std::conditional_t<sizeof(T) == 2, uint16,
@@ -92,13 +92,18 @@ namespace iplug::type  // move everything to iplug namespace?
 						std::conditional_t<sizeof(T) == 8, uint64,
 						_internal::InvalidType<T>>>>>;
 
-	// Returns int8, int16, int32 or int64 based on the size of T
+	// Returns a type of int8, int16, int32 or int64 based on the size of T
 	template <class T>
 	using int_sizeof = std::conditional_t<sizeof(T) == 1, int8,
 					   std::conditional_t<sizeof(T) == 2, int16,
 					   std::conditional_t<sizeof(T) == 4, int32,
 					   std::conditional_t<sizeof(T) == 8, int64,
 					   _internal::InvalidType<T>>>>>;
+
+	// Returns a type of int8, int16, int32 ,int64, uint8, uint16, uint32 or uint64 based on the size and signess of T
+	template <class T>
+	using type_sizeof = std::conditional_t<std::is_signed_v<T>, type::int_sizeof<T>, type::uint_sizeof<T> >;
+
 
 	template <class To, class From,
 			  std::enable_if_t<std::conjunction_v<std::bool_constant<sizeof(To) == sizeof(From)>,
