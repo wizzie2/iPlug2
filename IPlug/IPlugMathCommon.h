@@ -216,6 +216,19 @@ namespace iplug::math
 	}
 
 
+	// Bitwise rotation.
+	// Positive shift value = left rotation
+	// Negative shift value = right rotation
+	template <class T>
+	NODISCARD constexpr auto BitRotate(const T& value, const int& shift) -> std::enable_if_t<type::IsIntegral<T>, T>
+	{
+		constexpr int maxBits = sizeof(T) * 8;
+
+		const int n = shift & (maxBits - 1);
+		return static_cast<T>(value << n | value >> (maxBits - n));
+	}
+
+
 	// True if sign bit of value is 1
 	template <class T>
 	NODISCARD constexpr auto SignBit(const T& value) -> std::enable_if_t<sizeof(T) <= 8, bool>
