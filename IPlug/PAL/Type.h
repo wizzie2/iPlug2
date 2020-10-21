@@ -102,7 +102,7 @@ namespace iplug::type  // move everything to iplug namespace?
 
 	// Returns a type of int8, int16, int32 ,int64, uint8, uint16, uint32 or uint64 based on the size and signess of T
 	template <class T>
-	using type_sizeof = std::conditional_t<std::is_signed_v<T>, type::int_sizeof<T>, type::uint_sizeof<T> >;
+	using auto_sizeof = std::conditional_t<std::is_signed_v<T>, type::int_sizeof<T>, type::uint_sizeof<T>>;
 
 
 	template <class To, class From,
