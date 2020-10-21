@@ -216,18 +216,11 @@ namespace iplug::math
 	}
 
 
-	template <class Tr = bool, class T>
-	NODISCARD constexpr Tr SignBit(const T& value)
+	// True if sign bit of value is 1
+	template <class T>
+	NODISCARD constexpr auto SignBit(const T& value) -> std::enable_if_t<sizeof(T) <= 8, bool>
 	{
-		static_assert(sizeof(T) <= 8 && type::IsArithmetic<T>);
-		if constexpr (sizeof(T) == 1)
-			return *(uint8*) &value >= 0x80u;
-		if constexpr (sizeof(T) == 2)
-			return *(uint16*) &value >= 0x8000u;
-		if constexpr (sizeof(T) == 4)
-			return *(uint32*) &value >= 0x80000000u;
-		else if constexpr (sizeof(T) == 8)
-			return *(uint64*) &value >= 0x8000000000000000u;
+		return type::bit_cast<type::uint_sizeof<T>>(value) >= 1ull << (sizeof(T) * 8 - 1);
 	}
 
 
