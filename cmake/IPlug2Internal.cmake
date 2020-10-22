@@ -488,6 +488,7 @@ macro(_iplug_set_default_compiler_options)
                 -fno-trapping-math
                 -mavx
                 -Wdelete-non-virtual-dtor
+                -Wno-nested-anon-types          # Required by Clang when -pedantic is enabled
             )
 
             set(CL_FLAGS_DEBUG
