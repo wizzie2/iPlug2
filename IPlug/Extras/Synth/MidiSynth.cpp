@@ -339,7 +339,7 @@ void MidiSynth::HandleRPN(IMidiMsg msg)
 
 	uint8_t valueByte = msg.mData2;
 	int param, value;
-	switch (msg.mLSB)
+	switch (static_cast<EMidiControlChangeMsg>(msg.mData1))
 	{
 		case EMidiControlChangeMsg::RegisteredParameterNumberLSB:
 			state.paramLSB = valueByte;

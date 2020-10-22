@@ -190,14 +190,8 @@ enum class EMidiControlChangeMsg : uint8
 struct IMidiMsg
 {
 	int32 mOffset;
-	// uint8 mData1;
-	// uint8 mData2;
-	union
-	{  // clang-format off
-		struct {                 uint8 mData1;                 uint8 mData2; };
-		struct { EMidiControlChangeMsg mLSB;   EMidiControlChangeMsg mMSB;   };
-		uint8 mData[2];
-	};  // clang-format on
+	uint8 mData1;	// LSB
+	uint8 mData2;	// MSB
 	uint8 mStatus;
 
 
@@ -252,11 +246,11 @@ struct IMidiMsg
 	{
 		DEBUG_ASSERT(math::ClampEval(pitch, -1, 1));
 		DEBUG_ASSERT(math::ClampEval(channel, 0, 15));
-		uint16 i = static_cast<uint16>(pitch > 0.0f ? math::ReMap(pitch, 8192.0f, 16383.0f)
+		uint16 i = static_cast<uint16>(pitch > 0.0f ? math::ReMap(pitch, 0.0f, 1.0f, 8193.0f, 16383.0f)
 													: math::ReMap(pitch, -1.0f, 0.0f, 0.0f, 8192.0f));
 		mStatus  = static_cast<uint8>(channel | EMidiStatusMsg::PitchBendChange << 4);
-		mData1   = static_cast<uint8>(i) & 0x7F;
-		mData2   = static_cast<uint8>(i) >> 7;
+		mData1   = static_cast<uint8>(i & 0x7F);
+		mData2   = static_cast<uint8>(i >> 7);
 		mOffset  = offset;
 	}
 
@@ -398,9 +392,9 @@ struct IMidiMsg
 	{
 		if (GetStatus() == EMidiStatusMsg::PitchBendChange)
 		{
-			const float value = static_cast<float>((mData2 << 7) | mData1);
-			return value <= 8192 ? math::ReMap(value, 0.0f, 8192.0f, -1.0f, 0.0f)
-								 : math::ReMap(value, 8191.0f, 16383.0f, 0.0f, 1.0f);
+			const float value = static_cast<float>(mData2 << 7 | mData1);
+			return value > 8192 ? math::ReMap(value, 8193.0f, 16383.0f, 0.0f, 1.0f)
+								: math::ReMap(value, 0.0f, 8192.0f, -1.0f, 0.0f);
 		}
 		return 0.0f;
 	}
